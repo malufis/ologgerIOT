@@ -1,0 +1,14 @@
+# Arquivos de hardware e análises locais, fora do repositório
+nogit/
+
+# Arquivos temporários do Office
+~$*
+
+# Saídas de build
+build/
+build-*/
+dist/
+
+# Ambiente local
+.venv/
+__pycache__/
