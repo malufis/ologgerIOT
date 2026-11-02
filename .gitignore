@@ -9,6 +9,10 @@ build/
 build-*/
 dist/
 
+# ESP-IDF: sdkconfig gerado (o sdkconfig.defaults é versionado)
+sdkconfig
+sdkconfig.old
+
 # Ambiente local
 .venv/
 __pycache__/

@@ -1,12 +1,12 @@
 # Backlog do firmware — oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 01/11/2026 · **Versão:** 0.1.0
+> **Criado em:** 01/11/2026 · **Última modificação:** 02/11/2026 · **Versão:** 0.1.4
 
 ## Regras
 
 - Tarefas pequenas, de até um dia de trabalho. Itens maiores são divididos.
 - Cada item tem identificador `FW-###`, fase do plano, sprint e critério de aceite.
-- **Regra de pronto:** a tarefa só fecha quando o código compila para o perfil de device afetado, os testes passam e os documentos afetados estão atualizados (regras, mapa Modbus, dicionário de funções, `STATUS_PROJETO.md`).
+- **Regra de pronto:** a tarefa só fecha quando o código compila para o build afetado, os testes passam e os documentos afetados estão atualizados (regras, mapa Modbus, dicionário de funções, `STATUS_PROJETO.md`).
 - Ao fechar uma tarefa, registrar no histórico do documento alterado e na sprint.
 - Sprints de uma semana. Índice em `planejamento/sprints/`.
 
@@ -21,13 +21,14 @@ Prazo de referência do protótipo de bancada: 29/11/2026. São quatro semanas a
 | ID | Tarefa | Aceite |
 |---|---|---|
 | FW-001 | Criar estrutura de pastas `src/`, `include/`, `lib/`, `devices/`, `tests/`, `tools/` com README em cada uma | Pastas existem, README explica o propósito |
-| FW-002 | Criar CMake raiz com seleção de perfil de device (`-DDEVICE=ologgermulti` ou `y7080`) | Configura sem erro para cada perfil |
-| FW-003 | Criar perfis `devices/ologgermulti.h` e `devices/y7080.h` com entradas, saídas, rádio e flash | Perfil declara as capacidades de cada device |
+| FW-002 | Criar CMake raiz que recebe `-DDEVICE=ologgermulti` ou `y7080`, lê `builds/composicao.cmake` e liga só as funcionalidades do build (ver `documentacao/composicao_builds.md`) | Configura sem erro os dois builds e recusa device e funcionalidade inválidos |
+| FW-003 | Revisar a composição proposta em `builds/composicao.cmake` com o responsável técnico e criar a pinagem em `devices/ologgermulti/` e `devices/y7080/` | Composição aprovada; pinagem de cada build incluída pelo CMake |
 | FW-004 | Configurar Doxygen em português e gerar XML para o dicionário | `doxygen` gera saída sem erro |
 | FW-005 | Criar modelo de cabeçalho de arquivo (data, versão, descrição) | Modelo usado em todo arquivo novo |
 | FW-006 | Build vazio do STM32 (CMake com toolchain ARM e HAL) | Compila para o alvo STM32 |
 | FW-007 | Build vazio do ESP32 (ESP-IDF) | Compila para o alvo ESP32 |
 | FW-008 | Criar script de verificação do padrão C (tamanho de função e cabeçalho) | Script falha com função acima do limite |
+| FW-046 | Base FreeRTOS no STM32 e no ESP-IDF: configuração com alocação estática, tabela de prioridades e uma task de teste em cada alvo (`padrao_codigo_c.md`, seção FreeRTOS) | Task de teste roda nos dois alvos, mede pilha e não usa alocação dinâmica |
 
 ### Fase 1 — Aquisição analógica (SPRINT_01)
 
@@ -74,6 +75,10 @@ Prazo de referência do protótipo de bancada: 29/11/2026. São quatro semanas a
 | FW-027 | Mestre com timeout de 30 s e dez tentativas a cada 30 s | Simulador com ausência de resposta |
 | FW-028 | Escravo com mapa de `documentacao/mapa_modbus.md` | Leitura e escrita dos registradores |
 | FW-029 | Recuperação com cinco leituras válidas e defeito após uma hora | Teste de recuperação |
+| FW-047 | `lib/tabela_variaveis`: 64 variáveis na RAM, com estado, marca de tempo e mutex estático | Teste de leitura e escrita concorrente no PC, estados e limite de 64 |
+| FW-048 | `lib/mapeamento`: configuração de até 8 equipamentos, validação completa e gravação atômica em flash com CRC | Teste de configuração válida, inválida e de queda na gravação |
+| FW-049 | `lib/modbus_mestre` em task FreeRTOS, não bloqueante: um equipamento sem resposta não atrasa os demais | Simulador com um equipamento mudo e os outros respondendo no prazo |
+| FW-050 | `lib/modbus_escravo`: expõe a tabela no mapa fixo com registrador de status por variável | Leitura de valor e de estado pelo simulador Modbus |
 
 ### Fase 6 — Relógio e agenda offline (SPRINT_06)
 
@@ -121,3 +126,7 @@ Prazo de referência do protótipo de bancada: 29/11/2026. São quatro semanas a
 | Data | Versão | Alteração |
 |---|---|---|
 | 01/11/2026 | 0.1.0 | Criado backlog com 45 tarefas em 11 fases, vinculadas às sprints |
+| 02/11/2026 | 0.1.1 | FW-001 concluído: pastas `src/`, `include/`, `lib/`, `devices/`, `tests/`, `tools/` com README |
+| 02/11/2026 | 0.1.2 | FW-002 e FW-003 reescritos para imagem única por MCU e setup de composição, no lugar de seleção de perfil de compilação; regra de pronto e documentação ampliadas (estado, changelog, dicionário) |
+| 02/11/2026 | 0.1.4 | FreeRTOS em todo o sistema: FW-046 na base (SPRINT_00); FW-047 a FW-050 para o mapeamento Modbus (SPRINT_05), conforme `documentacao/modbus_mapeamento_dados.md` aprovado |
+| 02/11/2026 | 0.1.3 | Composição por build: FW-002 seleciona o build por `-DDEVICE` e lê `builds/composicao.cmake`; FW-003 revisa a composição e cria a pinagem por placa; setup em runtime removido |

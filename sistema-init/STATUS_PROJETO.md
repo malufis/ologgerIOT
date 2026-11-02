@@ -1,6 +1,6 @@
 # Status do Projeto — oLoggerIOT
 
-> **Criado em:** 15/10/2026 · **Última modificação:** 01/11/2026 · **Versão:** 0.3.128
+> **Criado em:** 15/10/2026 · **Última modificação:** 02/11/2026 · **Versão:** 0.3.134
 > **Repositório:** https://github.com/malufis/ologgerIOT
 
 ## Fase atual
@@ -308,8 +308,22 @@ Regra de processo: a entrevista do firmware só pergunta o que é do device. O q
 - **Pendente:** scripts `tools/verifica_padrao.py` e `tools/gera_dicionario.py` (FW-004 e FW-008), citados pelas skills.
 - **Risco de prazo:** o escopo do protótipo de 29/11/2026 não cabe no cronograma de uma semana por sprint. Reavaliar antes da SPRINT_03.
 
+## Decisões de desenvolvimento (02/11/2026)
+- **Um projeto, um build por tipo de device:** `ologgermulti` (STM32L412 e ESP32-C6) e `y7080` (STM32L071). Todas as funcionalidades ficam no mesmo código; o arquivo `builds/composicao.cmake` diz o que entra em cada build. Pinagem por placa em `devices/`. Esclarecido pelo responsável técnico em 02/11/2026, e a composição de cada build foi confirmada no mesmo dia (detalhes em `documentacao/composicao_builds.md`). ESP-IDF de referência: v5.4.4, em `C:\Espressif`.
+- **Código:** pequenos passos, uma função ou módulo por vez, com teste no mesmo passo. Boas práticas de C em `documentacao/padrao_codigo_c.md` e de ESP-IDF em `documentacao/padrao_esp_idf.md`.
+- **Documentação viva:** `CHANGELOG.md`, `documentacao/ESTADO_IMPLEMENTACAO.md`, `documentacao/dicionario_funcoes.md`, `documentacao/INDICE_AGENTES.md`, `INICIAR.md` e `README.md` na raiz. Sprint só fecha com a skill `sprint-close`.
+- **Agentes e skills:** `esp-idf-dev` e `firmware-reviewer` criados; skills `esp-idf-standards` e `sprint-close` criadas; `firmware-dev`, `doc-keeper`, `c-firmware-standards`, `device-profile-build`, `doc-sync` e `sprint-task` atualizados.
+
+## Decisões de dados Modbus e rádio externo (02/11/2026)
+- **MQTT do y7080:** cliente roda no modem SIM7080G, por comandos AT.
+- **Rádio externo do OloggerMulti:** UART1 do STM32 (PA9/PA10), repassa bytes sem interpretar. Integrador por tipo de rádio é fase futura.
+- **Dados de equipamentos Modbus:** tabela de variáveis só na RAM, com 64 variáveis no total e 8 equipamentos. O mapeamento de cada equipamento é configurado pelo sistema e pelo gateway USB e gravado em flash. Proposta detalhada em `documentacao/modbus_mapeamento_dados.md`.
+- **Princípio:** o STM32 é o cérebro; ESP32 e modem só transportam.
+- **FreeRTOS em todo o sistema** (STM32 e ESP32), com alocação estática. Regras em `documentacao/padrao_codigo_c.md`, seção FreeRTOS.
+- **Modbus aprovado** conforme `documentacao/modbus_mapeamento_dados.md` (v0.2.0). Escrita em equipamento externo fora do escopo. Backlog: FW-046 na SPRINT_00 e FW-047 a FW-050 na fase de Modbus.
+
 ## Próximo passo recomendado
-B5, B6 e B7 fechados pelo usuário em 01/11/2026. B8 fechado pelo usuário em 01/11/2026. B9 a B17 confirmados como fora do device. Plano de implantação criado em `planejamento/PLANO_IMPLANTACAO_FIRMWARE.md`. Próximo: Fase 0 do plano (base do projeto), com os pontos pendentes do device (SETUP e INFO, campos do heartbeat, nomes dos grupos do JSON e build do ESP32). As pendências de heartbeat, formato de SETUP e INFO e nomes dos grupos do JSON ficam para a implantação. Execução do teste NB-IoT (P-026) fica para a fase de bancada.
+B5, B6 e B7 fechados pelo usuário em 01/11/2026. B8 fechado pelo usuário em 01/11/2026. B9 a B17 confirmados como fora do device. Plano de implantação criado em `planejamento/PLANO_IMPLANTACAO_FIRMWARE.md`. Fase 0 em andamento na SPRINT_00: FW-001 concluído em 02/11/2026 (pastas com README). Próximo: FW-002 (CMake raiz com seleção de perfil). As pendências de heartbeat, formato de SETUP e INFO e nomes dos grupos do JSON ficam para a implantação. Execução do teste NB-IoT (P-026) fica para a fase de bancada.
 
 ## Histórico de atualizações
 | Data | Versão | Alteração |
@@ -413,6 +427,12 @@ B5, B6 e B7 fechados pelo usuário em 01/11/2026. B8 fechado pelo usuário em 01
 | 01/11/2026 | 0.3.94 | Usuário confirmou continuar coletando e substituir os dados mais antigos com memória cheia |
 | 01/11/2026 | 0.3.95 | Usuário definiu espaço separado e pequeno para alertas, apagados após sincronização |
 | 01/11/2026 | 0.3.96 | Usuário confirmou substituir o alerta mais antigo quando o espaço reservado estiver cheio |
+| 02/11/2026 | 0.3.134 | FreeRTOS aprovado para todo o sistema, com alocação estática; mapeamento Modbus aprovado com escravo de status; escrita em equipamento externo fora do escopo; backlog FW-046 a FW-050 |
+| 02/11/2026 | 0.3.133 | Decisões: MQTT do y7080 no modem; rádio externo do OloggerMulti na UART1 do STM32 com repasse transparente; dados Modbus só na RAM, 8 equipamentos e 64 variáveis; configuração pelo sistema e pelo gateway USB. Proposta em `documentacao/modbus_mapeamento_dados.md` |
+| 02/11/2026 | 0.3.132 | Composição confirmada pelo responsável técnico: OloggerMulti com saída em frequência, ESP32-C6 como único rádio e UART de rádio externo transparente (`RADIO_UART_EXTERNO`); y7080 com entrada diferencial, celular e MQTT, sem entradas nem saídas digitais; ESP-IDF v5.4.4 de referência |
+| 02/11/2026 | 0.3.131 | Esclarecido pelo responsável técnico: um build por tipo de device (`ologgermulti` e `y7080`), com todas as funcionalidades no mesmo projeto e o arquivo `builds/composicao.cmake` indicando o que entra em cada build; setup em runtime descartado; composição proposta validada no CMake |
+| 02/11/2026 | 0.3.130 | Padrões C e ESP-IDF, composição dos builds, skills e agentes de desenvolvimento, changelog, README, INICIAR, índice para agentes e estado da implementação criados |
+| 02/11/2026 | 0.3.129 | FW-001 concluído na SPRINT_00: pastas `src/`, `include/`, `lib/`, `devices/`, `tests/` e `tools/` com README; próximo item FW-002 |
 | 01/11/2026 | 0.3.128 | Criado processo de desenvolvimento: Git local com remoto, índice de documentação, backlog FW-001 a FW-045, sprints de uma semana, padrão C (MISRA C:2012), dicionário de funções, contrato de integração, manual de operação, skills e agentes |
 | 01/11/2026 | 0.3.127 | Criado plano de implantação do firmware em planejamento/PLANO_IMPLANTACAO_FIRMWARE.md, com 11 fases, aceite e testes |
 | 01/11/2026 | 0.3.126 | Confirmado pelo usuário: B9 a B17 registrados como fora do device; próximo passo é o plano de implantação do firmware |

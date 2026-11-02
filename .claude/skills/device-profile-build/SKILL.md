@@ -1,33 +1,38 @@
 ---
 name: device-profile-build
-description: Use ao compilar ou configurar o firmware oLoggerIOT para um device específico (OloggerMulti ou y7080). Garante que só o hardware do perfil escolhido seja compilado.
+description: Use ao compilar o firmware oLoggerIOT para o build de um device (ologgermulti ou y7080). Garante que só as funcionalidades listadas em builds/composicao.cmake entrem no build e que os dois builds continuem compilando.
 ---
 
-# Build por perfil de device
+# Build por tipo de device
 
-O firmware é único para todos os devices. Cada build usa um perfil em `devices/` e compila só os módulos que aquele hardware tem.
+## Modelo
 
-## Perfis
+Há **um único projeto de firmware**, com todas as funcionalidades, em `src/` e `lib/`. Há **um build por tipo de device**. Cada build leva só o que o device tem.
 
-| Perfil | Arquivo | Rádio | Observação |
+| Build | Comando | MCU | Imagens |
 |---|---|---|---|
-| OloggerMulti | `devices/ologgermulti.h` | ESP32-C6 (Wi-Fi) e rádio externo conforme montagem | STM32L412 |
-| y7080 | `devices/y7080.h` | Módulo SIMCom SIM7080G (celular) | STM32L071 |
+| OloggerMulti | `cmake -DDEVICE=ologgermulti` | STM32L412C8 e ESP32-C6 | Imagem STM32 e imagem ESP32 |
+| y7080 | `cmake -DDEVICE=y7080` | STM32L071CB | Imagem STM32 |
 
-Confirme a montagem no perfil antes de compilar. Não presuma o rádio.
+O que entra em cada build está em `builds/composicao.cmake`. Pinagem da placa fica em `devices/<build>/`. Documento: `documentacao/composicao_builds.md`.
 
 ## Como compilar
 
-1. Escolha o perfil: `-DDEVICE=ologgermulti` ou `-DDEVICE=y7080`.
-2. Configure o CMake raiz, que lê o perfil e liga só os módulos declarados.
-3. Compile o alvo do microcontrolador do perfil (STM32) e, se o perfil tiver ESP32, o alvo ESP-IDF.
+1. Leia `builds/composicao.cmake` e confirme as funcionalidades do build.
+2. Configure o CMake raiz com `-DDEVICE=<build>`. Ele valida o nome do device e cada funcionalidade contra o catálogo.
+3. Compile a imagem STM32 com a toolchain ARM. Se o build for `ologgermulti`, compile também a imagem ESP32 com `idf.py set-target esp32c6` e `idf.py build`.
+4. Meça o tamanho com `arm-none-eabi-size` (STM32) e `idf.py size` (ESP32). Registre no item da sprint.
 
 ## Regras
 
-- Nunca compile um módulo que o perfil não declara. Se precisar, adicione a capacidade ao perfil antes.
-- Nunca use nome de placa dentro do código C. Use a capacidade do perfil.
-- Ao mudar um perfil, verifique os dois perfis. Uma mudança comum não pode quebrar o outro.
+- Funcionalidade nova entra primeiro no catálogo de `builds/composicao.cmake`, quando o módulo existir em `lib/`.
+- Para incluir ou tirar funcionalidade de um build, edite só `builds/composicao.cmake`. Não mude código para isso.
+- Nunca use `#if` pelo nome do device. Use `#if OLOG_FEAT_<NOME>`.
+- Pino de placa fica em `devices/<build>/`. O código usa o nome do pino.
+- Mudança comum precisa compilar os dois builds. Mudança específica compila só o build afetado, e isso fica registrado no item.
+- Se o build do y7080 estourar flash ou RAM, pare e registre a pendência. Não remova funcionalidade sem decisão.
+- Funcionalidade marcada CONFIRMAR ou PENDENTE no arquivo não entra no build até ser confirmada.
 
 ## Antes de fechar a tarefa
 
-Compile os dois perfis quando a mudança for comum. Compile só o afetado quando a mudança for específica. Registre no item do backlog quais perfis foram compilados.
+Registre no item da sprint quais builds foram compilados, o resultado de `size` e o resultado do CMake.

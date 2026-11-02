@@ -1,41 +1,45 @@
 # Modelos e versões do firmware — oLoggerIOT
 
-> **Criado em:** 29/10/2026 · **Última modificação:** 29/10/2026 · **Versão:** 0.2.0
+> **Criado em:** 29/10/2026 · **Última modificação:** 02/11/2026 · **Versão:** 0.4.1
 
 ## Entendimento atual do projeto
 
-Desenvolver o firmware para **os dois projetos: OloggerMulti e y7080**, dentro da família oLoggerIOT. O foco atual é entender o projeto e seus comportamentos. A forma de separar e organizar a implementação será definida posteriormente por Rodrigo Maluf.
+Desenvolver o firmware para **os dois modelos: OloggerMulti e y7080**, dentro da família oLoggerIOT. Há **um único projeto de firmware**, com todas as funcionalidades. Cada modelo gera o **seu build**, que leva só as funcionalidades daquele device.
 
-## Ideia proposta pelo usuário
+## Decisão de implementação (02/11/2026)
 
-Ter **uma compilação única e um arquivo de setup que indique o que o dispositivo contém**. Esse setup descreve a composição do equipamento, incluindo os recursos presentes conforme o modelo: portas, sensores, rádios e interfaces. Origem: esclarecimento explícito de Rodrigo Maluf em 29/10/2026.
+- **Um projeto, todas as funcionalidades.** Código em `src/` e `lib/`.
+- **Um build por tipo de device:** `ologgermulti` e `y7080`.
+- **Composição por build em um arquivo:** `builds/composicao.cmake` diz o que entra em cada build. Detalhes em `composicao_builds.md`.
+- **Pinagem por placa:** `devices/ologgermulti/` e `devices/y7080/`.
+- **Imagens por build:**
+  - OloggerMulti: imagem STM32L412C8 e imagem ESP32-C6.
+  - y7080: imagem STM32L071CB.
 
-| Aspecto | Entendimento funcional | Detalhamento futuro |
-|---|---|---|
-| Hardware | O equipamento contém uma combinação de recursos | Quais informações cada setup precisará descrever |
-| Firmware | Controla os recursos existentes no dispositivo | Como o setup será aplicado na implementação |
-| Modelos | OloggerMulti e y7080 fazem parte do projeto | Organização do código, a ser definida pelo usuário |
-| Versões | O software terá evolução e versionamento | Numeração, geração e publicação das versões |
+A composição de cada build está confirmada em `builds/composicao.cmake` (02/11/2026). Ver `composicao_builds.md`.
+
+## Ideia original do usuário (29/10/2026)
+
+Ter **uma compilação única e um arquivo de setup que indique o que o dispositivo contém**. Origem: esclarecimento explícito de Rodrigo Maluf em 29/10/2026.
+
+Em 02/11/2026, o responsável técnico esclareceu: é **um build para cada tipo de device**, com um arquivo que indica o que entra em cada build. Essa é a forma vigente.
 
 ## Decisões técnicas ainda abertas
 
-Ainda não foram definidos:
+- Uso do conector ligado à UART0 do ESP32 no OloggerMulti, que o firmware não usa até confirmação.
+- Escrita em equipamento Modbus externo e tratamento de valor inválido: ver `modbus_mapeamento_dados.md`.
+- Versionamento e publicação das imagens de cada build.
+- Medição de flash e RAM de cada build no FW-006.
 
-- Formato, campos e local de armazenamento do setup.
-- Momento de aplicação do setup: geração, gravação ou inicialização/operação.
-- Possibilidade de alterar o setup e quem terá essa autorização.
-- Organização de arquivos, separação de módulos e ferramentas de compilação.
-- Realização técnica da compilação única nos MCUs utilizados.
+## Correção dos registros anteriores
 
-Esses pontos serão avaliados posteriormente. A ideia de compilação única é registrada como intenção do usuário, sem declarar uma solução já implementada ou tecnicamente validada.
-
-## Correção do registro anterior
-
-A versão 0.1.0 deste documento antecipou imagens separadas por modelo a partir de uma interpretação do assistente. Essa interpretação foi substituída pelo esclarecimento acima. Os exemplos de nomes de dois binários não constituem decisão vigente do projeto.
+- **0.1.0:** seleção de modelo na geração ou gravação. Substituída pelo build por device.
+- **0.2.0:** compilação única com arquivo de setup, sem decisão de formato.
+- **0.3.0:** imagem única por MCU com setup em flash, lido em runtime. Substituída em 02/11/2026 pelo build por device com composição em arquivo, como o responsável técnico esclareceu.
 
 ## Estado da implementação
 
-Há documentação e análise de hardware no workspace. Ainda não há firmware C, projeto de compilação ou binários produzidos. O levantamento de requisitos continua; esta atualização não confirma os blocos restantes da entrevista.
+Há documentação, padrões e análise de hardware no repositório. Há o arquivo de composição proposto, validado no CMake. Ainda não há código de aplicação, nem `CMakeLists.txt` raiz, nem binários produzidos. Ver `ESTADO_IMPLEMENTACAO.md`.
 
 ## Histórico
 
@@ -43,3 +47,6 @@ Há documentação e análise de hardware no workspace. Ainda não há firmware 
 |---|---|---|
 | 29/10/2026 | 0.1.0 | Registrados os dois modelos como alvos do firmware e a seleção/identificação da imagem na geração e gravação |
 | 29/10/2026 | 0.2.0 | Corrigida interpretação anterior: usuário propõe compilação única com arquivo de setup; separação e organização técnicas serão definidas depois; foco atual no entendimento do projeto |
+| 02/11/2026 | 0.3.0 | Decisão de imagem única por MCU com composição em setup de flash (registro depois substituído) |
+| 02/11/2026 | 0.4.0 | Esclarecido pelo responsável técnico: um build por tipo de device, um projeto com todas as funcionalidades e um arquivo que indica a composição de cada build (`builds/composicao.cmake`) |
+| 02/11/2026 | 0.4.1 | Composição confirmada: OloggerMulti com saída em frequência, único rádio ESP32-C6 e UART de rádio externo; y7080 com entrada diferencial, celular e MQTT, sem digitais |
