@@ -10,7 +10,7 @@ Toda tarefa só está pronta quando a documentação afetada está atualizada. U
 ## Checklist
 
 1. **Código:** compila os builds afetados (skill `device-profile-build`).
-2. **Dicionário:** cada função nova ou alterada entra em `documentacao/dicionario_funcoes.md`. Quando `tools/gera_dicionario.py` existir (FW-004 e FW-008), regenere a partir do Doxygen em vez de editar à mão.
+2. **Dicionário:** cada função nova ou alterada entra em `documentacao/dicionario_funcoes.md`. Regenere a tabela com `doxygen Doxyfile` e `python tools/gera_dicionario.py`, em vez de editar à mão. Confira com `python tools/gera_dicionario.py --check`.
 3. **Regras:** se o comportamento mudou, atualize o documento de regra afetado em `documentacao/`. Exemplos: `configuracao_do_dispositivo.md`, `telemetria_e_armazenamento.md`, `comunicacao_iot.md`, `mapa_modbus.md`, `composicao_builds.md`.
 4. **Integração:** se o contrato com o sistema mudou (tópico, JSON, comando), atualize `documentacao/integracao_sistema.md`.
 5. **Operação:** se o comportamento de campo mudou, atualize `documentacao/manual_operacao_device.md`.

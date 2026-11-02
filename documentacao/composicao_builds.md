@@ -1,7 +1,7 @@
 # Composição dos builds — oLoggerIOT
 
 > **Criado em:** 02/11/2026 · **Última modificação:** 02/11/2026 · **Versão:** 0.2.0
-> **Status:** composição confirmada pelo responsável técnico em 02/11/2026. A lista vigente está em `builds/composicao.cmake`.
+> **Versão:** 0.2.1 · **Status:** composição confirmada pelo responsável técnico em 02/11/2026. A lista vigente está em `builds/composicao.cmake`.
 
 ## Princípio
 
@@ -13,10 +13,19 @@ A escolha do que entra em cada build fica em um único arquivo: `builds/composic
 
 | Build | MCU principal | Módulo de comunicação | Observação |
 |---|---|---|---|
-| `ologgermulti` | STM32L412C8 | ESP32-C6-MINI-1 (ESP-IDF) | Imagem STM32 e imagem ESP32 |
-| `y7080` | STM32L071CB | Não há ESP32 | Imagem STM32 |
+| `ologgermulti` | STM32L412C8U6 (UFQFPN48) | ESP32-C6-MINI-1 (ESP-IDF) | Imagem STM32 e imagem ESP32 |
+| `y7080` | STM32L071CBU6 (UFQFPN48) | Não há ESP32 | Imagem STM32 |
 
-Comando (quando o FW-002 existir): `cmake -DDEVICE=ologgermulti` ou `cmake -DDEVICE=y7080`.
+Códigos de compra confirmados em 02/11/2026 (distribuidor, referências `511-STM32L412C8U6` e `511-STM32L071CBU6`, com as designações `Ologger-U1-MCU` e `y7080-U2-MCU`). Quantidade comprada: 7 unidades de cada MCU. Confirmam o chip de cada build: L412 com 64 KB de flash e L071CB com 128 KB.
+
+Configuração (FW-002, validada em 02/11/2026):
+
+```
+cmake -S . -B build/ologgermulti -G Ninja -DDEVICE=ologgermulti -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-arm-none-eabi.cmake
+cmake -S . -B build/y7080        -G Ninja -DDEVICE=y7080        -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-arm-none-eabi.cmake
+```
+
+A raiz do CMake lê `builds/composicao.cmake`, aplica as opções de CPU de `cmake/mcu.cmake` e define `OLOG_FEAT_<NOME>` para cada funcionalidade do build. Sem `DEVICE`, ou com device fora da lista, a configuração para com erro.
 
 ## Como o código usa a composição
 
@@ -80,4 +89,5 @@ A análise das netlists já tem o mapa preliminar de pinos das duas placas. Ele 
 | Data | Versão | Alteração |
 |---|---|---|
 | 02/11/2026 | 0.1.0 | Criado com o princípio de um projeto e um build por device, o arquivo `builds/composicao.cmake`, o catálogo de funcionalidades e a composição proposta |
+| 02/11/2026 | 0.2.1 | Códigos de MCU confirmados pela compra: STM32L412C8U6 (OloggerMulti) e STM32L071CBU6 (y7080), ambos em UFQFPN48 |
 | 02/11/2026 | 0.2.0 | Composição confirmada: saída em frequência no OloggerMulti, UART de rádio externo (`RADIO_UART_EXTERNO`), y7080 com entrada diferencial, celular e MQTT; sem digitais no y7080; mapa de pinos preliminar incluído |

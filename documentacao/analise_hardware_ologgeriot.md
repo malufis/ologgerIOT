@@ -1,6 +1,6 @@
 # Análise dos hardwares OloggerMulti e y7080
 
-> **Criado em:** 29/10/2026 · **Última modificação:** 29/10/2026 · **Versão:** 0.1.2
+> **Criado em:** 29/10/2026 · **Última modificação:** 02/11/2026 · **Versão:** 0.2.1
 > **Estado:** parte elétrica resolvida conforme confirmação de Rodrigo Maluf; análise dos arquivos preservada como histórico documental.
 
 ## Resultado
@@ -134,6 +134,20 @@ O nome `SIMY7080` e o footprint SIM7080G não determinam sozinhos o módulo efet
 
 Confirmar o módulo celular montado, os sensores PC11/K8, a seleção dos jumpers e os níveis elétricos do caminho AT/PWRKEY. Há estágios de adaptação na UART. O firmware deve seguir o módulo real e a polaridade do circuito, sem presumir que todos os rádios tenham comandos ou tempos iguais.
 
+### HW-006 — BOOT0 do OloggerMulti sem ligação
+
+**Evidência:** na netlist do OloggerMulti, o pino 44 do U1 (STM32L412C8, função PH3/BOOT0) está em `unconnected-(U1-PH3-Pad44)`, e o ERC já o marcava. Não há pull-down, jumper nem resistor. No y7080, o pino 44 do U2 (STM32L071CB) está na rede `BOOT0`, ligada ao R16 de 100 kΩ.
+
+**Confirmação em hardware (02/11/2026):** o L412 gravado por SWD iniciou na memória de sistema (PC em `0x1FFF....`), e os bits de opção estão no padrão (`nSWBOOT0 = 1`, BOOT0 lido do pino). O pino flutuando foi lido em nível alto. O responsável técnico confirmou que a placa do L4 não tem BOOT0 ligado.
+
+**Impacto:** o nível de um pino flutuando é indefinido e pode variar com ruído e temperatura. Cada unidade de fábrica pode iniciar pelo bootloader da ST, e não pelo firmware.
+
+**Aplicado em 02/11/2026:** na unidade de bancada, `nSWBOOT0 = 0` e `nBOOT0 = 1` foram gravados por SWD (`STM32_Programmer_CLI -c port=SWD mode=UR -ob nSWBOOT0=0 nBOOT0=1`) e conferidos na leitura de volta, com RDP no nível 0. Depois do reset, o PC ficou em `0x0800....`, e o SysTick ficou ativo e contando: o firmware executa.
+
+**Caminhos:**
+1. Corrigir a revisão da placa, com pull-down no pino 44. Resolve a causa, mas exige retrabalho.
+2. Gravar `nSWBOOT0 = 0` e `nBOOT0 = 1` nos bits de opção. O chip passa a ignorar o pino e a iniciar sempre pela flash, e o PH3 fica livre. Funciona nas placas atuais, mas **precisa entrar no procedimento de gravação de toda unidade**, porque o padrão de fábrica do chip depende do pino.
+
 ## Resultado do cruzamento dos Gerbers
 
 | Verificação | OloggerMulti | y7080 |
@@ -181,3 +195,5 @@ Para concluir o B2, já há evidência da origem dos dados e do armazenamento. F
 | 29/10/2026 | 0.1.0 | Análise dos dois conjuntos, mapas preliminares de pinos, cruzamento de atributos Gerber, verificação ERC parcial e pendências para firmware |
 | 29/10/2026 | 0.1.1 | Registrada confirmação do responsável técnico de que a parte elétrica está resolvida; encerrados bloqueios elétricos, preservando evidências históricas |
 | 29/10/2026 | 0.1.2 | Alinhado foco no entendimento dos modelos e na ideia de compilação única com setup, sem antecipar separação da implementação |
+| 02/11/2026 | 0.2.1 | HW-006 contornado por bits de opção na unidade de bancada; firmware executa no STM32L412 real |
+| 02/11/2026 | 0.2.0 | Achado HW-006: BOOT0 do OloggerMulti sem ligação no esquema, confirmado na gravação por SWD; y7080 tem BOOT0 ligado ao R16 de 100 kΩ |

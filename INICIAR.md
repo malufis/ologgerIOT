@@ -8,8 +8,10 @@ Leia este arquivo no começo de todo prompt novo. Ele aponta onde está cada inf
 
 - **Fase:** 0 — base do projeto (`planejamento/PLANO_IMPLANTACAO_FIRMWARE.md`).
 - **Sprint atual:** SPRINT_00, de 02/11/2026 a 06/11/2026 (`planejamento/sprints/SPRINT_00.md`).
-- **Último item concluído:** FW-001 (estrutura de pastas).
-- **Próximo item:** FW-002 (CMake raiz com seleção de build por device).
+- **Itens concluídos:** FW-001, FW-002, FW-004, FW-005, FW-006 e FW-008, no branch `feat/fw-002-cmake-raiz`.
+- **Pendentes da SPRINT_00:** FW-003, FW-007 e FW-046.
+- **Antes de fechar um item:** `python tools/verifica_padrao.py`, `doxygen Doxyfile` sem avisos e `python tools/gera_dicionario.py --check`.
+- **Próximo item:** FW-003 (revisão da composição e pinagem por placa).
 - **Estado do código:** ainda não há código de aplicação. Ver `documentacao/ESTADO_IMPLEMENTACAO.md`.
 - **Prazo de referência:** protótipo de bancada em 29/11/2026 (`planejamento/BACKLOG.md`, seção "Prazo e risco").
 

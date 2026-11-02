@@ -427,6 +427,11 @@ B5, B6 e B7 fechados pelo usuário em 01/11/2026. B8 fechado pelo usuário em 01
 | 01/11/2026 | 0.3.94 | Usuário confirmou continuar coletando e substituir os dados mais antigos com memória cheia |
 | 01/11/2026 | 0.3.95 | Usuário definiu espaço separado e pequeno para alertas, apagados após sincronização |
 | 01/11/2026 | 0.3.96 | Usuário confirmou substituir o alerta mais antigo quando o espaço reservado estiver cheio |
+| 02/11/2026 | 0.3.139 | OloggerMulti: BOOT0 do U1 sem ligação no esquema (HW-006), contornado por bits de opção sem intervenção física; imagem vazia executando no STM32L412 real (PC em `0x0800....`, SysTick contando). Criado FW-051 para o procedimento de gravação |
+| 02/11/2026 | 0.3.138 | FW-004, FW-005 e FW-008 concluídos: Doxygen com dicionário gerado, modelo de arquivo C e verificador de padrão, com 20 testes das ferramentas. OloggerMulti gravado por SWD, mas o BOOT0 em nível alto impede a execução; correção de hardware adiada |
+| 02/11/2026 | 0.3.137 | FW-006 concluído: imagens vazias dos dois builds STM32 compilam e linkam com `-Werror` (HAL L4 v1.18.2 para OloggerMulti e HAL L0 v1.12.4 para y7080) |
+| 02/11/2026 | 0.3.136 | FW-006 parcial: imagem vazia do OloggerMulti (STM32L412C8) compila e linka com HAL L4 v1.18.2 e `-Werror`; y7080 aguarda o pacote STM32CubeL0 |
+| 02/11/2026 | 0.3.135 | FW-002 concluído: CMake raiz com seleção de build por device, toolchain ARM e opções de CPU por MCU; configura os dois builds e recusa device inválido. Alvos STM32 pendentes de HAL (FW-006) |
 | 02/11/2026 | 0.3.134 | FreeRTOS aprovado para todo o sistema, com alocação estática; mapeamento Modbus aprovado com escravo de status; escrita em equipamento externo fora do escopo; backlog FW-046 a FW-050 |
 | 02/11/2026 | 0.3.133 | Decisões: MQTT do y7080 no modem; rádio externo do OloggerMulti na UART1 do STM32 com repasse transparente; dados Modbus só na RAM, 8 equipamentos e 64 variáveis; configuração pelo sistema e pelo gateway USB. Proposta em `documentacao/modbus_mapeamento_dados.md` |
 | 02/11/2026 | 0.3.132 | Composição confirmada pelo responsável técnico: OloggerMulti com saída em frequência, ESP32-C6 como único rádio e UART de rádio externo transparente (`RADIO_UART_EXTERNO`); y7080 com entrada diferencial, celular e MQTT, sem entradas nem saídas digitais; ESP-IDF v5.4.4 de referência |

@@ -21,8 +21,8 @@ Sprint só é fechada com o sistema inteiro documentado. Este checklist roda uma
 ## 3. Código e dicionário
 
 - `documentacao/dicionario_funcoes.md`: toda função criada ou alterada na sprint está listada, com módulo, arquivo e status.
-- Quando `tools/gera_dicionario.py` existir, a tabela foi regenerada no fim da sprint.
-- Padrão de código e de ESP-IDF respeitados: rodar `tools/verifica_padrao.py` quando existir.
+- A tabela foi regenerada no fim da sprint e `python tools/gera_dicionario.py --check` sai com 0.
+- Padrão de código e de ESP-IDF respeitados: `python tools/verifica_padrao.py` sai com 0 e `doxygen Doxyfile` roda sem avisos.
 
 ## 4. Regras e contratos
 

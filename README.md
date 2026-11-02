@@ -39,8 +39,16 @@ Firmware da família oLoggerIOT, para os modelos **OloggerMulti** e **y7080**. C
 
 Ainda não há build. Os comandos serão registrados aqui quando estiverem prontos:
 
-- Seleção do build (CMake): `cmake -DDEVICE=ologgermulti` ou `cmake -DDEVICE=y7080`. Depende da FW-002.
-- Imagem STM32: FW-002 e FW-006.
+- Configurar o build STM32 (ferramenta ARM GCC e Ninja no PATH):
+
+  ```
+  cmake -S . -B build/ologgermulti -G Ninja -DDEVICE=ologgermulti -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-arm-none-eabi.cmake
+  ```
+
+  Troque `ologgermulti` por `y7080` para o outro build. Precisa também da pasta do pacote STM32CubeL4, passada com `-DOLOG_STM32CUBE_L4=<pasta>`, por exemplo `C:/Users/<usuario>/STM32Cube/Repository/STM32Cube_FW_L4_V1.18.2`.
+
+- Configurar o y7080 pede o pacote STM32CubeL0 em `-DOLOG_STM32CUBE_L0=<pasta>`, por exemplo `C:/Users/<usuario>/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.4`.
+- Compilar: `cmake --build build/ologgermulti` ou `cmake --build build/y7080`. Saem `ologgeriot_stm32.elf`, `.bin` e `.map` em `build/<device>/src/`.
 - Imagem ESP32, só no build `ologgermulti` (`idf.py set-target esp32c6`, `idf.py build`): FW-007.
 - Versão de referência do ESP-IDF: v5.4.4, instalada em `C:\Espressif`. Fixar no README na FW-007.
 
@@ -49,6 +57,10 @@ Ainda não há build. Os comandos serão registrados aqui quando estiverem pront
 - Código C: `documentacao/padrao_codigo_c.md` (base MISRA C:2012).
 - Código ESP-IDF: `documentacao/padrao_esp_idf.md`.
 - Documentação em português do Brasil, com cabeçalho, versão e histórico.
+- Verificar o padrão do projeto: `python tools/verifica_padrao.py` (função, arquivo, cabeçalho e alocação dinâmica).
+- Documentação do código: `doxygen Doxyfile` (falha em item sem comentário) e `python tools/gera_dicionario.py` para atualizar o dicionário de funções.
+- Testes das ferramentas: `python -m unittest discover -s tools -p "test_*.py"`.
+- Modelos de arquivo C novo: `tools/modelos/`.
 
 ## Desenvolvimento
 

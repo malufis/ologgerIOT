@@ -1,6 +1,6 @@
 # Backlog do firmware — oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 02/11/2026 · **Versão:** 0.1.4
+> **Criado em:** 01/11/2026 · **Última modificação:** 02/11/2026 · **Versão:** 0.1.5
 
 ## Regras
 
@@ -120,6 +120,7 @@ Prazo de referência do protótipo de bancada: 29/11/2026. São quatro semanas a
 | FW-043 | Roteiro de bancada do protótipo | Roteiro aprovado |
 | FW-044 | Validação de NB-IoT com módulo e operadora (P-026) | Relatório de recepção e latência |
 | FW-045 | Execução do roteiro de bancada e relatório | Relatório registrado |
+| FW-051 | Procedimento de gravação do OloggerMulti com os bits de opção `nSWBOOT0=0` e `nBOOT0=1`, porque o BOOT0 do U1 está sem ligação (HW-006) | Script ou roteiro executado em uma placa nova, com leitura de volta dos bits e do PC em `0x0800....` |
 
 ## Histórico
 
@@ -128,5 +129,6 @@ Prazo de referência do protótipo de bancada: 29/11/2026. São quatro semanas a
 | 01/11/2026 | 0.1.0 | Criado backlog com 45 tarefas em 11 fases, vinculadas às sprints |
 | 02/11/2026 | 0.1.1 | FW-001 concluído: pastas `src/`, `include/`, `lib/`, `devices/`, `tests/`, `tools/` com README |
 | 02/11/2026 | 0.1.2 | FW-002 e FW-003 reescritos para imagem única por MCU e setup de composição, no lugar de seleção de perfil de compilação; regra de pronto e documentação ampliadas (estado, changelog, dicionário) |
+| 02/11/2026 | 0.1.5 | FW-051 adicionado: procedimento de gravação com bits de opção, por causa do BOOT0 sem ligação no OloggerMulti |
 | 02/11/2026 | 0.1.4 | FreeRTOS em todo o sistema: FW-046 na base (SPRINT_00); FW-047 a FW-050 para o mapeamento Modbus (SPRINT_05), conforme `documentacao/modbus_mapeamento_dados.md` aprovado |
 | 02/11/2026 | 0.1.3 | Composição por build: FW-002 seleciona o build por `-DDEVICE` e lê `builds/composicao.cmake`; FW-003 revisa a composição e cria a pinagem por placa; setup em runtime removido |
