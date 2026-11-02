@@ -55,3 +55,4 @@ Ainda não há build. Os comandos serão registrados aqui quando estiverem pront
 - Backlog: `planejamento/BACKLOG.md`. Sprints de uma semana em `planejamento/sprints/`.
 - Tarefas pequenas, de até um dia. Uma tarefa por alteração.
 - Responsável técnico: Rodrigo Maluf. Cliente: Optmile.
+- Branch principal: `main`. Trabalho em branch próprio e PR para `main`.
