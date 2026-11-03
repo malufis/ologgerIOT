@@ -27,6 +27,10 @@
   #include "io_tarefa.h"
 #endif
 
+#ifdef OLOG_TEM_SAIDA_DISCRETA
+  #include "io_saidas.h"
+#endif
+
 #ifdef OLOG_TEM_ENERGIA
   #include "energia.h"
 #endif
@@ -54,6 +58,7 @@ static const energia_ganchos_t ganchos_energia = {
   io_tarefa_pode_dormir,
   prepara_sleep,
   retoma_do_sleep,
+  NULL, /* sleep_permitido: a saída em frequência (FW-023) passa a impedi-lo quando existir. */
 };
 #endif
 
@@ -83,6 +88,13 @@ static int32_t cria_tarefas(void)
   }
 #endif
 
+#ifdef OLOG_TEM_SAIDA_DISCRETA
+  if (io_saidas_inicia() != IO_SAIDAS_OK)
+  {
+    return -1;
+  }
+#endif
+
 #if defined(OLOG_TEM_ENERGIA) && defined(OLOG_TEM_ENTRADA_DIGITAL)
   if (energia_inicia(&ganchos_energia) != ENERGIA_OK)
   {
@@ -103,6 +115,10 @@ static int32_t cria_tarefas(void)
 int main(void)
 {
   (void)HAL_Init();
+
+#ifdef OLOG_TEM_SAIDA_DISCRETA
+  (void)io_saidas_prepara(); /* O quanto antes: as saídas devem partir desligadas. */
+#endif
 
 #ifdef OLOG_TEM_AQUISICAO
   adc_diagnostico(); /* Antes das tarefas: o tick ainda corre. */

@@ -43,6 +43,14 @@ add_executable(test_io_pulsos
 target_include_directories(test_io_pulsos PRIVATE ../lib/io/include .)
 add_test(NAME io_pulsos COMMAND test_io_pulsos)
 
+# Módulo io: estado da saída digital discreta (ligada, desligada, acionada por tempo).
+add_executable(test_saida
+  io/test_saida.c
+  ../lib/io/src/saida.c
+)
+target_include_directories(test_saida PRIVATE ../lib/io/include .)
+add_test(NAME saida COMMAND test_saida)
+
 # Módulo io: totalizador de pulsos com duas cópias e complemento.
 add_executable(test_io_totalizador
   io/test_io_totalizador.c

@@ -52,6 +52,13 @@
 #define PINO_SAIDA_DIGITAL_3_NUM   GPIO_PIN_14
 #define PINO_SAIDA_DIGITAL_4_PORTA GPIOB
 #define PINO_SAIDA_DIGITAL_4_NUM   GPIO_PIN_15
+/**
+ * Nível do pino com a saída ligada. O pino aciona, por um resistor de 1k (R45 a R48), a base
+ * de um NPN BC847 em coletor aberto: nível alto liga o transistor e puxa OUT-n (conector
+ * J12) ao terra GNDD. Não há resistor entre base e emissor, então o pino deve ser levado ao
+ * nível desligado antes de virar saída. Origem: netlist extras.xml, conferida em 03/11/2026.
+ */
+#define PINO_SAIDA_DIGITAL_NIVEL_LIGADO GPIO_PIN_SET
 
 /* RS-485 (USART2). DE e /RE ligados à mesma rede. */
 #define PINO_RS485_TX_PORTA    GPIOA

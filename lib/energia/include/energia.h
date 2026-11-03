@@ -35,6 +35,8 @@
 #define ENERGIA_OK             0
 /** Código de retorno: parâmetro nulo ou tarefa não criada. */
 #define ENERGIA_ERRO           (-1)
+/** Código de retorno: um módulo impede habilitar o sleep (por exemplo, saída em frequência ativa). */
+#define ENERGIA_ERRO_BLOQUEADO (-2)
 
 /** Ganchos que ligam a gerência de energia aos módulos do equipamento. */
 typedef struct
@@ -42,6 +44,7 @@ typedef struct
   bool (*pode_dormir)(void); /**< Devolve true se nenhum módulo precisa do equipamento acordado. */
   void (*antes)(void);       /**< Prepara os módulos para dormir; pode ser nulo. */
   void (*depois)(void);      /**< Retoma os módulos ao acordar; pode ser nulo. */
+  bool (*sleep_permitido)(void); /**< Devolve false se algum módulo impede habilitar o sleep; pode ser nulo. */
 } energia_ganchos_t;
 
 /**
@@ -54,11 +57,17 @@ typedef struct
 int32_t energia_inicia(const energia_ganchos_t *ganchos);
 
 /**
- * @brief Habilita ou desabilita a entrada em sleep. Começa desabilitado.
+ * @brief Liga ou desliga o modo sleep. Começa desligado.
  *
- * @param valor true para permitir dormir.
+ * Desligar sempre funciona. Ligar é recusado se o gancho `sleep_permitido` disser que algum
+ * módulo impede: a saída em frequência só pode ser habilitada com o sleep desligado, e o sleep
+ * só pode ser ligado se nenhuma saída estiver em frequência. Corresponde ao modo de operação do
+ * mapa Modbus (40412: 0 = contínuo, 1 = sleep).
+ *
+ * @param valor true para ligar o sleep, false para desligar.
+ * @return ENERGIA_OK ou ENERGIA_ERRO_BLOQUEADO (só ao ligar).
  */
-void energia_define_habilitada(bool valor);
+int32_t energia_define_habilitada(bool valor);
 
 /**
  * @brief Informa se o sleep está habilitado.

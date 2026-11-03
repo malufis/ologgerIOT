@@ -16,10 +16,16 @@ if(TARGET aquisicao)
   target_link_libraries(ologgeriot_stm32 PRIVATE aquisicao)
   target_compile_definitions(ologgeriot_stm32 PRIVATE OLOG_TEM_AQUISICAO=1)
 endif()
-# Entradas digitais: só nos builds com ENTRADA_DIGITAL (hoje, o OloggerMulti).
+# Entradas e saídas digitais: só nos builds com ENTRADA_DIGITAL ou SAIDA_DISCRETA (hoje, o
+# OloggerMulti).
 if(TARGET io)
   target_link_libraries(ologgeriot_stm32 PRIVATE io)
-  target_compile_definitions(ologgeriot_stm32 PRIVATE OLOG_TEM_ENTRADA_DIGITAL=1)
+  if(ENTRADA_DIGITAL IN_LIST OLOG_FEATURES)
+    target_compile_definitions(ologgeriot_stm32 PRIVATE OLOG_TEM_ENTRADA_DIGITAL=1)
+  endif()
+  if(SAIDA_DISCRETA IN_LIST OLOG_FEATURES)
+    target_compile_definitions(ologgeriot_stm32 PRIVATE OLOG_TEM_SAIDA_DISCRETA=1)
+  endif()
 endif()
 # Gerência de energia: só nos builds com driver de Stop 2 (hoje, o OloggerMulti).
 if(TARGET energia)

@@ -98,9 +98,16 @@ int32_t energia_inicia(const energia_ganchos_t *ganchos)
   return (tarefa == NULL) ? ENERGIA_ERRO : ENERGIA_OK;
 }
 
-void energia_define_habilitada(bool valor)
+int32_t energia_define_habilitada(bool valor)
 {
+  if (valor && (ganchos_atuais != NULL) && (ganchos_atuais->sleep_permitido != NULL) &&
+      !ganchos_atuais->sleep_permitido())
+  {
+    return ENERGIA_ERRO_BLOQUEADO;
+  }
+
   habilitada = valor;
+  return ENERGIA_OK;
 }
 
 bool energia_habilitada(void)

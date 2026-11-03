@@ -12,10 +12,18 @@ add_library(vida STATIC vida/src/vida.c)
 target_include_directories(vida PUBLIC vida/include)
 target_link_libraries(vida PUBLIC rtos freertos)
 
-# Entrada digital: filtro de ruído (lógica pura, testada no PC em tests/io).
+# Entradas e saídas digitais (lib/io). Cada funcionalidade traz os seus arquivos. A lógica
+# pura (io_filtro, io_pulsos, io_totalizador, saida) é testada no PC em tests/io.
+set(IO_FONTES)
 if(ENTRADA_DIGITAL IN_LIST OLOG_FEATURES)
-  add_library(io STATIC io/src/io_filtro.c io/src/io_entrada.c io/src/io_pulsos.c io/src/io_backup.c io/src/io_totalizador.c
-    io/src/io_tarefa.c)
+  list(APPEND IO_FONTES io/src/io_filtro.c io/src/io_entrada.c io/src/io_pulsos.c
+    io/src/io_backup.c io/src/io_totalizador.c io/src/io_tarefa.c)
+endif()
+if(SAIDA_DISCRETA IN_LIST OLOG_FEATURES)
+  list(APPEND IO_FONTES io/src/saida.c io/src/io_saida.c io/src/io_saidas.c)
+endif()
+if(IO_FONTES)
+  add_library(io STATIC ${IO_FONTES})
   target_include_directories(io PUBLIC io/include)
   target_link_libraries(io PUBLIC ${OLOG_HAL_TARGET} rtos freertos)
 endif()
