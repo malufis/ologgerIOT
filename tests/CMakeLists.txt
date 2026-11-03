@@ -1,0 +1,52 @@
+# -----------------------------------------------------------------------------
+# Testes de unidade no PC. Projeto CMake separado do firmware: usa o compilador
+# do PC, sem HAL e sem hardware.
+#
+#   cmake -S tests -B build/tests -G Ninja -DCMAKE_C_COMPILER=gcc
+#   cmake --build build/tests
+#   ctest --test-dir build/tests --output-on-failure
+#
+# Cada módulo testável (lógica pura) entra aqui com seu teste.
+# -----------------------------------------------------------------------------
+
+cmake_minimum_required(VERSION 3.22)
+project(oLoggerIOT_testes C)
+
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+add_compile_options(-Wall -Wextra -Werror -pedantic)
+
+enable_testing()
+
+# Módulo sensor: média por segundo e conversão 4-20 mA.
+add_executable(test_sensor
+  sensor/test_sensor.c
+  ../lib/sensor/src/sensor.c
+)
+target_include_directories(test_sensor PRIVATE ../lib/sensor/include .)
+target_link_libraries(test_sensor PRIVATE m)
+add_test(NAME sensor COMMAND test_sensor)
+
+# Módulo io: filtro de ruído da entrada digital.
+add_executable(test_io_filtro
+  io/test_io_filtro.c
+  ../lib/io/src/io_filtro.c
+)
+target_include_directories(test_io_filtro PRIVATE ../lib/io/include .)
+add_test(NAME io_filtro COMMAND test_io_filtro)
+
+# Módulo io: contador de pulsos e inatividade.
+add_executable(test_io_pulsos
+  io/test_io_pulsos.c
+  ../lib/io/src/io_pulsos.c
+)
+target_include_directories(test_io_pulsos PRIVATE ../lib/io/include .)
+add_test(NAME io_pulsos COMMAND test_io_pulsos)
+
+# Módulo io: totalizador de pulsos com duas cópias e complemento.
+add_executable(test_io_totalizador
+  io/test_io_totalizador.c
+  ../lib/io/src/io_totalizador.c
+)
+target_include_directories(test_io_totalizador PRIVATE ../lib/io/include .)
+add_test(NAME io_totalizador COMMAND test_io_totalizador)

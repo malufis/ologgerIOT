@@ -20,6 +20,8 @@ set(OLOG_HAL_TARGET hal_stm32l0)
 set(OLOG_HAL_DEFINE STM32L071xx)
 set(OLOG_STARTUP ${L0}/Drivers/CMSIS/Device/ST/STM32L0xx/Source/Templates/gcc/startup_stm32l071xx.s)
 set(OLOG_LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/devices/y7080/STM32L071CBU6_FLASH.ld)
+set(OLOG_FREERTOS_ROOT ${L0}/Middlewares/Third_Party/FreeRTOS/Source)
+set(OLOG_FREERTOS_PORT ARM_CM0)
 
 add_library(${OLOG_HAL_TARGET} STATIC
   ${L0}/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal.c

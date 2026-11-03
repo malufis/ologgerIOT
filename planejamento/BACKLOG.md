@@ -1,6 +1,6 @@
 # Backlog do firmware — oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 02/11/2026 · **Versão:** 0.1.5
+> **Criado em:** 01/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.1.11
 
 ## Regras
 
@@ -38,6 +38,22 @@ Prazo de referência do protótipo de bancada: 29/11/2026. São quatro semanas a
 | FW-010 | Biblioteca `lib/sensor`: média simples por segundo | Valor de 1 segundo calculado no PC com sequência sintética |
 | FW-011 | Conversão de corrente para valor de engenharia com span, zero e offset | Conversão testada no PC |
 | FW-012 | Teste em bancada com gerador de corrente 4–20 mA | Leitura dentro da tolerância |
+
+### Fase 1B — Entrada digital (SPRINT_01B)
+
+Entrada digital de sinal ativo em nível alto, discreta (0 ou 1) ou de frequência em Hz, com filtro de ruído e despertar do sleep. Decisões de 03/11/2026 em `documentacao/configuracao_do_dispositivo.md`.
+
+| ID | Tarefa | Aceite |
+|---|---|---|
+| FW-052 | Biblioteca `lib/io`: leitura do nível das entradas digitais D1 a D4 pelas macros de `pinos.h`; nível alto = ativo | Leitura confere com a tensão aplicada na bancada |
+| FW-053 | `io_filtro`: filtro de ruído que aceita a mudança após N amostras seguidas do nível oposto | Testes no PC: mudança após N amostras, pulso curto descartado, ruído alternado sem mudança |
+| FW-054 | Modo de frequência em Hz: contagem de bordas em janela, escolhido por entrada na configuração | Teste no PC com sinal sintético de frequência conhecida |
+| FW-055 | Contagem de pulsos dormindo: interrupção externa na borda que ativa a entrada (PB5 a PB8) soma o pulso no contador e no totalizador e pede para o STM32 acordar | Teste em bancada: o pulso acorda o STM32 em Stop 2, o pulso que acordou é contado uma vez e nenhum se perde |
+| FW-056 | Roteiro e execução de bancada da entrada digital: nível, filtro, contador de pulsos, totalizador e sleep (`documentacao/roteiro_bancada_entrada_digital.md`) | Relatório registrado |
+| FW-057 | `io_pulsos`: contador de pulsos por entrada, com 60 s padrão sem pulso para poder dormir, e registro do pulso que acordou | Testes no PC: contagem, pulso mantido, despertar sem contar duas vezes, inatividade e volta do contador de tempo |
+| FW-058 | Entrada em Stop 2 pelo contador de pulsos: dorme após o tempo sem pulso, para a aquisição analógica ao dormir, acorda pelo pulso e fica acordado enquanto houver pulso; o despertar para transmitir fica em outra sprint | Teste em bancada: ciclo de dormir e acordar, pulso constante sem acordar e dormir a cada pulso, com a corrente medida |
+| FW-059 | Contagem de pulsos em hardware (LPTIM1 na entrada D4, PB5) durante o sleep, sem acordar. **A confirmar**: com quatro leitores só um conta assim; depende do RM0394 | Teste em bancada: pulsos contados em Stop 2 sem acordar, conferidos com um gerador |
+| FW-060 | Totalizador (hodômetro) de 32 bits por entrada, nos registradores de backup, com duas cópias e complemento e gravação a cada pulso | Teste no PC: soma, volta a zero e queda de energia em cada gravação; em bancada: reinício e queda de energia sem perder o total |
 
 ### Fase 2 — Regras de sensor (SPRINT_02)
 
@@ -132,3 +148,9 @@ Prazo de referência do protótipo de bancada: 29/11/2026. São quatro semanas a
 | 02/11/2026 | 0.1.5 | FW-051 adicionado: procedimento de gravação com bits de opção, por causa do BOOT0 sem ligação no OloggerMulti |
 | 02/11/2026 | 0.1.4 | FreeRTOS em todo o sistema: FW-046 na base (SPRINT_00); FW-047 a FW-050 para o mapeamento Modbus (SPRINT_05), conforme `documentacao/modbus_mapeamento_dados.md` aprovado |
 | 02/11/2026 | 0.1.3 | Composição por build: FW-002 seleciona o build por `-DDEVICE` e lê `builds/composicao.cmake`; FW-003 revisa a composição e cria a pinagem por placa; setup em runtime removido |
+| 03/11/2026 | 0.1.11 | Correção: o pulso acorda o STM32 e ele fica acordado, dormindo só após o tempo de inatividade; FW-055, FW-056 e FW-058 reescritos |
+| 03/11/2026 | 0.1.10 | FW-058 (Stop 2) e FW-060 (totalizador em hodômetro) detalhados e implementados; FW-059 rebaixado |
+| 03/11/2026 | 0.1.9 | FW-055 redefinido: o tratador da interrupção externa conta o pulso e o STM32 volta a dormir |
+| 03/11/2026 | 0.1.8 | Fase 1B: FW-059 (contagem em hardware no LPTIM1) e FW-060 (contagem persistente) propostos, a confirmar |
+| 03/11/2026 | 0.1.7 | Fase 1B: uso da entrada digital como contador de pulsos que dorme após 60 s sem pulso; FW-055 e FW-056 reescritos e FW-057 e FW-058 adicionados |
+| 03/11/2026 | 0.1.6 | Fase 1B adicionada (SPRINT_01B) com FW-052 a FW-056 para a entrada digital: nível alto ativo, filtro de ruído, modo de frequência, despertar do sleep e bancada |

@@ -1,6 +1,6 @@
 # Análise dos hardwares OloggerMulti e y7080
 
-> **Criado em:** 29/10/2026 · **Última modificação:** 02/11/2026 · **Versão:** 0.2.1
+> **Criado em:** 29/10/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.3.4
 > **Estado:** parte elétrica resolvida conforme confirmação de Rodrigo Maluf; análise dos arquivos preservada como histórico documental.
 
 ## Resultado
@@ -148,6 +148,46 @@ Confirmar o módulo celular montado, os sensores PC11/K8, a seleção dos jumper
 1. Corrigir a revisão da placa, com pull-down no pino 44. Resolve a causa, mas exige retrabalho.
 2. Gravar `nSWBOOT0 = 0` e `nBOOT0 = 1` nos bits de opção. O chip passa a ignorar o pino e a iniciar sempre pela flash, e o PH3 fica livre. Funciona nas placas atuais, mas **precisa entrar no procedimento de gravação de toda unidade**, porque o padrão de fábrica do chip depende do pino.
 
+### HW-007 — Escala do ADC do OloggerMulti ~1,37 acima do esperado
+
+**Evidência (02/11/2026, bancada):**
+- Entrada 4 com 4 mA, 8 mA e 20 mA, confirmados com multímetro em série e tensão no shunt (0,599 V, 1,200 V e 2,999 V). O seguidor de tensão tem ganho 1 e o pino do MCU mede a mesma tensão do shunt.
+- O ADC lê 1036, 2077 e 4095 contagens (saturado). As leituras são proporcionais, sem deslocamento, o que dá uma referência efetiva de **~2,37 V**, enquanto a alimentação medida no C9 é 3,25 V.
+- A referência interna VREFINT dá 2085–2092 contagens (esperado ~1527), o que implica VDDA de ~2,37 V pela calibração de fábrica (1652 a 3,0 V).
+- Descartados: configuração do ADC (12 bits, alinhamento à direita, sem sobreamostragem, sem modo diferencial, calibrado), VREFBUF (não responde no L412), shunt, seguidor e o próprio driver (as conversões simples por software, sem timer e sem DMA, dão o mesmo resultado).
+
+**Impacto:** o ADC satura a ~2,37 V no pino, ou seja, em ~15,8 mA. A faixa de 4 a 20 mA não pode ser medida por inteiro. A calibração por dois pontos (referência efetiva de 2,367 V) corrige a escala até esse limite, mas não resolve a saturação.
+
+**Causa identificada (02/11/2026):** a ferrite **L2 (BLM18HE152SN1D)**, entre a rede +3,3 V e a alimentação analógica 3,3V_A, **não está soldada** na placa de bancada. Sem ela, o VDDA do chip cai para ~2,37 V, e o ADC converte com essa escala. Medidas: C9 em 3,25 V e VDDA do chip em 2,37 V. Correção: soldar L2 e conferir a resistência CC (quase 0 Ω) e a tensão do VDDA (3,25 V).
+
+**Consequência para o firmware:** a calibração de 2,367 V em `aquisicao.h` é um remendo de bancada. Depois da solda, a referência volta para 3,25 V e a calibração deve ser refeita e revalidada, incluindo 20 mA.
+
+### HW-008 — Entradas digitais com 12 a 24 V: potência do resistor de entrada
+
+**Definição (03/11/2026):** a tensão de campo das entradas digitais é a mesma da entrada do CLP, de uma fonte de 12 a 24 V. Fonte: responsável técnico.
+
+**Evidência (`entradas_digitais.kicad_sch`):** quatro canais com o optoacoplador TLP291-4GB (U2), resistores de 4K7 (R3 a R6) e de 10k (R7 a R10), todos no encapsulamento 0402, e a matriz de proteção ESDA6V1SC5 (D1). A netlist (`nogit/analise_hardware/OloggerMulti/entradas_digitais.xml`) confirma a topologia: `IN-Dx` → 4K7 → ânodo do LED do TLP291, cátodo no terra de campo (`Earth-GND`); no lado do STM32, o coletor do fototransistor está em `MCU-Dx` com o 10k para +3,3 V e o emissor no `GNDPWR`. Com tensão no campo o LED acende, o fototransistor conduz e o **pino do STM32 vai a nível baixo**. O firmware trata ativo como nível baixo (`PINO_ENTRADA_DIGITAL_NIVEL_ATIVO` em `devices/ologgermulti/pinos.h`). A matriz D1 (ESDA6V1SC5) liga cada `IN-Dx` ao terra de campo, antes do 4K7.
+
+**Cálculo com essa topologia** (queda do LED de ~1,2 V, corrente `(V − 1,2) / 4,7 kΩ`):
+
+| Tensão de campo | Corrente no LED | Potência no 4K7 |
+|---|---|---|
+| 12 V | ~2,3 mA | ~25 mW |
+| 24 V | ~4,9 mA | ~110 mW |
+| 30 V (fonte alta) | ~6,1 mA | ~176 mW |
+
+- **Nível ativo:** a corrente do LED em 12 V (~2,3 mA) satura o fototransistor com folga, pois a pull-up de 10k só pede ~0,33 mA. Estimativa, a medir.
+- **Potência:** um resistor 0402 costuma ser de 62,5 mW ou 100 mW. O consumo estimado em 24 V (~110 mW) e em 30 V (~176 mW) fica acima disso. É o ponto crítico. Conferir a potência do componente montado.
+- **Proteção D1 em conflito com 12 a 24 V:** a D1 está ligada diretamente entre `IN-Dx` e o terra, sem resistência antes dela. O ESDA6V1SC5 é um supressor de 6,1 V de ruptura mínima, conforme a [página do produto na ST](https://www.st.com/ja/protections-and-emi-filters/esda6v1sc5.html) (confirmado em 03/11/2026; a tensão de operação reversa de ~5,25 V vem de listas de distribuidores, a conferir no PDF da ST), então conduz a partir de cerca de 6 V. Com 12 a 24 V no campo ele tenta grampear a fonte em ~6 V, com a corrente limitada só pela fonte, e o 4K7 não protege a D1 porque está depois dela. Resultado esperado: a entrada não opera de forma confiável acima de ~5 V e a D1 pode aquecer ou falhar. É o ponto mais grave deste achado. Confirmar em bancada, com fonte limitada em corrente, antes de aplicar 24 V.
+- **Inversão de polaridade:** não há diodo de proteção visível em série com o LED. A tensão reversa máxima do LED é da ordem de 5 V. A conferir.
+- **Velocidade:** com corrente menor no LED (12 V) o desligamento do fototransistor é mais lento. O pior caso para a frequência é 12 V.
+
+**Posição do responsável técnico (03/11/2026):** o circuito do optoacoplador está correto; o mesmo 4K7 já é usado em outro projeto, a 12 V, e o resistor passará a 0603 no próximo layout. Análise: o resistor em série com o LED resolve a corrente do LED, mas **não protege a D1**, que está no nó `IN-Dx` antes dele. Em 12 V a potência no 4K7 é ~25 mW e já cabe em 0402; a mudança para 0603 só importa perto de 24 V. Um 0603 comum é de 100 mW (existem de 125 mW), e o consumo estimado em 24 V é ~110 mW e em 30 V ~176 mW. Para 24 V: usar 0805 ou 1206 de 0,25 W, ou subir o resistor para ~10k (~52 mW em 24 V, ~1,1 mA no LED em 12 V; margem do ganho de corrente a conferir). Sobre a D1: no outro projeto, conferir se o componente é o mesmo; se for outro supressor (por exemplo, de 24 V ou bidirecional de tensão maior), a questão não se aplica aqui.
+
+**Decisão do responsável técnico (03/11/2026):** retirar a D1 (ESD) das entradas digitais e reaproveitá-la em outro projeto. Com isso o conflito de ~6 V some. Consequências: a entrada fica sem supressor de surto e ESD no terminal de campo; só o 4K7 e o optoacoplador limitam a energia. Se a proteção for necessária em campo industrial, no próximo layout usar um supressor com tensão de operação acima de 24 V (por exemplo, da família SMAJ ou SM5S de ~30 V), no nó `IN-Dx`. Na placa de bancada, sem a D1 a entrada aceita 12 V com folga; 24 V continua limitado pela potência do 4K7 em 0402 (~110 mW), então use até 12 V ou troque o resistor antes.
+
+**Pendência:** confirmar a proteção contra inversão de polaridade, a potência do resistor montado e a proteção contra inversão. A parte elétrica foi declarada resolvida pelo responsável técnico; este achado é um alerta de verificação, não uma solicitação de alteração.
+
 ## Resultado do cruzamento dos Gerbers
 
 | Verificação | OloggerMulti | y7080 |
@@ -195,5 +235,10 @@ Para concluir o B2, já há evidência da origem dos dados e do armazenamento. F
 | 29/10/2026 | 0.1.0 | Análise dos dois conjuntos, mapas preliminares de pinos, cruzamento de atributos Gerber, verificação ERC parcial e pendências para firmware |
 | 29/10/2026 | 0.1.1 | Registrada confirmação do responsável técnico de que a parte elétrica está resolvida; encerrados bloqueios elétricos, preservando evidências históricas |
 | 29/10/2026 | 0.1.2 | Alinhado foco no entendimento dos modelos e na ideia de compilação única com setup, sem antecipar separação da implementação |
+| 03/11/2026 | 0.3.4 | HW-008: decisão de retirar a D1 das entradas digitais; registradas a perda de proteção contra surto e ESD e o limite de 12 V na bancada com o 4K7 em 0402 |
+| 03/11/2026 | 0.3.3 | HW-008: ruptura de 6,1 V da D1 confirmada na página da ST; registrada a decisão de usar resistor 0603 no próximo layout e a análise de potência |
+| 03/11/2026 | 0.3.2 | HW-008 atualizado com a netlist: topologia confirmada, pino ativo em nível baixo e proteção D1 de ~6 V em conflito com 12 a 24 V |
+| 03/11/2026 | 0.3.1 | Achado HW-008: entradas digitais com fonte de 12 a 24 V; potência do resistor de entrada de 4K7 em 0402 e proteção contra inversão a verificar |
+| 02/11/2026 | 0.3.0 | Achado HW-007: escala do ADC do OloggerMulti ~1,37 acima do esperado (referência efetiva de ~2,37 V com alimentação de 3,25 V); driver, configuração do ADC e circuito de entrada descartados |
 | 02/11/2026 | 0.2.1 | HW-006 contornado por bits de opção na unidade de bancada; firmware executa no STM32L412 real |
 | 02/11/2026 | 0.2.0 | Achado HW-006: BOOT0 do OloggerMulti sem ligação no esquema, confirmado na gravação por SWD; y7080 tem BOOT0 ligado ao R16 de 100 kΩ |

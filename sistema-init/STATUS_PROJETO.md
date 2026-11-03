@@ -427,6 +427,8 @@ B5, B6 e B7 fechados pelo usuário em 01/11/2026. B8 fechado pelo usuário em 01
 | 01/11/2026 | 0.3.94 | Usuário confirmou continuar coletando e substituir os dados mais antigos com memória cheia |
 | 01/11/2026 | 0.3.95 | Usuário definiu espaço separado e pequeno para alertas, apagados após sincronização |
 | 01/11/2026 | 0.3.96 | Usuário confirmou substituir o alerta mais antigo quando o espaço reservado estiver cheio |
+| 02/11/2026 | 0.3.141 | FW-046 concluído no STM32: FreeRTOS com alocação estática nos dois builds, tarefa de vida executando no L412 real com o tick de 1 ms conferido (9,9 ciclos/s para 10 esperados). Parte ESP32 adiada |
+| 02/11/2026 | 0.3.140 | FW-003 concluído: pinagem das duas placas conferida contra as netlists e compilada com o HAL real; corrigido aviso do linker no y7080. Decisão: testar todo o STM32 antes do ESP32 |
 | 02/11/2026 | 0.3.139 | OloggerMulti: BOOT0 do U1 sem ligação no esquema (HW-006), contornado por bits de opção sem intervenção física; imagem vazia executando no STM32L412 real (PC em `0x0800....`, SysTick contando). Criado FW-051 para o procedimento de gravação |
 | 02/11/2026 | 0.3.138 | FW-004, FW-005 e FW-008 concluídos: Doxygen com dicionário gerado, modelo de arquivo C e verificador de padrão, com 20 testes das ferramentas. OloggerMulti gravado por SWD, mas o BOOT0 em nível alto impede a execução; correção de hardware adiada |
 | 02/11/2026 | 0.3.137 | FW-006 concluído: imagens vazias dos dois builds STM32 compilam e linkam com `-Werror` (HAL L4 v1.18.2 para OloggerMulti e HAL L0 v1.12.4 para y7080) |

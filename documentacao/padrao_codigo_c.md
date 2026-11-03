@@ -1,6 +1,6 @@
 # Padrão de código C — firmware oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 02/11/2026 · **Versão:** 0.4.0
+> **Criado em:** 01/11/2026 · **Última modificação:** 02/11/2026 · **Versão:** 0.5.0
 
 ## Base
 
@@ -40,7 +40,24 @@ O sistema inteiro roda em FreeRTOS: STM32 e ESP32. Não há laço principal com 
 
 | Task | Prioridade | Pilha | Responsabilidade |
 |---|---|---|---|
-| Em definição | — | — | Preenchida conforme cada task é criada, na sprint correspondente |
+| Ociosa (FreeRTOS) | 0 | 128 palavras | Tarefa ociosa do kernel; memória estática em `lib/rtos` |
+| `vida` | 1 (`RTOS_PRIO_SEGUNDO_PLANO`) | 128 palavras, 101 livres medidas | Conta ciclos a cada 100 ms e mede a folga de pilha (`lib/vida`) |
+
+A coluna Pilha é preenchida com a folga medida no hardware, conforme a regra "Pilha medida". Task nova entra nesta tabela na sprint em que for criada.
+
+### Prioridades
+
+Definidas em `lib/rtos/include/rtos.h`. O kernel tem 7 níveis (`configMAX_PRIORITIES`), do 0 (ociosa) ao 6.
+
+| Constante | Valor | Uso |
+|---|---|---|
+| `RTOS_PRIO_SEGUNDO_PLANO` | 1 | Diagnóstico e tarefas sem prazo |
+| `RTOS_PRIO_COMUNICACAO` | 2 | Serial, rádio e MQTT |
+| `RTOS_PRIO_REGRAS` | 3 | Regras de sensor, de saída e agenda |
+| `RTOS_PRIO_AQUISICAO` | 4 | Aquisição analógica, com prazo de tempo real |
+| `RTOS_PRIO_CRITICA` | 5 | Watchdog e tratamento de falha |
+
+O SysTick é compartilhado entre o HAL e o FreeRTOS: `SysTick_Handler` (`src/interrupcoes.c`) avança o tick do HAL e chama `rtos_tick_handler`. Os dois ticks têm 1 ms.
 
 ## Pequenos códigos e bibliotecas
 
@@ -101,4 +118,5 @@ int32_t conv_corrente_para_valor(float corrente_ma, float span, float zero, floa
 | 01/11/2026 | 0.1.0 | Criado padrão de código com base MISRA C:2012 e regras do projeto |
 | 02/11/2026 | 0.2.0 | Regra 10 trocada: composição por setup, não por `#if` de perfil; incluídas regras de pequenos códigos, bibliotecas e boas práticas de C; referência ao padrão ESP-IDF |
 | 02/11/2026 | 0.3.0 | Composição por build, no lugar de setup em runtime: funcionalidades em `builds/composicao.cmake` e `#if OLOG_FEAT_<NOME>`; pinagem por placa em `devices/`; regras 10 a 12 reescritas |
+| 02/11/2026 | 0.5.0 | Tabela de tasks ativas e de prioridades preenchida (FW-046), com a folga de pilha medida no hardware |
 | 02/11/2026 | 0.4.0 | Seção FreeRTOS: sistema inteiro em FreeRTOS, com alocação estática, filas, mutex e tabela de tasks ativas |

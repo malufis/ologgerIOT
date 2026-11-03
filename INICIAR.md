@@ -8,10 +8,10 @@ Leia este arquivo no começo de todo prompt novo. Ele aponta onde está cada inf
 
 - **Fase:** 0 — base do projeto (`planejamento/PLANO_IMPLANTACAO_FIRMWARE.md`).
 - **Sprint atual:** SPRINT_00, de 02/11/2026 a 06/11/2026 (`planejamento/sprints/SPRINT_00.md`).
-- **Itens concluídos:** FW-001, FW-002, FW-004, FW-005, FW-006 e FW-008, no branch `feat/fw-002-cmake-raiz`.
-- **Pendentes da SPRINT_00:** FW-003, FW-007 e FW-046.
+- **Itens concluídos:** FW-001 a FW-006, FW-008 e FW-046 (parte STM32). PR #1 aberto para `main` com o que existia até o FW-006 e as ferramentas; FW-003 e FW-046 vêm em seguida no branch `feat/fw-002-cmake-raiz`.
+- **Pendente da SPRINT_00:** FW-007 (ESP32) e a parte ESP32 do FW-046. Decisão de 02/11/2026: testar todo o STM32 antes do ESP32.
 - **Antes de fechar um item:** `python tools/verifica_padrao.py`, `doxygen Doxyfile` sem avisos e `python tools/gera_dicionario.py --check`.
-- **Próximo item:** FW-003 (revisão da composição e pinagem por placa).
+- **Próximo item:** aquisição analógica (FW-009: ADC com timer e DMA).
 - **Estado do código:** ainda não há código de aplicação. Ver `documentacao/ESTADO_IMPLEMENTACAO.md`.
 - **Prazo de referência:** protótipo de bancada em 29/11/2026 (`planejamento/BACKLOG.md`, seção "Prazo e risco").
 

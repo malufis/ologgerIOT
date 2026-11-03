@@ -54,6 +54,8 @@ if(OLOG_MCU STREQUAL "STM32L412C8")
 elseif(OLOG_MCU STREQUAL "STM32L071CB")
   include(cmake/hal-stm32l0.cmake)
 endif()
+include(cmake/freertos.cmake)
+add_subdirectory(lib)
 add_subdirectory(src)
 
 message(STATUS "oLoggerIOT ${DEVICE}: MCU ${OLOG_MCU}, ${OLOG_MCU_CPU_FLAGS}")

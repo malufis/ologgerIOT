@@ -1,6 +1,6 @@
 # Sprints do firmware — índice
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 01/11/2026 · **Versão:** 0.1.0
+> **Criado em:** 01/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.1.1
 
 Sprints de uma semana. Cada sprint tem meta, itens do backlog e critério de encerramento. Itens concluídos são marcados no arquivo da sprint e no `BACKLOG.md`.
 
@@ -8,6 +8,7 @@ Sprints de uma semana. Cada sprint tem meta, itens do backlog e critério de enc
 |---|---|---|---|
 | SPRINT_00 | 02/11/2026 | Base do projeto e build vazio | FW-001 a FW-008 |
 | SPRINT_01 | 09/11/2026 | Aquisição analógica | FW-009 a FW-012 |
+| SPRINT_01B | 03/11/2026 (paralela) | Entrada digital | FW-052 a FW-056 |
 | SPRINT_02 | 16/11/2026 | Regras de sensor | FW-013 a FW-016 |
 | SPRINT_03 | 23/11/2026 | Média móvel, fila e alertas | FW-017 a FW-021 |
 | SPRINT_04 | 30/11/2026 | Saídas e controle | FW-022 a FW-025 |
@@ -24,3 +25,4 @@ As datas são a sequência de semanas a partir de 02/11/2026. O protótipo de ba
 | Data | Versão | Alteração |
 |---|---|---|
 | 01/11/2026 | 0.1.0 | Criado índice das sprints de SPRINT_00 a SPRINT_09 |
+| 03/11/2026 | 0.1.1 | Adicionada SPRINT_01B (entrada digital), paralela à SPRINT_01 |

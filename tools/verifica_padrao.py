@@ -11,7 +11,7 @@ Regras verificadas (documentacao/padrao_codigo_c.md):
 Uso:
   python tools/verifica_padrao.py [caminho ...]
 
-Sem argumentos, verifica src/, lib/ e include/. Aceita arquivos e pastas.
+Sem argumentos, verifica src/, lib/, include/ e devices/. Aceita arquivos e pastas.
 Saída: uma linha 'arquivo:linha: mensagem' por violação.
 Código de saída: 0 sem violações, 1 com violações.
 
@@ -27,7 +27,7 @@ LIMITE_LINHAS_ARQUIVO = 400
 LINHAS_PROCURA_CABECALHO = 40
 CAMPOS_CABECALHO = ("@file", "@brief", "@date criacao", "@date modificacao", "@version")
 EXTENSOES = {".c", ".h"}
-PASTAS_PADRAO = ("src", "lib", "include")
+PASTAS_PADRAO = ("src", "lib", "include", "devices")
 
 RE_ALOCACAO = re.compile(r"\b(malloc|calloc|realloc|free)\s*\(")
 # Linha de assinatura de função: termina em ')' (chave na linha seguinte)

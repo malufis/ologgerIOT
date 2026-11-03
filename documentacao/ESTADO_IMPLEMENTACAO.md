@@ -10,7 +10,12 @@ Documento vivo. Diz o que existe no código, o que está em teste e o que falta.
 - **Código de aplicação:** nenhum módulo implementado ainda.
 - **Pronto:** estrutura de pastas com README (FW-001); CMake raiz com seleção de build por device (FW-002); imagens vazias dos dois builds STM32 compilando (FW-006).
 - **Ferramentas prontas:** Doxygen com dicionário gerado (FW-004), modelo de arquivo (FW-005) e verificador de padrão (FW-008).
-- **Próximo:** composição e pinagem (FW-003), build do ESP32 (FW-007) e base FreeRTOS (FW-046).
+- **Pinagem pronta (FW-003).** Os dois builds incluem `pinos.h` pelo CMake.
+- **FreeRTOS pronto no STM32 (FW-046).** Alocação estática, SysTick compartilhado com o HAL e tarefa de vida medida no chip.
+- **Aquisição analógica em bancada (fase 1):** entrada 4 lida com 8 mA injetados e o chip mostra 8,007 mA (multímetro: 8 mA). Calibração de dois pontos (4 e 8 mA) com referência efetiva de 2,367 V, no lugar de 3,25 V. A causa do fator ~1,37 segue em aberto (ver achado HW-007 em `analise_hardware_ologgeriot.md`).
+- **Bloqueio da fase 1 (HW-007), causa achada:** a ferrite L2 não foi soldada na placa de bancada. Com ela ausente, o VDDA cai para ~2,37 V e o ADC satura em ~15,8 mA. Plano para amanhã: soldar L2, conferir a resistência (quase 0 Ω) e o VDDA (3,25 V), depois voltar a referência do firmware para 3,25 V e refazer a calibração em 4, 8, 12, 16 e 20 mA.
+- **Risco no FreeRTOS:** entre a criação da primeira tarefa e `vTaskStartScheduler` o SysTick fica mascarado. Chamada do HAL com *timeout* nessa janela nunca expira. Inicializar hardware antes de criar tarefas, ou dentro delas.
+- **Próximo:** resolver o HW-007, depois conferir 12 e 16 mA e as outras três entradas e fechar o FW-012. O build do ESP32 (FW-007) e a parte ESP32 do FW-046 ficam depois do teste completo do STM32, por decisão de 02/11/2026.
 
 ## Módulos
 
@@ -18,6 +23,9 @@ Documento vivo. Diz o que existe no código, o que está em teste e o que falta.
 |---|---|---|---|---|
 | Estrutura de pastas | raiz | Implementado | FW-001 | Verificação de existência |
 | Composição dos builds | `builds/composicao.cmake` | Confirmada em 02/11/2026; validada no CMake | FW-003 | Sintaxe e erros do CMake nos dois builds |
+| FreeRTOS no STM32 (kernel, hooks e SysTick) | `include/FreeRTOSConfig.h`, `cmake/freertos.cmake`, `lib/rtos/`, `src/interrupcoes.c` | Implementado; executa no L412 real | FW-046 | Tick de 1 ms medido no hardware (9,9 ciclos/s para 10 esperados); sem símbolo de alocação dinâmica no binário |
+| Tarefa de vida | `lib/vida/` | Implementada; executa no L412 real | FW-046 | Contador subindo no chip; 101 de 128 palavras de pilha livres |
+| Pinagem por placa | `devices/ologgermulti/pinos.h`, `devices/y7080/pinos.h`, `tools/verifica_pinos.py` | Implementada | FW-003 | Conferida contra as netlists (31 e 26 funções); compila com o HAL real; 7 testes do verificador |
 | Configuração CMake (raiz, toolchain, CPU por MCU) | `CMakeLists.txt`, `cmake/` | Configuração concluída; alvos pendentes | FW-002 | Configura os dois builds e recusa device inválido |
 | Imagem STM32 do OloggerMulti (L412) | `src/`, `cmake/hal-stm32l4.cmake`, `include/stm32l4xx_hal_conf.h`, `devices/ologgermulti/` | Compila e linka sem avisos (1432 bytes de código, 12 de dados, 1564 de BSS). Executa no STM32L412 real | FW-006 | Build vazio com `-Werror`; em hardware, PC em `0x0800....` e SysTick ativo e contando (02/11/2026) |
 | Imagem STM32 do y7080 (L071) | `cmake/hal-stm32l0.cmake`, `include/stm32l0xx_hal_conf.h`, `devices/y7080/` | Compila e linka sem avisos (1348 bytes de código, 20 de dados, 5660 de BSS, incluindo pilha e heap reservados) | FW-006 | Build vazio com `-Werror` |
@@ -39,6 +47,7 @@ Legenda de estado: **Não iniciado**, **Em desenvolvimento**, **Em teste**, **Im
 ## Decisões em aberto que afetam a implementação
 
 - **Execução em hardware do OloggerMulti não verificada (02/11/2026):** a imagem vazia foi gravada e verificada no STM32L412 por SWD, mas o chip inicia pela memória de sistema (PC em `0x1FFF....`). Causa confirmada (achado HW-006 em `analise_hardware_ologgeriot.md`): o pino 44 (PH3/BOOT0) do U1 está sem ligação no esquema do OloggerMulti e flutua em nível alto. O y7080 tem o BOOT0 ligado ao R16 de 100 kΩ. **Contornado sem intervenção física em 02/11/2026:** gravados `nSWBOOT0=0` e `nBOOT0=1` nos bits de opção da unidade de bancada, e o firmware passou a executar. Confirmado também depois de desligar e religar a placa: bits mantidos, PC em `0x0800....` e SysTick contando, lidos sem resetar o chip. O ajuste precisa entrar no procedimento de gravação de toda unidade (FW-051). A correção definitiva é um pull-down no pino 44 na próxima revisão da placa.
+- Versão do FreeRTOS: os pacotes da ST trazem V10.3.1 (L4) e V10.2.0 (L0), então os dois builds usam kernels diferentes. Decidir se fixa uma só versão para os dois, copiada para o repositório.
 - Ferramenta de verificação estática MISRA e o ADR de escolha, previstos no padrão de código (FW-008 entregou só o verificador do projeto).
 - Pinagem de cada placa em `devices/` (FW-003), a partir do mapa preliminar de `documentacao/composicao_builds.md`. Confirmar em bancada.
 - Protocolo do rádio externo na UART do OloggerMulti (`RADIO_UART_EXTERNO`).

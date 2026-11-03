@@ -20,9 +20,17 @@ set(OLOG_HAL_TARGET hal_stm32l4)
 set(OLOG_HAL_DEFINE STM32L412xx)
 set(OLOG_STARTUP ${L4}/Drivers/CMSIS/Device/ST/STM32L4xx/Source/Templates/gcc/startup_stm32l412xx.s)
 set(OLOG_LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/devices/ologgermulti/STM32L412C8_FLASH.ld)
+set(OLOG_FREERTOS_ROOT ${L4}/Middlewares/Third_Party/FreeRTOS/Source)
+set(OLOG_FREERTOS_PORT ARM_CM4F)
 
 add_library(${OLOG_HAL_TARGET} STATIC
   ${L4}/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal.c
+  ${L4}/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_adc.c
+  ${L4}/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_adc_ex.c
+  ${L4}/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_dma.c
+  ${L4}/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_dma_ex.c
+  ${L4}/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_tim.c
+  ${L4}/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_tim_ex.c
   ${L4}/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_cortex.c
   ${L4}/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash.c
   ${L4}/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash_ex.c

@@ -1,6 +1,6 @@
 ﻿# Configuração do dispositivo — oLoggerIOT
 
-> **Criado em:** 29/10/2026 · **Última modificação:** 01/11/2026 · **Versão:** 0.1.36
+> **Criado em:** 29/10/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.1.45
 
 ## Origem e estado
 
@@ -113,6 +113,18 @@ O usuário esclareceu que sua referência anterior a **escala logarítmica** diz
 
 A frequência de atualização e a relação entre quantidade de entradas e saídas ainda não foram definidas. Não foram definidos largura de pulso, duty cycle, estado elétrico em 0 Hz ou forma de geração do sinal.
 
+## Entrada digital — respostas de 03/11/2026
+
+- **Sinal ativo:** a entrada é ativa quando há tensão, ou seja, em nível alto.
+- **Filtro de ruído:** a mudança de estado só é aceita depois de um tempo estável. Tempo padrão de **50 ms**, definido pelo responsável técnico em 03/11/2026. O firmware converte o tempo em número de amostras, arredondando para cima; o período de leitura da entrada ainda não foi definido.
+- **Tensão de campo:** de 12 a 24 V, a mesma fonte da entrada do CLP (03/11/2026). Análise do circuito em `analise_hardware_ologgeriot.md`, achado HW-008.
+- **Polaridade no pino:** no OloggerMulti o optoacoplador inverte o sinal. Com tensão no campo, o pino do STM32 fica em nível baixo; o firmware entrega o estado já corrigido (ativa = há tensão).
+- **Sleep:** a entrada pode acordar o STM32 do sleep.
+- **Contador de pulsos (03/11/2026):** o device pode ser usado como contador de pulsos, para economizar energia. O pulso acorda o STM32 (Stop 2), que fica acordado contando e só dorme de novo depois do tempo sem pulso, de 60 s por padrão e configurável; com pulso constante ele não acorda e dorme a cada pulso. Dormindo, só a entrada digital fica ativa. Os pulsos vêm de leitores, sem repique, a 5 a 10 por segundo no máximo, com até quatro leitores ao mesmo tempo. O filtro dos pulsos acordado é de 20 ms. Cada entrada tem um totalizador de 32 bits, como um hodômetro: só soma, volta a zero ao estourar, é guardado fora da RAM e sobrevive a reset e à falta de energia; o servidor calcula as diferenças. O ESP32 só é acordado para transmitir (1, 2 ou 5 vezes ao dia, ou por uma entrada analógica), em outra sprint. Contar dormindo é preferível, mas nenhum pulso pode ser perdido antes da transmissão. Detalhes e pendências em `planejamento/sprints/SPRINT_01B.md`.
+- **Tipos de uso:** a entrada pode ser discreta (0 ou 1) ou de frequência, medida em Hz. Para o modo de frequência, a faixa máxima e a janela de medição ainda não foram definidas.
+- **Implementação:** o módulo `lib/io` atende a funcionalidade `ENTRADA_DIGITAL` do OloggerMulti. A escolha entre discreta e frequência fica em cada entrada, na configuração.
+- **Itens de backlog:** FW-052 a FW-056, na fase 1B (SPRINT_01B).
+
 ## Fluxos propostos pelo usuário
 
 ### 1. Dispositivo com conectividade própria
@@ -206,4 +218,13 @@ Depois de estabelecida a conectividade do dispositivo, a configuração continua
 | 31/10/2026 | 0.1.26 | Usuário definiu prioridade do sensor local sobre regra automática da plataforma em conflito na mesma saída |
 | 31/10/2026 | 0.1.27 | Usuário definiu agenda local apenas offline e regra automática da plataforma com conectividade, preservada a prioridade do sensor local |
 | 31/10/2026 | 0.1.28 | Usuário definiu aviso de reconexão, manutenção do último estado e espera por novo comando da plataforma |
+| 03/11/2026 | 0.1.37 | Entrada digital: sinal ativo em nível alto, filtro de ruído, despertar do sleep e modo discreto ou de frequência em Hz; itens FW-052 a FW-056 criados |
+| 03/11/2026 | 0.1.45 | Correção da lógica do sleep do contador de pulsos: o pulso acorda o STM32, que fica acordado até o tempo de inatividade; o ESP32 só acorda para transmitir |
+| 03/11/2026 | 0.1.44 | Contador de pulsos: até quatro leitores, uso de Stop 2 e totalizador estilo hodômetro por entrada |
+| 03/11/2026 | 0.1.43 | Modo sleep do contador de pulsos: a interrupção conta e o STM32 volta a dormir; pulsos de leitores, sem repique, de 5 a 10 por segundo |
+| 03/11/2026 | 0.1.42 | Contador de pulsos: filtro de 20 ms, inatividade de 60 s configurável, despertar para transmitir em 1, 2 ou 5 vezes ao dia e requisito de não perder pulsos |
+| 03/11/2026 | 0.1.41 | Registrado o uso da entrada digital como contador de pulsos que dorme após 1 minuto sem pulso e acorda com o pulso |
+| 03/11/2026 | 0.1.40 | Registrada a polaridade da entrada digital no pino: ativo em nível baixo, por causa do optoacoplador |
+| 03/11/2026 | 0.1.39 | Tensão de campo das entradas digitais definida em 12 a 24 V, mesma fonte da entrada do CLP |
+| 03/11/2026 | 0.1.38 | Tempo padrão do filtro de ruído definido em 50 ms, com conversão para amostras arredondada para cima; limite de frequência de entrada a confirmar no datasheet do STM32L412 |
 

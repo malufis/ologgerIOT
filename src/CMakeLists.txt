@@ -5,10 +5,27 @@
 
 add_executable(ologgeriot_stm32
   main.c
+  interrupcoes.c
   ${OLOG_STARTUP}
 )
 
-target_link_libraries(ologgeriot_stm32 PRIVATE ${OLOG_HAL_TARGET})
+target_link_libraries(ologgeriot_stm32 PRIVATE ${OLOG_HAL_TARGET} freertos rtos vida)
+
+# Aquisição analógica: só nos builds com driver de ADC (hoje, o OloggerMulti).
+if(TARGET aquisicao)
+  target_link_libraries(ologgeriot_stm32 PRIVATE aquisicao)
+  target_compile_definitions(ologgeriot_stm32 PRIVATE OLOG_TEM_AQUISICAO=1)
+endif()
+# Entradas digitais: só nos builds com ENTRADA_DIGITAL (hoje, o OloggerMulti).
+if(TARGET io)
+  target_link_libraries(ologgeriot_stm32 PRIVATE io)
+  target_compile_definitions(ologgeriot_stm32 PRIVATE OLOG_TEM_ENTRADA_DIGITAL=1)
+endif()
+# Gerência de energia: só nos builds com driver de Stop 2 (hoje, o OloggerMulti).
+if(TARGET energia)
+  target_link_libraries(ologgeriot_stm32 PRIVATE energia)
+  target_compile_definitions(ologgeriot_stm32 PRIVATE OLOG_TEM_ENERGIA=1)
+endif()
 set_target_properties(ologgeriot_stm32 PROPERTIES SUFFIX ".elf")
 
 target_link_options(ologgeriot_stm32 PRIVATE
@@ -16,6 +33,9 @@ target_link_options(ologgeriot_stm32 PRIVATE
   -T${OLOG_LINKER_SCRIPT}
   -specs=nano.specs
   -Wl,--gc-sections
+  # Firmware bare-metal: o segmento de carga reúne flash e RAM, o que o linker
+  # novo reporta como RWX. É o layout do script ST e não afeta a execução.
+  -Wl,--no-warn-rwx-segments
   -Wl,-Map=$<TARGET_FILE_DIR:ologgeriot_stm32>/ologgeriot_stm32.map
 )
 

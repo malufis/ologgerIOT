@@ -1,7 +1,7 @@
 # Composição dos builds — oLoggerIOT
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 02/11/2026 · **Versão:** 0.2.0
-> **Versão:** 0.2.1 · **Status:** composição confirmada pelo responsável técnico em 02/11/2026. A lista vigente está em `builds/composicao.cmake`.
+> **Criado em:** 02/11/2026 · **Última modificação:** 02/11/2026 · **Versão:** 0.2.2
+> **Status:** composição confirmada pelo responsável técnico em 02/11/2026. A lista vigente está em `builds/composicao.cmake`.
 
 ## Princípio
 
@@ -69,12 +69,14 @@ Funcionalidade nova entra primeiro no catálogo, quando o módulo correspondente
 | `RADIO_UART_EXTERNO` | Sim (UART de comunicação externa) | Não | Confirmado em 02/11/2026 |
 | `MQTT` | Sim | Sim | Confirmado em 02/11/2026 |
 
-## Mapeamento de pinos (fonte para `devices/`)
+## Pinagem
 
-A análise das netlists já tem o mapa preliminar de pinos das duas placas. Ele é a base da pinagem de FW-003, e os itens marcados abaixo precisam de confirmação na bancada.
+A pinagem de cada placa está em `devices/<build>/pinos.h` (FW-003), com um par `PINO_<FUNCAO>_PORTA` e `PINO_<FUNCAO>_NUM` por função. O CMake inclui a pasta do build escolhido, e o código usa só esses nomes.
 
-- **OloggerMulti:** entradas 4–20 mA em PA1, PA0, PB0 e PB1; entradas digitais em PB7, PB8, PB6 e PB5; saídas em PB12 a PB15; RS-485 em PA2/PA3 com DE/RE em PB9; UART para o ESP32 em PB10/PB11; **UART de comunicação externa em PA9/PA10** (rótulo `UART1`, "serial externa"); flash SPI em PA4 a PA7.
-- **y7080:** entrada 4–20 mA em PA0; medição diferencial com `SENSE` em PB1 e controles PB13, PB15 e PA15; modem celular em PB10/PB11 (LPUART1) e `NBIOT-PWRKEY` em PC13; RS-485 em PA2/PA3 com DE/RE em PB9; flash SPI em PA4 a PA7.
+- Conferida contra as netlists dos esquemas em 02/11/2026: 31 funções no OloggerMulti e 26 no y7080, sem pino duplicado e sem pino sem ligação.
+- `python tools/verifica_pinos.py` repete a checagem de pino duplicado e de par incompleto.
+- Pontos a validar na bancada estão marcados com "validar" nos cabeçalhos: PWRKEY do modem, jumper da flash, linha de interrupção do y7080 e saída MCLK do OloggerMulti.
+- No OloggerMulti, o canal 4–20 mA 1 está no PA1 e o canal 2 no PA0, o inverso da ordem dos pinos. A serial externa (USART1, PA9/PA10) recebe o rádio externo.
 
 ## Pendências
 
@@ -89,5 +91,6 @@ A análise das netlists já tem o mapa preliminar de pinos das duas placas. Ele 
 | Data | Versão | Alteração |
 |---|---|---|
 | 02/11/2026 | 0.1.0 | Criado com o princípio de um projeto e um build por device, o arquivo `builds/composicao.cmake`, o catálogo de funcionalidades e a composição proposta |
+| 02/11/2026 | 0.2.2 | Mapa preliminar de pinos substituído pela pinagem em `devices/<build>/pinos.h`, conferida contra as netlists |
 | 02/11/2026 | 0.2.1 | Códigos de MCU confirmados pela compra: STM32L412C8U6 (OloggerMulti) e STM32L071CBU6 (y7080), ambos em UFQFPN48 |
 | 02/11/2026 | 0.2.0 | Composição confirmada: saída em frequência no OloggerMulti, UART de rádio externo (`RADIO_UART_EXTERNO`), y7080 com entrada diferencial, celular e MQTT; sem digitais no y7080; mapa de pinos preliminar incluído |

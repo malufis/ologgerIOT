@@ -11,8 +11,8 @@ OUTPUT_DIRECTORY       = build/doxygen
 INPUT                  = src lib include
 FILE_PATTERNS          = *.c *.h
 RECURSIVE              = YES
-# Cabeçalhos de configuração do HAL são só definições de módulos e frequências.
-EXCLUDE_PATTERNS       = */stm32*_hal_conf.h
+# Cabeçalhos de configuração do HAL e do FreeRTOS são só listas de definições.
+EXCLUDE_PATTERNS       = */stm32*_hal_conf.h */FreeRTOSConfig.h
 
 GENERATE_XML           = YES
 GENERATE_HTML          = YES
