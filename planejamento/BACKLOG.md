@@ -1,6 +1,6 @@
 # Backlog do firmware — oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.2.1
+> **Criado em:** 01/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.2.4
 
 ## Regras
 
@@ -88,10 +88,11 @@ Entrada digital ativa com tensão no campo (de 12 a 24 V; na bancada, até 12 V)
 
 | ID | Tarefa | Aceite | Situação |
 |---|---|---|---|
-| FW-022 | Saídas discretas e pulsadas | Testes de estado | Pendente |
-| FW-023 | Saída em frequência proporcional a 4–20 mA, com 4 mA e 20 mA configuráveis | Teste de proporcionalidade | Pendente |
-| FW-024 | Partida com atraso configurável e cancelamento por comando de desligar | Testes de temporização | Pendente |
+| FW-022 | Saídas discretas: ligar e desligar, com as saídas desligadas na partida | Testes de estado | Código pronto em 03/11/2026: ligar e desligar (`saida`, `io_saida`, `io_saidas`), com as saídas desligadas na partida. Bancada pendente |
+| FW-023 | Saída em frequência (a "pulsada") proporcional a 4–20 mA, com 4 mA e 20 mA configuráveis; só pode ser habilitada com o sleep desligado | Teste de proporcionalidade | Pendente |
+| FW-024 | Retardo de acionamento (relé de tempo, o "acionamento por tempo") por saída discreta, com cancelamento por comando de desligar | Testes de temporização | Código pronto em 03/11/2026 (`saida_define_atraso`, `io_saidas_define_atraso`): 36 verificações no PC com o retardo, o comando descartado, o cancelamento por desligar e a volta do contador. Regras confirmadas em 03/11/2026. Bancada pendente |
 | FW-025 | Modo manual e automático por saída, com prioridade do sensor | Tabela de estados testada | Pendente |
+| FW-061 | Ligar e desligar o modo sleep (modo de operação, registro 40412), com exclusão mútua: o sleep só liga se nenhuma saída estiver em frequência, e a saída em frequência só habilita com o sleep desligado | Testes: ligar o sleep com uma saída em frequência é recusado, e habilitar a frequência com o sleep ligado também | Lado do sleep pronto em 03/11/2026 (`energia_define_habilitada` devolve erro se um módulo impede). Falta o lado das saídas (FW-023) e o comando do Modbus |
 
 ### Fase 5 — Modbus RTU (SPRINT_05)
 
@@ -152,6 +153,9 @@ Entrada digital ativa com tensão no campo (de 12 a 24 V; na bancada, até 12 V)
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 03/11/2026 | 0.2.4 | O "acionamento por tempo" é o retardo de acionamento; ligar com a saída ligada ou aguardando é descartado; mapa Modbus das saídas ajustado (P-037) |
+| 03/11/2026 | 0.2.3 | Decisões de 03/11/2026: "pulsada" é a saída em frequência (FW-023), o retardo de acionamento vale para a saída discreta (FW-024) e o sleep liga e desliga com exclusão mútua com a frequência (novo FW-061) |
+| 03/11/2026 | 0.2.2 | FW-022: código pronto (saídas discretas e acionamento por tempo); a SPRINT_04 começou |
 | 03/11/2026 | 0.2.1 | FW-007 e a parte ESP32 do FW-046 movidos para a SPRINT_07, para depois de finalizados os testes do STM32 e de ele estar validado |
 | 03/11/2026 | 0.2.0 | Coluna de situação em todos os itens; textos de FW-052 e FW-057 corrigidos; seção "Prazo e risco" com a reavaliação de 03/11/2026 |
 | 03/11/2026 | 0.1.11 | Correção: o pulso acorda o STM32 e ele fica acordado, dormindo só após o tempo de inatividade; FW-055, FW-056 e FW-058 reescritos |

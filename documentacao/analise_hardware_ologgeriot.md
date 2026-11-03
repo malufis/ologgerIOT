@@ -1,6 +1,6 @@
 # Análise dos hardwares OloggerMulti e y7080
 
-> **Criado em:** 29/10/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.3.5
+> **Criado em:** 29/10/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.3.7
 > **Estado:** parte elétrica resolvida conforme confirmação de Rodrigo Maluf; análise dos arquivos preservada como histórico documental.
 
 ## Resultado
@@ -188,6 +188,16 @@ Confirmar o módulo celular montado, os sensores PC11/K8, a seleção dos jumper
 
 **Pendência:** confirmar a proteção contra inversão de polaridade, a potência do resistor montado e a proteção contra inversão. A parte elétrica foi declarada resolvida pelo responsável técnico; este achado é um alerta de verificação, não uma solicitação de alteração.
 
+### HW-009 — Saídas digitais sem pull-down na base do transistor
+
+**Evidência (netlist `extras.xml`, 03/11/2026):** cada uma das quatro saídas é um NPN BC847 (Q3 a Q6) em coletor aberto. O pino do STM32 (PB12 a PB15) passa por um resistor de 1k (R45 a R48, 0805) até a base. O emissor está no terra `GNDD` e o coletor vai ao conector J12 (`OUT-1` a `OUT-4`). Não há resistor entre base e emissor, nem diodo de roda livre. Pino em nível alto liga o transistor, que puxa `OUT-n` ao terra.
+
+**Impacto:** durante o reset, no bootloader da ST ou antes de o firmware configurar o pino, o pino flutua e o estado do transistor não é garantido. O requisito é manter as saídas desligadas durante atualização e reinício (`atualizacao_firmware.md`). O firmware leva o pino ao nível desligado logo depois do `HAL_Init`, antes de configurá-lo como saída, mas isso não cobre o intervalo de reset e boot.
+
+**Recomendação (anotada em 03/11/2026 pelo responsável técnico para a próxima revisão, em `melhorias_hardware.md`):** pull-down de ~10 kΩ entre a base e o emissor, ou do pino ao terra, no próximo layout. Medir em bancada o estado de `OUT-n` durante o reset. A carga indutiva (relé, contator) precisa de diodo de roda livre externo. A corrente máxima de coletor do BC847 deve ser conferida no datasheet antes de ligar carga; não foi verificada.
+
+**Limite de frequência:** só PB13 (`TIM1_CH1N`), PB14 (`TIM15_CH1`, `TIM1_CH2N`) e PB15 (`TIM15_CH2`, `TIM1_CH3N`) têm canal de timer; PB12 só tem `TIM1_BKIN`. Fonte: base do STM32CubeMX (`STM32L412C8Ux.xml`). Afeta a saída em frequência (FW-023).
+
 ## Resultado do cruzamento dos Gerbers
 
 | Verificação | OloggerMulti | y7080 |
@@ -232,6 +242,8 @@ Para concluir o B2, já há evidência da origem dos dados e do armazenamento. F
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 03/11/2026 | 0.3.7 | HW-009: recomendação do pull-down anotada na lista de melhorias de hardware |
+| 03/11/2026 | 0.3.6 | Achado HW-009: saídas digitais sem pull-down na base do transistor e limites de timer por pino |
 | 03/11/2026 | 0.3.5 | HW-008: D1 retirada na bancada, limite de 12 V e resistor de 4K7 em 0402 mantido até o novo layout |
 | 29/10/2026 | 0.1.0 | Análise dos dois conjuntos, mapas preliminares de pinos, cruzamento de atributos Gerber, verificação ERC parcial e pendências para firmware |
 | 29/10/2026 | 0.1.1 | Registrada confirmação do responsável técnico de que a parte elétrica está resolvida; encerrados bloqueios elétricos, preservando evidências históricas |

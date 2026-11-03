@@ -1,6 +1,6 @@
 # Status do Projeto — oLoggerIOT
 
-> **Criado em:** 15/10/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.3.143
+> **Criado em:** 15/10/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.3.146
 > **Repositório:** https://github.com/malufis/ologgerIOT
 
 ## Fase atual
@@ -51,6 +51,10 @@
 | P-031 | Confirmar que os leitores geram pulsos mais largos que 20 ms (com folga) e a taxa de 5 a 10 pulsos por segundo | Fase 1B | PENDENTE — confirmar com os leitores |
 | P-032 | Mapa Modbus: definir os modos da entrada digital (discreto, contador de pulsos e frequência) e o endereço do totalizador; hoje o mapa diz "discreto ou pulsado" | Fase 1B | PENDENTE |
 | P-033 | Frequência em Hz (FW-054): limite do pino no datasheet e do optoacoplador TLP291, faixa de 0 a 20 kHz, janela de medição e filtro próprio do modo | Fase 1B | PENDENTE — ajuste fica para depois |
+| P-034 | Saída digital "pulsada" (modo 1 do mapa Modbus) | Fase 4 | RESOLVIDO em 03/11/2026 — "pulsada" é a saída em frequência; a saída discreta tem acionamento por tempo e retardo de acionamento (relé de tempo) |
+| P-035 | HW-009: saídas digitais sem pull-down na base do transistor; estado durante reset e bootloader não garantido | Fase 4 | ANOTADO em 03/11/2026 em `documentacao/melhorias_hardware.md` para a próxima revisão; pull-down de ~10 kΩ |
+| P-036 | Saída em frequência (FW-023): PB12 não tem canal de timer e o temporizador de software não roda em Stop 2 | Fase 4 | RESOLVIDO em 03/11/2026 — a frequência só habilita com o sleep desligado e o sleep só liga sem saída em frequência (FW-061); falta implementar o lado das saídas |
+| P-037 | Mapa Modbus: o modo da saída (40166–40180) tinha 1 = pulsado e 2 = frequência, que são a mesma coisa | Fase 4 | RESOLVIDO em 03/11/2026 — 0 = discreto, 1 = frequência (pulsada), 2 reservado; 40271–40285 reservado (o tempo de acionamento é o retardo de 40256–40270) |
 
 ## Decisões tomadas
 B0 — Identificação: respostas e resumo confirmados pelo usuário em 29/10/2026.
@@ -308,7 +312,7 @@ Regra de processo: a entrevista do firmware só pergunta o que é do device. O q
 ## Processo de desenvolvimento (01/11/2026)
 - **Git:** repositório local iniciado em `firmware/`, com remoto `origin` para `https://github.com/malufis/ologgerIOT.git`. Em 03/11/2026 o branch `feat/fw-002-cmake-raiz` tem commits enviados ao remoto e o PR #1 está aberto para `main`; commit e push seguem dependendo de ordem explícita do usuário.
 - **Documentação:** índice em `documentacao/README.md`. Dicionário de funções, padrão de código C (base MISRA C:2012), contrato de integração e manual de operação criados como esqueletos.
-- **Backlog:** `planejamento/BACKLOG.md`, com 60 itens (FW-001 a FW-060) em 12 fases, incluindo a fase 1B. Sprints de uma semana, de SPRINT_00 a SPRINT_09, em `planejamento/sprints/`.
+- **Backlog:** `planejamento/BACKLOG.md`, com 61 itens (FW-001 a FW-061) em 12 fases, incluindo a fase 1B. Sprints de uma semana, de SPRINT_00 a SPRINT_09, em `planejamento/sprints/`.
 - **Skills:** `c-firmware-standards`, `doc-sync`, `device-profile-build` e `sprint-task` em `firmware/.claude/skills/`.
 - **Agentes:** `firmware-dev` e `doc-keeper` em `firmware/.claude/agents/`.
 - **Scripts prontos (02/11/2026):** `tools/verifica_padrao.py` e `tools/gera_dicionario.py` (FW-004 e FW-008), citados pelas skills.
@@ -336,12 +340,21 @@ Regra de processo: a entrevista do firmware só pergunta o que é do device. O q
 - **Frequência em Hz:** faixa de projeto de 0 a 20 kHz; o ajuste fica para depois.
 - Detalhes em `documentacao/configuracao_do_dispositivo.md` e `planejamento/sprints/SPRINT_01B.md`.
 
+## Saídas digitais (03/11/2026)
+- **Circuito:** NPN BC847 em coletor aberto por saída; pino em nível alto liga e puxa `OUT-n` ao terra; base com 1k e sem pull-down (HW-009).
+- **Implementado (FW-022 e FW-024):** ligar, desligar e retardo de acionamento (relé de tempo), com as saídas desligadas na partida. O "acionamento por tempo" é o retardo; não há desligamento automático. Todo comando de ligar espera o retardo; com a saída ligada ou com o retardo em andamento, outro ligar é descartado; desligar cancela a partida. Falta modo manual e automático (FW-025) e saída em frequência (FW-023). "Pulsada" é a saída em frequência.
+- **Sleep e frequência:** a saída em frequência só habilita com o sleep desligado, e o sleep só liga sem saída em frequência (FW-061). Diodo de roda livre no relé externo. Melhorias de hardware em `documentacao/melhorias_hardware.md`.
+- Detalhes em `planejamento/sprints/SPRINT_04.md` e `documentacao/configuracao_do_dispositivo.md`.
+
 ## Próximo passo recomendado
 A entrevista está encerrada e o firmware está em desenvolvimento. Os dois builds STM32 compilam sem avisos. Próximo: executar o roteiro de bancada da entrada digital (FW-056) quando o device estiver disponível, soldar a L2 e fechar o FW-012. O FW-007 (ESP32) e a parte ESP32 do FW-046 foram para a SPRINT_07 e só começa depois de finalizados os testes do STM32 e de o STM32 estar validado (decisão de 03/11/2026). O estado de cada módulo está em `documentacao/ESTADO_IMPLEMENTACAO.md`; o backlog e as sprints, em `planejamento/`. As pendências de heartbeat, formato de SETUP e INFO e nomes dos grupos do JSON ficam para a fase 7. Execução do teste NB-IoT (P-026) fica para a fase de bancada.
 
 ## Histórico de atualizações
 | Data | Versão | Alteração |
 |---|---|---|
+| 03/11/2026 | 0.3.146 | O "acionamento por tempo" é o retardo de acionamento; ligar com a saída ligada ou aguardando é descartado; mapa Modbus das saídas ajustado (P-037) |
+| 03/11/2026 | 0.3.145 | Saídas digitais: pulsada é a saída em frequência, retardo de acionamento, sleep e frequência não coexistem, melhorias de hardware anotadas; P-034 e P-036 resolvidas, P-035 anotada e P-037 aberta |
+| 03/11/2026 | 0.3.144 | SPRINT_04 começou: saídas digitais discretas (FW-022) em código pronto; pendências P-034 a P-036 |
 | 03/11/2026 | 0.3.143 | Decisão do responsável técnico: o ESP32 (FW-007) fica para depois de finalizados os testes do STM32 e de ele estar validado; movido para a SPRINT_07 |
 | 03/11/2026 | 0.3.142 | Fase de desenvolvimento: aquisição analógica, entrada digital, contador de pulsos, totalizador e gerência de energia em código; decisões de 03/11/2026 registradas; pendências P-028 a P-033; backlog com situação e sprints 01 a 09 criadas |
 | 15/10/2026 | 0.1.0 | Criação do status inicial a partir do rascunho |

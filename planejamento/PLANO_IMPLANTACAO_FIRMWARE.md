@@ -1,6 +1,6 @@
 # Plano de implantação do firmware — oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.2.1
+> **Criado em:** 01/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.2.3
 
 ## Objetivo e escopo
 
@@ -56,7 +56,7 @@ Prazo de referência: protótipo de bancada em um mês a partir de 29/10/2026, d
 - **Aceite:** testes de fila cheia, envio perdido e confirmação recebida.
 
 ### Fase 4 — Saídas e controle
-- Saídas digitais discretas, pulsadas e em frequência (Hz proporcional a 4–20 mA, com 4 mA e 20 mA configuráveis).
+- Saídas digitais discretas (ligar e desligar, com retardo de acionamento, o relé de tempo) e em frequência, a "pulsada" (Hz proporcional a 4–20 mA, com 4 mA e 20 mA configuráveis). A saída em frequência só habilita com o sleep desligado.
 - Partida com atraso configurável por saída. Comando de desligar cancela a partida.
 - Modo manual e automático por saída. Manual prevalece e alerta o CCO. Retorno ao automático executa a regra válida imediatamente.
 - Prioridade: sensor local, depois agenda, depois regra da plataforma.
@@ -126,6 +126,8 @@ Prazo de referência: protótipo de bancada em um mês a partir de 29/10/2026, d
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 03/11/2026 | 0.2.3 | O "acionamento por tempo" é o retardo de acionamento; ligar com a saída ligada ou aguardando é descartado; mapa Modbus das saídas ajustado (P-037) |
+| 03/11/2026 | 0.2.2 | Fase 4: "pulsada" é a saída em frequência; retardo de acionamento na saída discreta; exclusão com o sleep |
 | 03/11/2026 | 0.2.1 | FW-007 posicionado depois da validação do STM32 (SPRINT_07) |
 | 03/11/2026 | 0.2.0 | Adicionada a fase 1B (entrada digital e contador de pulsos) e atualizadas as pendências do device |
 | 01/11/2026 | 0.1.0 | Criado plano de implantação do firmware, em fases com aceite e testes no PC, simulador e bancada |

@@ -1,6 +1,6 @@
 # Documentação do oLoggerIOT — índice
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.2.1
+> **Criado em:** 01/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.2.2
 
 Ponto de entrada para agentes e programadores. Comece por `INICIAR.md` na raiz do repositório. Para achar um assunto, use `INDICE_AGENTES.md`. Este arquivo lista todos os documentos. Cada documento informa a versão e tem tabela de histórico.
 
@@ -28,6 +28,7 @@ Ponto de entrada para agentes e programadores. Comece por `INICIAR.md` na raiz d
 | `composicao_builds.md` | Funcionalidades de cada build, catálogo e composição proposta. A lista fica em `builds/composicao.cmake`. |
 | `analise_hardware_ologgeriot.md` | Análise dos esquemáticos e Gerbers. |
 | `roteiro_bancada_entrada_digital.md` | Roteiro de bancada da entrada digital, do contador de pulsos, do totalizador e do sleep (FW-056). |
+| `melhorias_hardware.md` | Mudanças de hardware anotadas para a próxima revisão das placas (pull-down das saídas, resistor e proteção das entradas, VBAT). |
 
 ## Interfaces
 

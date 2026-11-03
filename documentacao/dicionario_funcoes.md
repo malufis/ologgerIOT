@@ -35,7 +35,7 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `aquisicao_para` | aquisicao | `lib/aquisicao/include/aquisicao.h` | Para a aquisição, o timer e o ADC, para o equipamento dormir. | AQUISICAO_OK ou AQUISICAO_ERRO_INICIO. | ativa |
 | `aquisicao_retoma` | aquisicao | `lib/aquisicao/include/aquisicao.h` | Retoma a aquisição depois do sleep, com a mesma taxa. | AQUISICAO_OK ou AQUISICAO_ERRO_INICIO. | ativa |
 | `aquisicao_segundos` | aquisicao | `lib/aquisicao/include/aquisicao.h` | Lê a quantidade de segundos fechados desde a partida. | Segundos fechados. | ativa |
-| `energia_define_habilitada` | energia | `lib/energia/include/energia.h` | Habilita ou desabilita a entrada em sleep. Começa desabilitado. | void | ativa |
+| `energia_define_habilitada` | energia | `lib/energia/include/energia.h` | Liga ou desliga o modo sleep. Começa desligado. | ENERGIA_OK ou ENERGIA_ERRO_BLOQUEADO (só ao ligar). | ativa |
 | `energia_habilitada` | energia | `lib/energia/include/energia.h` | Informa se o sleep está habilitado. | true se o equipamento pode entrar em sleep. | ativa |
 | `energia_inicia` | energia | `lib/energia/include/energia.h` | Cria a tarefa de gerência de energia com memória estática. | ENERGIA_OK ou ENERGIA_ERRO. | ativa |
 | `energia_solicita_acordar` | energia | `lib/energia/include/energia.h` | Pede para o equipamento sair do sleep na próxima oportunidade. | void | ativa |
@@ -57,6 +57,16 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `io_pulsos_inicia` | io_pulsos | `lib/io/include/io_pulsos.h` | Inicia o contador. O instante inicial conta como atividade. | IO_PULSOS_OK ou IO_PULSOS_ERRO_PARAMETRO. | ativa |
 | `io_pulsos_pode_dormir` | io_pulsos | `lib/io/include/io_pulsos.h` | Informa se a entrada ficou sem pulso pelo tempo configurado. | true se passou ao menos o tempo de inatividade desde o último pulso. | ativa |
 | `io_pulsos_soma` | io_pulsos | `lib/io/include/io_pulsos.h` | Soma pulsos contados enquanto o equipamento dormia. | void | ativa |
+| `io_saida_define` | io_saida | `lib/io/include/io_saida.h` | Liga ou desliga uma saída no pino. | IO_SAIDA_OK ou IO_SAIDA_ERRO_PARAMETRO. | ativa |
+| `io_saida_inicia` | io_saida | `lib/io/include/io_saida.h` | Configura os pinos das saídas, todos desligados. | IO_SAIDA_OK. | ativa |
+| `io_saida_le` | io_saida | `lib/io/include/io_saida.h` | Lê o estado que o pino de uma saída está comandando. | IO_SAIDA_OK ou IO_SAIDA_ERRO_PARAMETRO. | ativa |
+| `io_saidas_aguardando` | io_saidas | `lib/io/include/io_saidas.h` | Informa se uma saída está esperando o retardo de acionamento. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
+| `io_saidas_define_atraso` | io_saidas | `lib/io/include/io_saidas.h` | Define o retardo de acionamento (relé de tempo) de uma saída. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
+| `io_saidas_desliga` | io_saidas | `lib/io/include/io_saidas.h` | Desliga uma saída. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
+| `io_saidas_estado` | io_saidas | `lib/io/include/io_saidas.h` | Lê o estado de uma saída. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
+| `io_saidas_inicia` | io_saidas | `lib/io/include/io_saidas.h` | Cria a tarefa que liga as saídas ao fim do retardo, com memória estática. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_TAREFA. | ativa |
+| `io_saidas_liga` | io_saidas | `lib/io/include/io_saidas.h` | Liga uma saída sem prazo, respeitando o retardo de acionamento configurado. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
+| `io_saidas_prepara` | io_saidas | `lib/io/include/io_saidas.h` | Leva os pinos das saídas ao estado desligado e zera os estados. | IO_SAIDAS_OK. | ativa |
 | `io_tarefa_bruto` | io_tarefa | `lib/io/include/io_tarefa.h` | Lê o estado das entradas sem filtro. | Máscara de bits, igual a io_tarefa_estado(), mas da última leitura direta. | ativa |
 | `io_tarefa_define_inatividade` | io_tarefa | `lib/io/include/io_tarefa.h` | Altera o tempo sem pulso necessário para poder dormir, em todas as entradas. | IO_TAREFA_OK ou IO_TAREFA_ERRO. | ativa |
 | `io_tarefa_define_total` | io_tarefa | `lib/io/include/io_tarefa.h` | Define o totalizador de uma entrada, por exemplo para igualar ao medidor. | IO_TAREFA_OK ou IO_TAREFA_ERRO. | ativa |
@@ -74,6 +84,13 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `io_totalizador_le` | io_totalizador | `lib/io/include/io_totalizador.h` | Lê o total de uma entrada. | Total acumulado; zero se o canal for inválido. | ativa |
 | `io_totalizador_soma` | io_totalizador | `lib/io/include/io_totalizador.h` | Soma pulsos ao total de uma entrada e grava no armazém. | IO_TOTALIZADOR_OK ou IO_TOTALIZADOR_ERRO_PARAMETRO. | ativa |
 | `rtos_tick_handler` | rtos | `lib/rtos/include/rtos.h` | Trata o tick do sistema, chamado pela interrupção do SysTick. | void | ativa |
+| `saida_aguardando` | saida | `lib/io/include/saida.h` | Informa se a saída está esperando o retardo de acionamento. | true se há um retardo em curso; a saída continua desligada. | ativa |
+| `saida_atualiza` | saida | `lib/io/include/saida.h` | Atualiza o estado com o instante atual e devolve se a saída está ligada. | true se a saída está ligada depois da atualização. | ativa |
+| `saida_define_atraso` | saida | `lib/io/include/saida.h` | Define o retardo de acionamento da saída. | void | ativa |
+| `saida_desliga` | saida | `lib/io/include/saida.h` | Comando de desligar. Cancela o retardo em curso e desliga a saída. | void | ativa |
+| `saida_inicia` | saida | `lib/io/include/saida.h` | Inicia a saída desligada e sem retardo. | SAIDA_OK ou SAIDA_ERRO_PARAMETRO. | ativa |
+| `saida_liga` | saida | `lib/io/include/saida.h` | Comando de ligar a saída, respeitando o retardo de acionamento. | void | ativa |
+| `saida_ligada` | saida | `lib/io/include/saida.h` | Lê o estado da saída sem atualizar o retardo. | true se a saída está ligada. | ativa |
 | `sensor_contagens_para_ma` | sensor | `lib/sensor/include/sensor.h` | Converte contagens do ADC em corrente, pela tensão no resistor shunt. | SENSOR_OK ou SENSOR_ERRO_PARAMETRO. | ativa |
 | `sensor_ma_para_valor` | sensor | `lib/sensor/include/sensor.h` | Converte corrente 4-20 mA em valor de engenharia, com zero, span e offset. | SENSOR_OK ou SENSOR_ERRO_PARAMETRO. | ativa |
 | `sensor_media_acumula` | sensor | `lib/sensor/include/sensor.h` | Acumula uma amostra e, ao fechar um segundo, entrega a média. | SENSOR_OK ou SENSOR_ERRO_PARAMETRO. | ativa |

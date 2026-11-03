@@ -1,16 +1,17 @@
 # Estado da implementação — oLoggerIOT
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.2.2
+> **Criado em:** 02/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.2.5
 
 Documento vivo. Diz o que existe no código, o que está em teste e o que falta. Agentes e desenvolvedores leem aqui antes de começar um item. Atualizado pela skill `doc-sync` a cada item fechado e revisado pela skill `sprint-close`.
 
 ## Situação atual
 
 - **Sprints em andamento:** SPRINT_00 (todos os itens concluídos ou movidos; pronta para o `sprint-close`) e SPRINT_01B (entrada digital e contador de pulsos). A SPRINT_01 (aquisição analógica) está bloqueada pela ferrite L2.
-- **Dois builds compilam sem avisos com `-Werror`** (03/11/2026): `ologgermulti` com 24 952 bytes de código e `y7080` com 4 944. O `y7080` não leva `ENTRADA_DIGITAL`, nem a gerência de energia.
+- **Dois builds compilam sem avisos com `-Werror`** (03/11/2026): `ologgermulti` com 25 792 bytes de código e `y7080` com 4 944. O `y7080` não leva `ENTRADA_DIGITAL`, nem a gerência de energia.
 - **Testes no PC (03/11/2026):** sensor (57 verificações), filtro de ruído (135), contador de pulsos (25) e totalizador (36); verificadores das ferramentas (27 testes). Todos passam. O executável do `sensor` foi bloqueado uma vez pela política de Controle de Aplicativo do Windows depois de um relink, mas recompilado rodou e passou.
 - **Hardware verificado em 02/11/2026:** a imagem do OloggerMulti executa no STM32L412 real, com FreeRTOS e a tarefa de vida. A aquisição analógica mede a entrada 4 com 8 mA injetados e mostra 8,007 mA.
 - **Nada da entrada digital, do contador de pulsos, do totalizador e da gerência de energia foi testado em hardware.** Só compilam e têm testes de lógica no PC. O roteiro de bancada está em `documentacao/roteiro_bancada_entrada_digital.md`.
+- **Saídas digitais (FW-022 e FW-024, 03/11/2026):** ligar, desligar e retardo de acionamento (relé de tempo, o "acionamento por tempo") em código, com 36 verificações no PC. O que falta: quem manda na saída (manual, automático, sensor), saída em frequência (a "pulsada") e a ligação com comandos. Sem teste em hardware. A saída em frequência só habilita com o sleep desligado, e o sleep só liga sem saída em frequência (FW-061).
 - **Bancada de 03/11/2026:** D1 retirada das entradas digitais, limite de 12 V na entrada, resistor de 4K7 em 0402 mantido até o novo layout (achado HW-008).
 - **Bloqueio da fase 1 (HW-007):** a ferrite L2 não foi soldada na placa de bancada. Sem ela, o VDDA cai para ~2,37 V e o ADC satura em ~15,8 mA. Soldar a L2, conferir a resistência (quase 0 Ω) e o VDDA (3,25 V), voltar a referência do firmware para 3,25 V e refazer a calibração em 4, 8, 12, 16 e 20 mA.
 - **Risco no FreeRTOS:** entre a criação da primeira tarefa e `vTaskStartScheduler` o SysTick fica mascarado. Chamada do HAL com *timeout* nessa janela nunca expira. Inicializar hardware antes de criar tarefas, ou dentro delas.
@@ -27,7 +28,7 @@ Documento vivo. Diz o que existe no código, o que está em teste e o que falta.
 | Tarefa de vida | `lib/vida/` | Implementada; executa no L412 real | FW-046 | Contador subindo no chip; 101 de 128 palavras de pilha livres |
 | Pinagem por placa | `devices/ologgermulti/pinos.h`, `devices/y7080/pinos.h`, `tools/verifica_pinos.py` | Implementada | FW-003 | Conferida contra as netlists (31 e 26 funções); compila com o HAL real; 7 testes do verificador |
 | Configuração CMake (raiz, toolchain, CPU por MCU) | `CMakeLists.txt`, `cmake/` | Implementada | FW-002 | Configura os dois builds e recusa device inválido |
-| Imagem STM32 do OloggerMulti (L412) | `src/`, `cmake/hal-stm32l4.cmake`, `include/stm32l4xx_hal_conf.h`, `devices/ologgermulti/` | Compila e linka sem avisos (24 952 bytes de código em 03/11/2026). Executa no STM32L412 real com a versão de 02/11/2026 | FW-006 | Build com `-Werror`; em hardware, PC em `0x0800....` e SysTick contando |
+| Imagem STM32 do OloggerMulti (L412) | `src/`, `cmake/hal-stm32l4.cmake`, `include/stm32l4xx_hal_conf.h`, `devices/ologgermulti/` | Compila e linka sem avisos (25 792 bytes de código em 03/11/2026). Executa no STM32L412 real com a versão de 02/11/2026 | FW-006 | Build com `-Werror`; em hardware, PC em `0x0800....` e SysTick contando |
 | Imagem STM32 do y7080 (L071) | `cmake/hal-stm32l0.cmake`, `include/stm32l0xx_hal_conf.h`, `devices/y7080/` | Compila e linka sem avisos (4 944 bytes de código em 03/11/2026). Sem teste em hardware | FW-006 | Build com `-Werror` |
 | Build ESP32 | `esp32/` | Não iniciado; depois da validação do STM32 (SPRINT_07) | FW-007 | — |
 | Doxygen e dicionário de funções | `Doxyfile`, `tools/gera_dicionario.py` | Implementado; 56 funções no dicionário | FW-004 | 8 testes do gerador; Doxygen barra função e parâmetro sem documentação |
@@ -44,6 +45,13 @@ Documento vivo. Diz o que existe no código, o que está em teste e o que falta.
 | Tarefa das entradas digitais | `lib/io/` (`io_tarefa`) | Código pronto; leitura a cada 2 ms, filtros, pulsos e totalizador | FW-052, FW-053, FW-057 | Sem teste em hardware |
 | Contagem dormindo (interrupção externa) | `lib/io/`, `src/interrupcoes.c` | Código pronto; o pulso acorda o STM32 e ele fica acordado | FW-055 | Sem teste em hardware |
 | Gerência de energia (Stop 2) | `lib/energia/` | Código pronto; **desabilitado por padrão**; só no STM32L4 | FW-058 | Sem teste em hardware |
+| Estado da saída digital | `lib/io/` (`saida`) | Implementado; desligada, aguardando o retardo ou ligada | FW-022, FW-024 | 36 verificações no PC |
+| Driver dos pinos das saídas | `lib/io/` (`io_saida`) | Código pronto; pino em nível alto liga a saída (NPN em coletor aberto) | FW-022 | Sem teste em hardware |
+| Controle das quatro saídas | `lib/io/` (`io_saidas`) | Código pronto; tarefa de 100 ms liga as saídas ao fim do retardo | FW-022 | Sem teste em hardware |
+| Saída em frequência (a "pulsada") | `lib/io/` | Não iniciado; PB12 não tem canal de timer; só habilita com o sleep desligado | FW-023 | — |
+| Retardo de acionamento (relé de tempo) | `lib/io/` (`saida`, `io_saidas`) | Código pronto; bancada pendente | FW-024 | 36 verificações no PC |
+| Ligar e desligar o sleep | `lib/energia/` | Lado do sleep pronto (`energia_define_habilitada` pode recusar); falta o lado das saídas e o comando | FW-061 | Sem teste em hardware |
+| Modo manual e automático por saída | `lib/io/` | Não iniciado | FW-025 | — |
 | Modo de frequência em Hz | `lib/io/` | Não iniciado; faixa de 0 a 20 kHz, ajuste fica para depois | FW-054 | — |
 | Contagem em hardware (LPTIM1, D4) | `lib/io/` | Não iniciado; a confirmar | FW-059 | — |
 | Fila de telemetria | `lib/fila/` | Não iniciado | FW-019 | — |
@@ -58,6 +66,9 @@ Legenda de estado: **Não iniciado**, **Em desenvolvimento**, **Em teste**, **Im
 
 - **Execução em hardware do OloggerMulti (HW-006):** o pino 44 (PH3/BOOT0) do U1 está sem ligação no esquema do OloggerMulti e flutua em nível alto. Contornado em 02/11/2026 com os bits de opção `nSWBOOT0=0` e `nBOOT0=1` na unidade de bancada, sem intervenção física. O ajuste precisa entrar no procedimento de gravação de toda unidade (FW-051). A correção definitiva é um pull-down no pino 44 na próxima revisão da placa.
 - **Entrada digital de 12 a 24 V (HW-008):** a proteção D1 (ESDA6V1SC5, ruptura de 6,1 V) foi retirada na bancada em 03/11/2026. O resistor de 4K7 em 0402 limita a entrada a 12 V; passará a 0603 no próximo layout, e para 24 V ainda precisa de potência maior. Sem a D1 a entrada não tem supressor de surto e ESD, nem diodo contra inversão de polaridade. Se for para campo industrial, avaliar um supressor de ~30 V no próximo layout.
+- **Saídas digitais sem pull-down na base (HW-009):** durante o reset e o bootloader o pino flutua e o estado da saída não é garantido. Anotado em `documentacao/melhorias_hardware.md` para a próxima revisão (pull-down de ~10 kΩ). O firmware leva o pino a desligado logo depois do `HAL_Init`.
+- **Saída em frequência (FW-023):** só PB13, PB14 e PB15 têm canal de timer; a saída 1 (PB12) não. Frequências independentes pedem temporizador com tratador, que não roda em Stop 2: por isso a frequência só habilita com o sleep desligado e o sleep só liga sem saída em frequência (decidido em 03/11/2026).
+- **Mapa Modbus das saídas (P-037, resolvida em 03/11/2026):** modo da saída 0 = discreto, 1 = frequência (pulsada) e 2 reservado; o tempo de acionamento (40271–40285) ficou reservado, porque é o mesmo retardo de acionamento (40256–40270).
 - **Bateria no pino VBAT:** os registradores de backup do totalizador só sobrevivem à falta de energia se o VBAT tiver bateria. Confirmar na placa.
 - **Largura mínima do pulso:** o filtro de 20 ms exige que o medidor gere pulsos mais largos que isso. Confirmar com os leitores.
 - **Frequência em Hz (FW-054):** faixa de projeto de 0 a 20 kHz, mas o limite real é o optoacoplador TLP291 com o 10k; confirmar o limite do pino no datasheet e medir em bancada. Ajuste fica para depois.
@@ -78,6 +89,9 @@ Legenda de estado: **Não iniciado**, **Em desenvolvimento**, **Em teste**, **Im
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 03/11/2026 | 0.2.5 | O "acionamento por tempo" é o retardo de acionamento; ligar com a saída ligada ou aguardando é descartado; mapa Modbus das saídas ajustado (P-037) |
+| 03/11/2026 | 0.2.4 | Retardo de acionamento (FW-024) em código pronto; saída em frequência e sleep com exclusão mútua; melhorias de hardware anotadas |
+| 03/11/2026 | 0.2.3 | Saídas digitais: FW-022 em código pronto; HW-009 e as decisões da saída em frequência |
 | 03/11/2026 | 0.2.2 | FW-007 movido para a SPRINT_07, depois da validação do STM32; SPRINT_00 pronta para o `sprint-close` |
 | 03/11/2026 | 0.2.1 | Corrigido o estado do teste do `sensor` (passa, 57 verificações) e o `y7080` sem entrada digital |
 | 03/11/2026 | 0.2.0 | Reescrito com o estado real: aquisição analógica, entrada digital, contador de pulsos, totalizador e gerência de energia; separação entre teste no PC, só compila e bancada; decisões em aberto atualizadas |

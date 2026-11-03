@@ -1,6 +1,6 @@
 # Mapa Modbus do device oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.1.3
+> **Criado em:** 01/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.1.5
 
 ## Origem e estado
 
@@ -51,12 +51,12 @@ Mapa definido pelo usuário em 01/11/2026: seguir a norma Modbus, com float ocup
 |---|---|---|
 | 00001–00015 | coil | Comando e estado da saída n (1 = ligada, 0 = desligada) |
 | 30091–30120 | input float | Frequência atual da saída n em Hz (0 quando não está em modo frequência) |
-| 40166–40180 | holding uint16 | Modo da saída n: 0 = discreto, 1 = pulsado, 2 = frequência |
+| 40166–40180 | holding uint16 | Modo da saída n: 0 = discreto, 1 = frequência (a saída "pulsada"), 2 = reservado (ajustado em 03/11/2026) |
 | 40181–40210 | holding float | Frequência em Hz correspondente a 4 mA da saída n |
 | 40211–40240 | holding float | Frequência em Hz correspondente a 20 mA da saída n |
 | 40241–40255 | holding uint16 | Entrada analógica associada à saída n (0 = nenhuma) |
-| 40256–40270 | holding uint16 | Atraso de partida da saída n, em segundos |
-| 40271–40285 | holding uint16 | Tempo de acionamento da saída n, em segundos (confirmado em 01/11/2026) |
+| 40256–40270 | holding uint16 | Retardo de acionamento da saída n (relé de tempo), em segundos; 0 = liga na hora. É também o "atraso de partida" e o "tempo de acionamento" |
+| 40271–40285 | holding uint16 | Reservado: o tempo de acionamento é o mesmo retardo de acionamento (40256–40270), decisão de 03/11/2026 |
 | 40286–40300 | holding uint16 | Modo da saída n: 0 = automático, 1 = manual |
 
 ## Sistema trifásico (reservado, sem hardware identificado)
@@ -190,11 +190,14 @@ Os nomes dos grupos (analogico, digital, falhas, sistema, rede) são uma propost
 - Bloco trifásico mantido como reservado, pois o device poderá integrar com MGE ou inversores pelo Modbus.
 - Lista final de campos do heartbeat e formato das mensagens SETUP e INFO.
 - Entrada digital (aberto em 03/11/2026): o registrador de modo da entrada (40151–40165) hoje diz "0 = discreto, 1 = pulsado". Falta definir os modos (discreto, contador de pulsos e frequência em Hz) e o endereço do totalizador de 32 bits de cada entrada, que será lido como valor absoluto (o servidor calcula as diferenças). Item P-032 em `STATUS_PROJETO.md`.
+- Saída digital (resolvido em 03/11/2026): "pulsada" é a saída em frequência, então o modo da saída (40166–40180) ficou 0 = discreto, 1 = frequência e 2 reservado. O "acionamento por tempo" é o retardo de acionamento (40256–40270), e o registrador 40271–40285 ficou reservado. O modo de operação (40412: 0 = contínuo, 1 = sleep) só pode ser 1 se nenhuma saída estiver em frequência, e a saída só pode ir para frequência com o modo de operação em 0.
 
 ## Histórico
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 03/11/2026 | 0.1.5 | O "acionamento por tempo" é o retardo de acionamento; ligar com a saída ligada ou aguardando é descartado; mapa Modbus das saídas ajustado (P-037) |
+| 03/11/2026 | 0.1.4 | Registrada a pendência do modo da saída (pulsada é frequência) e a exclusão mútua com o sleep |
 | 03/11/2026 | 0.1.3 | Registrada a pendência dos modos da entrada digital (discreto, contador de pulsos e frequência) e do endereço do totalizador |
 | 01/11/2026 | 0.1.2 | Confirmados float big-endian (ABCD), tempo de acionamento em segundos e endereço escravo de 1 a 247; trifásico mantido reservado para integração com MGE e inversores |
 | 01/11/2026 | 0.1.1 | Configuração válida pelo Modbus e pelo MQTT, com a mesma regra de sessão única; sessão de configuração termina após 5 minutos sem atividade |

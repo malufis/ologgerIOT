@@ -1,6 +1,6 @@
 # Sprints do firmware — índice
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.2.1
+> **Criado em:** 01/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.2.3
 
 Sprints de uma semana. Cada sprint tem um arquivo com meta, itens do backlog, estado e critério de encerramento. Itens concluídos são marcados no arquivo da sprint e no `BACKLOG.md`.
 
@@ -11,7 +11,7 @@ Sprints de uma semana. Cada sprint tem um arquivo com meta, itens do backlog, es
 | `SPRINT_01B` | 03/11/2026 (paralela) | Entrada digital e contador de pulsos | FW-052 a FW-060 | Código pronto, lógica testada no PC; bancada pendente |
 | `SPRINT_02` | 16/11/2026 | Regras de sensor | FW-013 a FW-016 | Planejada |
 | `SPRINT_03` | 23/11/2026 | Média móvel, fila e alertas | FW-017 a FW-021 | Planejada |
-| `SPRINT_04` | 30/11/2026 | Saídas e controle | FW-022 a FW-025 | Planejada |
+| `SPRINT_04` | 30/11/2026 | Saídas e controle | FW-022 a FW-025 e FW-061 | Em andamento: FW-022 e FW-024 em código pronto; lado do sleep do FW-061 pronto |
 | `SPRINT_05` | 07/12/2026 | Modbus RTU | FW-026 a FW-029 e FW-047 a FW-050 | Planejada |
 | `SPRINT_06` | 14/12/2026 | Relógio e agenda offline | FW-030 a FW-032 | Planejada |
 | `SPRINT_07` | 21/12/2026 | MQTT e ESP32 | FW-007 e FW-033 a FW-036 | Planejada; o ESP32 só começa depois da validação do STM32 |
@@ -26,6 +26,8 @@ As datas são a sequência de semanas a partir de 02/11/2026. O protótipo de ba
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 03/11/2026 | 0.2.3 | SPRINT_04 inclui o FW-061 (sleep liga e desliga); FW-022 e FW-024 em código pronto |
+| 03/11/2026 | 0.2.2 | SPRINT_04 em andamento: FW-022 em código pronto |
 | 03/11/2026 | 0.2.1 | FW-007 movido para a SPRINT_07; SPRINT_00 pronta para o `sprint-close` |
 | 03/11/2026 | 0.2.0 | Criados os arquivos das sprints 01 e 02 a 09, que só existiam no índice. Adicionada a coluna de situação. Corrigidos os itens: FW-047 a FW-050 na SPRINT_05, FW-051 na SPRINT_09 e FW-046 na SPRINT_00 |
 | 03/11/2026 | 0.1.1 | Adicionada SPRINT_01B (entrada digital), paralela à SPRINT_01 |

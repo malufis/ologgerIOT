@@ -1,14 +1,14 @@
 # Iniciar — oLoggerIOT
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.2.1
+> **Criado em:** 02/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.2.3
 
 Leia este arquivo no começo de todo prompt novo. Ele aponta onde está cada informação. Depois dele, use `documentacao/INDICE_AGENTES.md` para achar o documento de um assunto específico.
 
 ## Onde estamos
 
 - **Fase:** 0 (base do projeto) concluída, exceto o FW-007; fases 1 (aquisição analógica) e 1B (entrada digital e contador de pulsos) em andamento (`planejamento/PLANO_IMPLANTACAO_FIRMWARE.md`).
-- **Sprints atuais:** SPRINT_00 (02/11/2026 a 06/11/2026) e SPRINT_01B (entrada digital, paralela). A SPRINT_01 (aquisição analógica) está bloqueada pela ferrite L2 (`planejamento/sprints/`).
-- **Itens concluídos:** FW-001 a FW-006, FW-008, FW-046 (parte STM32), FW-053 e FW-057. **Código pronto, sem teste em hardware:** FW-052, FW-055, FW-058 e a lógica do FW-060. PR #1 aberto para `main` (branch `feat/fw-002-cmake-raiz`).
+- **Sprints atuais:** SPRINT_00 (02/11/2026 a 06/11/2026) e SPRINT_01B (entrada digital, paralela). A SPRINT_04 (saídas) começou pelo FW-022. A SPRINT_01 (aquisição analógica) está bloqueada pela ferrite L2 (`planejamento/sprints/`).
+- **Itens concluídos:** FW-001 a FW-006, FW-008, FW-046 (parte STM32), FW-053 e FW-057. **Código pronto, sem teste em hardware:** FW-022, FW-024, FW-052, FW-055, FW-058 e a lógica do FW-060. PR #1 aberto para `main` (branch `feat/fw-002-cmake-raiz`).
 - **ESP32:** o FW-007 e a parte ESP32 do FW-046 foram para a SPRINT_07 e só começa depois de finalizados os testes do STM32 e de o STM32 estar validado (decisão de 03/11/2026). A SPRINT_00 está pronta para o `sprint-close`.
 - **Antes de fechar um item:** `python tools/verifica_padrao.py`, `doxygen Doxyfile` sem avisos e `python tools/gera_dicionario.py --check`.
 - **Próximo:** executar o roteiro de bancada da entrada digital (`documentacao/roteiro_bancada_entrada_digital.md`, FW-056) quando o device estiver disponível, e soldar a L2 para fechar o FW-012. Na bancada: D1 retirada e limite de 12 V (HW-008).

@@ -1,6 +1,6 @@
 # Manual de operação do device — oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.2.0
+> **Criado em:** 01/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.2.3
 
 ## Para quem é
 
@@ -21,6 +21,15 @@ Só o OloggerMulti tem entradas digitais (D1 a D4). Em código e ainda sem valid
 - **Entrada solta:** uma entrada ligada a nada pode captar ruído e acordar o STM32 sem necessidade. Entradas sem uso devem ficar com o sinal definido.
 - Roteiro de teste de bancada: `documentacao/roteiro_bancada_entrada_digital.md`.
 
+## Saídas digitais (OloggerMulti)
+
+Quatro saídas, no conector J12. Em código e ainda sem validação em bancada.
+
+- **Tipo:** cada saída é um transistor NPN em coletor aberto. Ligada, ela **puxa `OUT-n` ao terra** do equipamento. A carga deve ser ligada entre uma tensão positiva e a saída, e a fonte da carga deve ter o terra em comum.
+- **Carga:** a corrente máxima da saída ainda não foi confirmada no datasheet do transistor; não ligar carga pesada antes disso. **Carga indutiva (relé, contator) precisa de diodo de roda livre externo**, porque a saída não tem proteção; o diodo fica no relé externo.
+- **Estado:** as saídas partem desligadas e não religam sozinhas depois de falta de energia. Durante o reset e a gravação do firmware o estado da saída não é garantido (achado HW-009).
+- **Retardo de acionamento (relé de tempo):** uma saída pode ter um retardo. Todo comando de ligar espera o retardo e então liga; um comando de desligar durante a espera cancela a partida. Com a saída já ligada, ou com o retardo em andamento, outro comando de ligar é descartado. No sleep do STM32 o retardo não corre.
+
 ## Seções planejadas
 
 1. **Modelos e perfis:** OloggerMulti e y7080, entradas, saídas e rádios de cada um.
@@ -36,5 +45,8 @@ Só o OloggerMulti tem entradas digitais (D1 a D4). Em código e ainda sem valid
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 03/11/2026 | 0.2.3 | O "acionamento por tempo" é o retardo de acionamento; ligar com a saída ligada ou aguardando é descartado; mapa Modbus das saídas ajustado (P-037) |
+| 03/11/2026 | 0.2.2 | Saídas digitais: retardo de acionamento e diodo no relé externo |
+| 03/11/2026 | 0.2.1 | Adicionada a seção de saídas digitais (em código, sem validação em bancada) |
 | 03/11/2026 | 0.2.0 | Adicionada a seção de entradas digitais e contador de pulsos (em código, sem validação em bancada) |
 | 01/11/2026 | 0.1.0 | Criado esqueleto do manual de operação |
