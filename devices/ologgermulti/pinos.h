@@ -8,8 +8,8 @@
  * marcados com "validar".
  *
  * @date criacao 02/11/2026
- * @date modificacao 02/11/2026
- * @version 0.1.0
+ * @date modificacao 03/11/2026
+ * @version 0.1.1
  */
 
 #ifndef PINOS_H

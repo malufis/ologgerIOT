@@ -8,8 +8,8 @@
  * leitura por depurador na bancada.
  *
  * @date criacao 02/11/2026
- * @date modificacao 02/11/2026
- * @version 0.1.0
+ * @date modificacao 03/11/2026
+ * @version 0.2.0
  */
 
 #ifndef AQUISICAO_H

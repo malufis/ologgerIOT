@@ -8,8 +8,8 @@
  * período de leitura, que quem chama define.
  *
  * @date criacao 02/11/2026
- * @date modificacao 02/11/2026
- * @version 0.1.0
+ * @date modificacao 03/11/2026
+ * @version 0.1.1
  */
 
 #ifndef IO_FILTRO_H
@@ -32,7 +32,7 @@ typedef struct
 {
   uint16_t amostras_estaveis; /**< Amostras seguidas do nível oposto para aceitar a mudança. */
   uint16_t contagem;          /**< Amostras seguidas do nível oposto já lidas. */
-  bool estado;                /**< Estado aceito da entrada: true = ativa (nível alto). */
+  bool estado;                /**< Estado aceito da entrada: true = ativa. */
 } io_filtro_t;
 
 /**
@@ -61,7 +61,7 @@ int32_t io_filtro_amostras_do_tempo(uint32_t tempo_ms, uint32_t periodo_us, uint
  * @brief Recebe uma amostra do nível da entrada e devolve o estado aceito.
  *
  * @param filtro Filtro iniciado com io_filtro_inicia().
- * @param nivel Nível lido nesta amostra: true = nível alto.
+ * @param nivel Estado lido nesta amostra: true = ativa.
  * @return Estado aceito após esta amostra.
  */
 bool io_filtro_atualiza(io_filtro_t *filtro, bool nivel);

@@ -6,8 +6,8 @@
  * PA1 = IN6, PA0 = IN5, PB0 = IN15, PB1 = IN16.
  *
  * @date criacao 02/11/2026
- * @date modificacao 02/11/2026
- * @version 0.1.0
+ * @date modificacao 03/11/2026
+ * @version 0.2.0
  */
 
 #include "adc.h"
