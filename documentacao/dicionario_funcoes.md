@@ -1,6 +1,6 @@
 # Dicionário de funções — firmware oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 02/11/2026 · **Versão:** 0.2.0
+> **Criado em:** 01/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.3.0
 
 ## Como manter
 
@@ -87,5 +87,6 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 03/11/2026 | 0.3.0 | Tabela regenerada com 56 funções públicas: `io`, `energia`, parada e retomada da aquisição e as demais |
 | 01/11/2026 | 0.1.0 | Criado esqueleto do dicionário de funções, gerado a partir do Doxygen |
 | 02/11/2026 | 0.2.0 | Regra de manutenção antes da geração automática; tabela de funções com colunas definidas; só interface pública entra |

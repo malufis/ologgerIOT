@@ -1,30 +1,26 @@
 # Transferência de contexto — oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 01/11/2026 · **Versão:** 1.0.20
+> **Criado em:** 01/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 1.1.1
 
 ## Instruções para o próximo agente
 
-Continue a entrevista em português do Brasil com Rodrigo Maluf, responsável técnico e decisor da Optmile. Leia `sistema-init/PROMPT_MESTRE.md` e `sistema-init/STATUS_PROJETO.md` antes de prosseguir. Os caminhos efetivamente usados são `sistema-init/` e `documentacao/`, mesmo onde o prompt mestre apresenta caminhos genéricos diferentes. Siga as instruções atuais do usuário quando divergirem do fluxo padrão.
+A entrevista de levantamento está **encerrada**: B0 a B8 foram confirmados no device e B9 a B17 são do sistema, sem perguntas de firmware. O projeto está em desenvolvimento. Leia `INICIAR.md` (estado e onde procurar), depois `sistema-init/STATUS_PROJETO.md`, `documentacao/ESTADO_IMPLEMENTACAO.md` e a sprint atual em `planejamento/sprints/`. Responda em português do Brasil ao Rodrigo Maluf, responsável técnico e decisor da Optmile. Os caminhos usados são `sistema-init/` e `documentacao/`. Siga as instruções atuais do usuário quando divergirem do fluxo padrão e não apresente suposições como decisões confirmadas.
 
-O usuário quer **entender e levantar as funcionalidades antes de escolher como separar o projeto ou iniciar implementação**. Não apresente suposições como decisões confirmadas; faça perguntas pontuais e registre as respostas nos documentos correspondentes, incrementando versão e histórico. B0 a B8 estão confirmados no device. B9 a B17 são do sistema e foram confirmados como fora do device, sem perguntas de firmware. Regra do device: toda comunicação é por MQTT ou serial. Plano de implantação criado em `planejamento/PLANO_IMPLANTACAO_FIRMWARE.md` (fases 0 a 10). Próximo passo: Fase 0, base do projeto. Não reinicie a entrevista.
+Regra do device: toda comunicação é por MQTT ou serial.
 
 ## Onde continuar
 
-B4 foi fechado pelo usuário em 01/11/2026. As pendências de amostragem, falha e protótipo foram finalizadas pelo usuário na mesma data, e estão registradas em `documentacao/configuracao_do_dispositivo.md`:
-- **Amostragem:** 10 a 1000 amostras por segundo por entrada; média simples por segundo; envio por média móvel com janela de um envio.
-- **Falha por dente de serra:** inversão de sentido acima do percentual dentro de 5 segundos. Padrão de 2% sem inversor e 10% com inversor de frequência. Falha vai para 0 Hz, alerta e valor real sem suavização.
-- **Escala logarítmica:** não é requisito.
-- **Protótipo de bancada:** sensores 4–20 mA reais com a placa de destino, incluindo NB-IoT com módulo e operadora.
-
-Valores definidos depois, em 01/11/2026: timeout Modbus de 30 segundos (fixo no firmware) e espaço de alertas de 300 registros.
-
-B5 em andamento (01/11/2026): perfis Cliente, Integrador, Técnico de campo e Suporte/administrador; sessão única por dispositivo, sem mais de uma sessão no módulo, com bloqueio durante a configuração (P-008 concluído); hierarquia país > estado > cidade > empresa > unidade; várias unidades com restrição; acesso por horário e dia da semana por perfil. Pendências: restrição de unidades, janelas por perfil e ações exclusivas de cada perfil. Não rediscutir decisões já tomadas.
+- **Código:** os dois builds STM32 (`ologgermulti` e `y7080`) compilam sem avisos. Estão implementados a aquisição analógica, a entrada digital com contador de pulsos, o totalizador (hodômetro) e a gerência de energia em Stop 2. A lógica passa nos testes do PC. O ESP32 (FW-007) não foi iniciado e só começa depois de finalizados os testes do STM32 e de o STM32 estar validado (decisão de 03/11/2026).
+- **Falta validar em hardware:** a entrada digital, o contador de pulsos, o totalizador, o Stop 2 e a retomada da aquisição só compilam. O roteiro de bancada está em `documentacao/roteiro_bancada_entrada_digital.md` (FW-056).
+- **Bancada de 03/11/2026:** D1 retirada das entradas digitais e limite de 12 V, com o resistor de 4K7 em 0402 (achado HW-008). A aquisição analógica depende de soldar a ferrite L2 (HW-007).
+- **Regras recentes** (03/11/2026, em `documentacao/configuracao_do_dispositivo.md`): o pulso acorda o STM32, que fica acordado contando e só dorme depois de 60 s sem pulso (configurável); o ESP32 só é acordado para transmitir; o filtro dos pulsos é de 20 ms; cada entrada tem um totalizador de 32 bits como hodômetro.
+- **Pendências para decisão do responsável técnico:** `planejamento/sprints/SPRINT_01B.md`, seção "Pendências", e `sistema-init/STATUS_PROJETO.md`, seção "Pendências".
 
 ## Visão do produto
 
 - Família de equipamentos para saneamento; dois projetos de placa, **OloggerMulti** e **y7080**, analisados nos arquivos de hardware. O usuário informou que a parte elétrica está resolvida. As capacidades e quantidades de sensores, portas e rádios variam conforme o modelo.
 - STM32 em C é o coletor e orquestrador; ESP32 com ESP-IDF atua como módulo de comunicação subordinado e pode armazenar telemetria. O usuário imagina uma compilação e um setup que descreve os recursos do equipamento; a separação final será definida depois. Os esquemáticos indicam flash SPI externa de 16 MiB; distribuição de espaço ainda não definida.
-- Protótipo para bancada foi solicitado em um mês, com referência registrada em 29/10/2026 e data derivada 29/11/2026. Isso não define sozinho o escopo do protótipo. Firmware não foi identificado nesta pasta: em 01/11/2026 a busca por `.c`, `.h`, `.ioc` e `CMakeLists.txt` não retornou arquivos. Não há implementação comprovada. A pasta local não foi reconhecida como repositório Git nessa verificação; não presumir branch, commit ou publicação.
+- Protótipo para bancada foi solicitado em um mês, com referência registrada em 29/10/2026 e data derivada 29/11/2026. Isso não define sozinho o escopo do protótipo; a reavaliação está em `planejamento/BACKLOG.md`. Em 03/11/2026 o repositório Git (`github.com/malufis/ologgerIOT`, branch `feat/fw-002-cmake-raiz`, PR #1) tem código dos dois builds STM32; ver `documentacao/ESTADO_IMPLEMENTACAO.md` para o que foi validado em hardware.
 
 ## Regras fundamentais já levantadas
 
@@ -53,12 +49,14 @@ Estes documentos são requisitos e análises, não prova de implementação ou t
 
 ## Mensagem inicial sugerida para outro agente
 
-> Leia `sistema-init/TRANSFERENCIA_CONTINUIDADE.md`, `sistema-init/PROMPT_MESTRE.md` e `sistema-init/STATUS_PROJETO.md` e continue a entrevista do oLoggerIOT a partir do B4. Não reinicie as perguntas já respondidas. Preserve as decisões do Rodrigo e atualize a documentação conforme as novas respostas.
+> Leia `INICIAR.md`, `sistema-init/STATUS_PROJETO.md` e `documentacao/ESTADO_IMPLEMENTACAO.md` e continue o desenvolvimento do oLoggerIOT pela sprint atual. A entrevista está encerrada. Preserve as decisões do Rodrigo, não invente regra e atualize a documentação a cada item fechado, pela skill `doc-sync`.
 
 ## Histórico
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 03/11/2026 | 1.1.1 | Registrada a condição para iniciar o ESP32: depois da validação do STM32 |
+| 03/11/2026 | 1.1.0 | Documento atualizado para a fase de desenvolvimento: entrevista encerrada, estado do código e da bancada, regras recentes do contador de pulsos e instruções para o próximo agente |
 | 01/11/2026 | 1.0.20 | Processo de desenvolvimento criado: Git local com remoto (sem commit ou push), índice `documentacao/README.md`, backlog e sprints, padrão C, integração, manual, skills e agentes. Próximo passo: SPRINT_00 |
 | 01/11/2026 | 1.0.19 | Criado plano de implantação do firmware (planejamento/PLANO_IMPLANTACAO_FIRMWARE.md), com fases 0 a 10, aceite e testes |
 | 01/11/2026 | 1.0.18 | Definições do device registradas (Doxygen em português, MQTT 5.0 e TLS 1.3, versionamento por data e build, build CMake com toolchain ARM, testes em PC, simulador Python e bancada); B9 a B17 confirmados como fora do device |

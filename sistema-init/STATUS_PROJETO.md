@@ -1,11 +1,11 @@
 # Status do Projeto — oLoggerIOT
 
-> **Criado em:** 15/10/2026 · **Última modificação:** 02/11/2026 · **Versão:** 0.3.134
+> **Criado em:** 15/10/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.3.143
 > **Repositório:** https://github.com/malufis/ologgerIOT
 
 ## Fase atual
-**Fase 0 — Entrevista e concepção** (B0 a B8 confirmados; B9 a B17 registrados como fora do device, confirmado pelo usuário em 01/11/2026)
-**Progresso da entrevista:** 9/18 blocos confirmados no device; B9 a B17 são do sistema e não têm perguntas de firmware.
+**Desenvolvimento do firmware** — entrevista encerrada (B0 a B8 confirmados; B9 a B17 registrados como fora do device, confirmado pelo usuário em 01/11/2026). Fase 0 do plano concluída, exceto o FW-007; fases 1 e 1B em andamento (`planejamento/sprints/`).
+**Progresso da entrevista:** concluída (9/18 blocos no device; B9 a B17 são do sistema e não têm perguntas de firmware). O estado do código está em `documentacao/ESTADO_IMPLEMENTACAO.md`.
 
 ## Concluído
 - Kit de inicialização criado (`sistema-init/`)
@@ -45,6 +45,12 @@
 | P-026 | Validar recepção de comandos NB-IoT em baixo consumo, modo do módulo/operadora, despertar do STM32 e caminho MQTT | B3 | DEFINIDO — validação por teste com módulo real e operadora; execução pendente |
 
 | P-027 | Amostragem de 10 a 1000 amostras/s com média simples por segundo; envio por média móvel de janela de um envio; falha por dente de serra com inversão acima de 2% sem inversor e 10% com inversor, em 5 s; falha vai para 0 Hz; primeira leitura após zero sem comparação; escala logarítmica não é requisito | B4 | CONCLUÍDO em 01/11/2026 |
+| P-028 | HW-007: soldar a ferrite L2 na placa de bancada, conferir o VDDA (3,25 V) e refazer a calibração em 4, 8, 12, 16 e 20 mA | Fase 1 | PENDENTE — bloqueia o FW-012 |
+| P-029 | HW-008: entrada digital com D1 retirada e limite de 12 V na bancada; resistor de 4K7 em 0402 passa a 0603 no próximo layout, e 24 V ainda pede potência maior; avaliar supressor de ~30 V para campo industrial | Fase 1B | PARCIAL — 12 V na bancada; decidir o layout |
+| P-030 | Confirmar bateria no pino VBAT: os registradores de backup do totalizador só sobrevivem à falta de energia com ela | Fase 1B | PENDENTE |
+| P-031 | Confirmar que os leitores geram pulsos mais largos que 20 ms (com folga) e a taxa de 5 a 10 pulsos por segundo | Fase 1B | PENDENTE — confirmar com os leitores |
+| P-032 | Mapa Modbus: definir os modos da entrada digital (discreto, contador de pulsos e frequência) e o endereço do totalizador; hoje o mapa diz "discreto ou pulsado" | Fase 1B | PENDENTE |
+| P-033 | Frequência em Hz (FW-054): limite do pino no datasheet e do optoacoplador TLP291, faixa de 0 a 20 kHz, janela de medição e filtro próprio do modo | Fase 1B | PENDENTE — ajuste fica para depois |
 
 ## Decisões tomadas
 B0 — Identificação: respostas e resumo confirmados pelo usuário em 29/10/2026.
@@ -300,12 +306,12 @@ Regra de processo: a entrevista do firmware só pergunta o que é do device. O q
 - Pendentes do device: build do ESP32 (ESP-IDF), lista de campos do heartbeat, formato de SETUP e INFO, nomes dos grupos do JSON.
 
 ## Processo de desenvolvimento (01/11/2026)
-- **Git:** repositório local iniciado em `firmware/`, com remoto `origin` para `https://github.com/malufis/ologgerIOT.git`. Nada enviado ao remoto e nenhum commit feito ainda, porque commit e push dependem de ordem explícita.
+- **Git:** repositório local iniciado em `firmware/`, com remoto `origin` para `https://github.com/malufis/ologgerIOT.git`. Em 03/11/2026 o branch `feat/fw-002-cmake-raiz` tem commits enviados ao remoto e o PR #1 está aberto para `main`; commit e push seguem dependendo de ordem explícita do usuário.
 - **Documentação:** índice em `documentacao/README.md`. Dicionário de funções, padrão de código C (base MISRA C:2012), contrato de integração e manual de operação criados como esqueletos.
-- **Backlog:** `planejamento/BACKLOG.md`, com 45 itens FW-001 a FW-045 em 11 fases. Sprints de uma semana, de SPRINT_00 a SPRINT_09, em `planejamento/sprints/`.
+- **Backlog:** `planejamento/BACKLOG.md`, com 60 itens (FW-001 a FW-060) em 12 fases, incluindo a fase 1B. Sprints de uma semana, de SPRINT_00 a SPRINT_09, em `planejamento/sprints/`.
 - **Skills:** `c-firmware-standards`, `doc-sync`, `device-profile-build` e `sprint-task` em `firmware/.claude/skills/`.
 - **Agentes:** `firmware-dev` e `doc-keeper` em `firmware/.claude/agents/`.
-- **Pendente:** scripts `tools/verifica_padrao.py` e `tools/gera_dicionario.py` (FW-004 e FW-008), citados pelas skills.
+- **Scripts prontos (02/11/2026):** `tools/verifica_padrao.py` e `tools/gera_dicionario.py` (FW-004 e FW-008), citados pelas skills.
 - **Risco de prazo:** o escopo do protótipo de 29/11/2026 não cabe no cronograma de uma semana por sprint. Reavaliar antes da SPRINT_03.
 
 ## Decisões de desenvolvimento (02/11/2026)
@@ -322,12 +328,22 @@ Regra de processo: a entrevista do firmware só pergunta o que é do device. O q
 - **FreeRTOS em todo o sistema** (STM32 e ESP32), com alocação estática. Regras em `documentacao/padrao_codigo_c.md`, seção FreeRTOS.
 - **Modbus aprovado** conforme `documentacao/modbus_mapeamento_dados.md` (v0.2.0). Escrita em equipamento externo fora do escopo. Backlog: FW-046 na SPRINT_00 e FW-047 a FW-050 na fase de Modbus.
 
+## Decisões de entrada digital e contador de pulsos (03/11/2026)
+- **Uso:** o device pode ser contador de pulsos, com até quatro leitores ao mesmo tempo, pulsos sem repique de 5 a 10 por segundo. Tensão de campo de 12 a 24 V, a mesma fonte da entrada do CLP; na bancada, até 12 V e sem a D1 (HW-008).
+- **Filtros:** 50 ms no estado discreto e 20 ms nos pulsos; leitura a cada 2 ms.
+- **Sleep:** Stop 2. O pulso acorda o STM32, que fica acordado e só dorme de novo depois de 60 s sem pulso (configurável); com pulso constante não acorda e dorme a cada pulso. O ESP32 só é acordado para transmitir (1, 2 ou 5 vezes ao dia, ou por entrada analógica), em outra sprint. O sleep começa desabilitado.
+- **Totalizador:** cada entrada tem um total de 32 bits que só soma, como um hodômetro, guardado nos registradores de backup (duas cópias com complemento) e gravado a cada pulso. Quem lê calcula a diferença. Nenhum pulso pode ser perdido antes da transmissão.
+- **Frequência em Hz:** faixa de projeto de 0 a 20 kHz; o ajuste fica para depois.
+- Detalhes em `documentacao/configuracao_do_dispositivo.md` e `planejamento/sprints/SPRINT_01B.md`.
+
 ## Próximo passo recomendado
-B5, B6 e B7 fechados pelo usuário em 01/11/2026. B8 fechado pelo usuário em 01/11/2026. B9 a B17 confirmados como fora do device. Plano de implantação criado em `planejamento/PLANO_IMPLANTACAO_FIRMWARE.md`. Fase 0 em andamento na SPRINT_00: FW-001 concluído em 02/11/2026 (pastas com README). Próximo: FW-002 (CMake raiz com seleção de perfil). As pendências de heartbeat, formato de SETUP e INFO e nomes dos grupos do JSON ficam para a implantação. Execução do teste NB-IoT (P-026) fica para a fase de bancada.
+A entrevista está encerrada e o firmware está em desenvolvimento. Os dois builds STM32 compilam sem avisos. Próximo: executar o roteiro de bancada da entrada digital (FW-056) quando o device estiver disponível, soldar a L2 e fechar o FW-012. O FW-007 (ESP32) e a parte ESP32 do FW-046 foram para a SPRINT_07 e só começa depois de finalizados os testes do STM32 e de o STM32 estar validado (decisão de 03/11/2026). O estado de cada módulo está em `documentacao/ESTADO_IMPLEMENTACAO.md`; o backlog e as sprints, em `planejamento/`. As pendências de heartbeat, formato de SETUP e INFO e nomes dos grupos do JSON ficam para a fase 7. Execução do teste NB-IoT (P-026) fica para a fase de bancada.
 
 ## Histórico de atualizações
 | Data | Versão | Alteração |
 |---|---|---|
+| 03/11/2026 | 0.3.143 | Decisão do responsável técnico: o ESP32 (FW-007) fica para depois de finalizados os testes do STM32 e de ele estar validado; movido para a SPRINT_07 |
+| 03/11/2026 | 0.3.142 | Fase de desenvolvimento: aquisição analógica, entrada digital, contador de pulsos, totalizador e gerência de energia em código; decisões de 03/11/2026 registradas; pendências P-028 a P-033; backlog com situação e sprints 01 a 09 criadas |
 | 15/10/2026 | 0.1.0 | Criação do status inicial a partir do rascunho |
 | 15/10/2026 | 0.2.0 | Removido nome provisório; decisões de stack deferidas; lambda e auditoria incorporados |
 | 15/10/2026 | 0.3.0 | Entrevista em 18 blocos: IoT/MQTT, apps móveis, banco/RLS/LGPD e auditoria separada |

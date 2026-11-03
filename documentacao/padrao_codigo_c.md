@@ -1,6 +1,6 @@
 # Padrão de código C — firmware oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 02/11/2026 · **Versão:** 0.5.0
+> **Criado em:** 01/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.6.0
 
 ## Base
 
@@ -59,6 +59,16 @@ Definidas em `lib/rtos/include/rtos.h`. O kernel tem 7 níveis (`configMAX_PRIOR
 
 O SysTick é compartilhado entre o HAL e o FreeRTOS: `SysTick_Handler` (`src/interrupcoes.c`) avança o tick do HAL e chama `rtos_tick_handler`. Os dois ticks têm 1 ms.
 
+## Interrupções, sleep e armazenamento (proposta de 03/11/2026, a confirmar)
+
+Regras que saíram da implementação da entrada digital. Proposta, a confirmar pelo responsável técnico.
+
+- **Tratador de vetor fraco fica em `src/`, não em `lib/`.** O startup define os vetores como referência fraca, e o linker não extrai um objeto de uma biblioteca estática para resolver uma referência fraca. Um tratador definido em `lib/` não é ligado e a interrupção cai no tratador padrão, sem erro de compilação. O módulo expõe uma função (por exemplo, `io_entrada_irq`) e o tratador, em `src/interrupcoes.c`, a chama.
+- **Tratador de interrupção curto e sem FreeRTOS.** Quem não usa as variantes `FromISR` não precisa de prioridade acima do limite do FreeRTOS. Registrar o evento, contar ou pedir para acordar, e sair.
+- **Dado que não pode se perder vai para armazenamento fora da RAM no próprio tratador** (por exemplo, os registradores de backup), com duas cópias e complemento quando a gravação puder ser interrompida.
+- **Entrada em sleep sem perder pedido:** mascarar as interrupções, verificar o pedido de acordar e só então chamar o WFI, que sai na hora se houver interrupção pendente.
+- **O tick do FreeRTOS para em Stop 2.** Tempos medidos por ele não contam o tempo dormido; usar o RTC para hora e prazos longos.
+
 ## Pequenos códigos e bibliotecas
 
 - Uma tarefa do backlog gera uma alteração pequena, de preferência com menos de 300 linhas no diff. Acima disso, dividir o item antes de codificar.
@@ -115,6 +125,7 @@ int32_t conv_corrente_para_valor(float corrente_ma, float span, float zero, floa
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 03/11/2026 | 0.6.0 | Adicionada a seção de interrupções, sleep e armazenamento, a confirmar pelo responsável técnico |
 | 01/11/2026 | 0.1.0 | Criado padrão de código com base MISRA C:2012 e regras do projeto |
 | 02/11/2026 | 0.2.0 | Regra 10 trocada: composição por setup, não por `#if` de perfil; incluídas regras de pequenos códigos, bibliotecas e boas práticas de C; referência ao padrão ESP-IDF |
 | 02/11/2026 | 0.3.0 | Composição por build, no lugar de setup em runtime: funcionalidades em `builds/composicao.cmake` e `#if OLOG_FEAT_<NOME>`; pinagem por placa em `devices/`; regras 10 a 12 reescritas |

@@ -1,6 +1,6 @@
 ﻿# Configuração do dispositivo — oLoggerIOT
 
-> **Criado em:** 29/10/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.1.45
+> **Criado em:** 29/10/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.1.47
 
 ## Origem e estado
 
@@ -116,14 +116,14 @@ A frequência de atualização e a relação entre quantidade de entradas e saí
 ## Entrada digital — respostas de 03/11/2026
 
 - **Sinal ativo:** a entrada é ativa quando há tensão, ou seja, em nível alto.
-- **Filtro de ruído:** a mudança de estado só é aceita depois de um tempo estável. Tempo padrão de **50 ms**, definido pelo responsável técnico em 03/11/2026. O firmware converte o tempo em número de amostras, arredondando para cima; o período de leitura da entrada ainda não foi definido.
-- **Tensão de campo:** de 12 a 24 V, a mesma fonte da entrada do CLP (03/11/2026). Análise do circuito em `analise_hardware_ologgeriot.md`, achado HW-008.
+- **Filtro de ruído:** a mudança de estado só é aceita depois de um tempo estável. Tempo padrão de **50 ms**, definido pelo responsável técnico em 03/11/2026. O firmware converte o tempo em número de amostras, arredondando para cima; a entrada é lida a cada 2 ms.
+- **Tensão de campo:** de 12 a 24 V, a mesma fonte da entrada do CLP (03/11/2026). Na placa de bancada, a D1 foi retirada e o limite é 12 V, com o resistor de 4K7 em 0402 mantido até o novo layout (0603). Análise do circuito em `analise_hardware_ologgeriot.md`, achado HW-008.
 - **Polaridade no pino:** no OloggerMulti o optoacoplador inverte o sinal. Com tensão no campo, o pino do STM32 fica em nível baixo; o firmware entrega o estado já corrigido (ativa = há tensão).
 - **Sleep:** a entrada pode acordar o STM32 do sleep.
 - **Contador de pulsos (03/11/2026):** o device pode ser usado como contador de pulsos, para economizar energia. O pulso acorda o STM32 (Stop 2), que fica acordado contando e só dorme de novo depois do tempo sem pulso, de 60 s por padrão e configurável; com pulso constante ele não acorda e dorme a cada pulso. Dormindo, só a entrada digital fica ativa. Os pulsos vêm de leitores, sem repique, a 5 a 10 por segundo no máximo, com até quatro leitores ao mesmo tempo. O filtro dos pulsos acordado é de 20 ms. Cada entrada tem um totalizador de 32 bits, como um hodômetro: só soma, volta a zero ao estourar, é guardado fora da RAM e sobrevive a reset e à falta de energia; o servidor calcula as diferenças. O ESP32 só é acordado para transmitir (1, 2 ou 5 vezes ao dia, ou por uma entrada analógica), em outra sprint. Contar dormindo é preferível, mas nenhum pulso pode ser perdido antes da transmissão. Detalhes e pendências em `planejamento/sprints/SPRINT_01B.md`.
-- **Tipos de uso:** a entrada pode ser discreta (0 ou 1) ou de frequência, medida em Hz. Para o modo de frequência, a faixa máxima e a janela de medição ainda não foram definidas.
-- **Implementação:** o módulo `lib/io` atende a funcionalidade `ENTRADA_DIGITAL` do OloggerMulti. A escolha entre discreta e frequência fica em cada entrada, na configuração.
-- **Itens de backlog:** FW-052 a FW-056, na fase 1B (SPRINT_01B).
+- **Tipos de uso:** a entrada pode ser discreta (0 ou 1), contador de pulsos ou de frequência em Hz (faixa de projeto de 0 a 20 kHz; faixa máxima, janela de medição e filtro do modo de frequência ainda a definir).
+- **Implementação:** o módulo `lib/io` atende a funcionalidade `ENTRADA_DIGITAL` do OloggerMulti. A escolha entre os modos fica em cada entrada, na configuração.
+- **Itens de backlog:** FW-052 a FW-060, na fase 1B (SPRINT_01B).
 
 ## Fluxos propostos pelo usuário
 
@@ -181,6 +181,8 @@ Depois de estabelecida a conectividade do dispositivo, a configuração continua
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 03/11/2026 | 0.1.47 | Corrigidos o período de leitura (2 ms), os modos da entrada (discreto, contador de pulsos e frequência) e a faixa de itens do backlog (FW-052 a FW-060) |
+| 03/11/2026 | 0.1.46 | Tensão de campo da entrada digital: D1 retirada na bancada e limite de 12 V até o novo layout |
 | 29/10/2026 | 0.1.0 | Registrada configuração em linguagem natural pelo WhatsApp, gateway USB no celular e modo local restrito para estabelecer conectividade |
 | 29/10/2026 | 0.1.1 | Explicitada a camada de módulos de comunicação e rede entre STM32 e broker MQTT, conforme correção do usuário |
 | 29/10/2026 | 0.1.2 | Registrada dependência do gateway USB em relação ao MCU, com incompatibilidade no y7080 indicado pelos esquemáticos |

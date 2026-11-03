@@ -1,6 +1,6 @@
 # Integração do device com o sistema — oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 01/11/2026 · **Versão:** 0.1.0
+> **Criado em:** 01/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.1.1
 
 ## Para quem é
 
@@ -84,9 +84,11 @@ Aplicação Python no notebook do técnico, com chaveiro serial ligado ao STM32.
 - Nomes dos grupos do JSON.
 - Formato do identificador de comando e da confirmação de lote.
 - Caminho base dos tópicos: formato e tamanho máximo.
+- Grupo `digital` do JSON (aberto em 03/11/2026): estado de cada entrada e, no modo contador de pulsos, o totalizador de 32 bits enviado como valor absoluto. O servidor calcula as diferenças entre duas leituras, o que torna uma transmissão perdida sem perda de contagem. Nomes dos campos a definir junto com o mapa Modbus (P-032).
 
 ## Histórico
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 03/11/2026 | 0.1.1 | Registrada a pendência do grupo digital do JSON com o totalizador enviado como valor absoluto |
 | 01/11/2026 | 0.1.0 | Criado contrato de integração com tópicos padrão, confirmações, formato de dados, mapa Modbus e sessão de configuração |

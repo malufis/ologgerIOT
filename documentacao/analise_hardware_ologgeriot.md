@@ -1,6 +1,6 @@
 # Análise dos hardwares OloggerMulti e y7080
 
-> **Criado em:** 29/10/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.3.4
+> **Criado em:** 29/10/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.3.5
 > **Estado:** parte elétrica resolvida conforme confirmação de Rodrigo Maluf; análise dos arquivos preservada como histórico documental.
 
 ## Resultado
@@ -184,7 +184,7 @@ Confirmar o módulo celular montado, os sensores PC11/K8, a seleção dos jumper
 
 **Posição do responsável técnico (03/11/2026):** o circuito do optoacoplador está correto; o mesmo 4K7 já é usado em outro projeto, a 12 V, e o resistor passará a 0603 no próximo layout. Análise: o resistor em série com o LED resolve a corrente do LED, mas **não protege a D1**, que está no nó `IN-Dx` antes dele. Em 12 V a potência no 4K7 é ~25 mW e já cabe em 0402; a mudança para 0603 só importa perto de 24 V. Um 0603 comum é de 100 mW (existem de 125 mW), e o consumo estimado em 24 V é ~110 mW e em 30 V ~176 mW. Para 24 V: usar 0805 ou 1206 de 0,25 W, ou subir o resistor para ~10k (~52 mW em 24 V, ~1,1 mA no LED em 12 V; margem do ganho de corrente a conferir). Sobre a D1: no outro projeto, conferir se o componente é o mesmo; se for outro supressor (por exemplo, de 24 V ou bidirecional de tensão maior), a questão não se aplica aqui.
 
-**Decisão do responsável técnico (03/11/2026):** retirar a D1 (ESD) das entradas digitais e reaproveitá-la em outro projeto. Com isso o conflito de ~6 V some. Consequências: a entrada fica sem supressor de surto e ESD no terminal de campo; só o 4K7 e o optoacoplador limitam a energia. Se a proteção for necessária em campo industrial, no próximo layout usar um supressor com tensão de operação acima de 24 V (por exemplo, da família SMAJ ou SM5S de ~30 V), no nó `IN-Dx`. Na placa de bancada, sem a D1 a entrada aceita 12 V com folga; 24 V continua limitado pela potência do 4K7 em 0402 (~110 mW), então use até 12 V ou troque o resistor antes.
+**Executado em 03/11/2026:** a D1 (ESD) foi retirada das entradas digitais da placa de bancada, por decisão do responsável técnico, e será reaproveitada em outro projeto. Com isso o conflito de ~6 V some. Consequências: a entrada fica sem supressor de surto e ESD no terminal de campo; só o 4K7 e o optoacoplador limitam a energia. **O limite de entrada na bancada é 12 V**, com o resistor de 4K7 em 0402. No próximo layout o resistor passa a 0603, o que ainda não cobre 24 V (~110 mW contra 100 mW de um 0603 comum); para 24 V, usar um resistor de 0805 ou 1206 de 0,25 W, ou subir o valor para ~10k. Se a proteção for necessária em campo industrial, usar um supressor com tensão de operação acima de 24 V (por exemplo, da família SMAJ ou SM5S de ~30 V) no nó `IN-Dx`.
 
 **Pendência:** confirmar a proteção contra inversão de polaridade, a potência do resistor montado e a proteção contra inversão. A parte elétrica foi declarada resolvida pelo responsável técnico; este achado é um alerta de verificação, não uma solicitação de alteração.
 
@@ -232,6 +232,7 @@ Para concluir o B2, já há evidência da origem dos dados e do armazenamento. F
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 03/11/2026 | 0.3.5 | HW-008: D1 retirada na bancada, limite de 12 V e resistor de 4K7 em 0402 mantido até o novo layout |
 | 29/10/2026 | 0.1.0 | Análise dos dois conjuntos, mapas preliminares de pinos, cruzamento de atributos Gerber, verificação ERC parcial e pendências para firmware |
 | 29/10/2026 | 0.1.1 | Registrada confirmação do responsável técnico de que a parte elétrica está resolvida; encerrados bloqueios elétricos, preservando evidências históricas |
 | 29/10/2026 | 0.1.2 | Alinhado foco no entendimento dos modelos e na ideia de compilação única com setup, sem antecipar separação da implementação |

@@ -1,6 +1,6 @@
 # Mapa Modbus do device oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 01/11/2026 · **Versão:** 0.1.2
+> **Criado em:** 01/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.1.3
 
 ## Origem e estado
 
@@ -189,11 +189,13 @@ Os nomes dos grupos (analogico, digital, falhas, sistema, rede) são uma propost
 - Resolvidas em 01/11/2026: ordem do float (ABCD), unidade do tempo de acionamento (segundos), faixa do endereço escravo (1 a 247) e configuração pelo Modbus.
 - Bloco trifásico mantido como reservado, pois o device poderá integrar com MGE ou inversores pelo Modbus.
 - Lista final de campos do heartbeat e formato das mensagens SETUP e INFO.
+- Entrada digital (aberto em 03/11/2026): o registrador de modo da entrada (40151–40165) hoje diz "0 = discreto, 1 = pulsado". Falta definir os modos (discreto, contador de pulsos e frequência em Hz) e o endereço do totalizador de 32 bits de cada entrada, que será lido como valor absoluto (o servidor calcula as diferenças). Item P-032 em `STATUS_PROJETO.md`.
 
 ## Histórico
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 03/11/2026 | 0.1.3 | Registrada a pendência dos modos da entrada digital (discreto, contador de pulsos e frequência) e do endereço do totalizador |
 | 01/11/2026 | 0.1.2 | Confirmados float big-endian (ABCD), tempo de acionamento em segundos e endereço escravo de 1 a 247; trifásico mantido reservado para integração com MGE e inversores |
 | 01/11/2026 | 0.1.1 | Configuração válida pelo Modbus e pelo MQTT, com a mesma regra de sessão única; sessão de configuração termina após 5 minutos sem atividade |
 | 01/11/2026 | 0.1.0 | Criado mapa Modbus com 15 posições por tipo, float em 2 registradores, conectividade e configurações, com base na norma e no manual Raptor |

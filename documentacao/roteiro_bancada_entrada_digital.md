@@ -1,6 +1,6 @@
 # Roteiro de bancada — entrada digital e contador de pulsos
 
-> **Criado em:** 03/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.1.0
+> **Criado em:** 03/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.1.1
 
 Roteiro do item FW-056, para o build `ologgermulti`. Nenhum dos testes abaixo foi executado: todo o código descrito aqui só foi compilado e testado no PC. Cada passo tem o resultado esperado e um campo para registrar o resultado medido. O que contradisser o esperado vira achado, não é ajustado no roteiro.
 
@@ -17,7 +17,7 @@ Roteiro do item FW-056, para o build `ologgermulti`. Nenhum dos testes abaixo fo
 - Placa OloggerMulti com a imagem do build `ologgermulti` gravada, depurador SWD e fonte de 3,3 V/USB da placa.
 - Fonte de bancada de 5 V e de 12 V, limitada em corrente.
 - Gerador de pulsos (ou segundo microcontrolador) que entregue 0 V / 12 V com largura e taxa ajustáveis; osciloscópio ou analisador lógico para conferir a largura real.
-- Multímetro ou analisador de corrente de baixo consumo (faixa de microampères) em série com a alimentação, para o teste 7.
+- Multímetro ou analisador de corrente de baixo consumo (faixa de microampères) em série com a alimentação, para o teste 8.
 
 ## Preparação
 
@@ -25,7 +25,7 @@ Roteiro do item FW-056, para o build `ologgermulti`. Nenhum dos testes abaixo fo
    `cmake -S . -B build/ologgermulti -G Ninja -DDEVICE=ologgermulti -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-arm-none-eabi.cmake -DOLOG_STM32CUBE_L4=<pasta>` e `cmake --build build/ologgermulti`.
 2. No depurador, observar as variáveis `estado_bruto` e `estado_filtrado` (arquivo `lib/io/src/io_tarefa.c`) e os registradores de backup `TAMP->BKP0R` a `BKP15R`.
 3. Cada entrada Dn usa quatro registradores de backup: valor (`BKP[4(n-1)]`), complemento (`+1`), e as mesmas duas palavras da segunda cópia (`+2` e `+3`). Em uma entrada válida o complemento é o valor invertido bit a bit.
-4. Habilitar o sleep só nos testes 7 a 9, com `energia_define_habilitada(true)` ou escrevendo `1` na variável `habilitada` (arquivo `lib/energia/src/energia.c`).
+4. Habilitar o sleep só nos testes 8 a 12, com `energia_define_habilitada(true)` ou escrevendo `1` na variável `habilitada` (arquivo `lib/energia/src/energia.c`).
 5. Atenção ao depurador no Stop 2: a conexão SWD cai. Nos testes de sleep, manter o depurador conectado só se o clock de depuração do Stop estiver ativo no depurador, ou observar o resultado ao acordar.
 
 ## Testes
@@ -61,4 +61,5 @@ Roteiro do item FW-056, para o build `ologgermulti`. Nenhum dos testes abaixo fo
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 03/11/2026 | 0.1.1 | Corrigida a numeração dos testes de sleep (8 a 12) e do consumo (teste 8) |
 | 03/11/2026 | 0.1.0 | Criado o roteiro com 12 testes para a entrada digital, o contador de pulsos, o totalizador e o sleep |

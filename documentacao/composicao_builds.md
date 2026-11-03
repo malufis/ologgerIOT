@@ -1,6 +1,6 @@
 # Composição dos builds — oLoggerIOT
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 02/11/2026 · **Versão:** 0.2.2
+> **Criado em:** 02/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.2.3
 > **Status:** composição confirmada pelo responsável técnico em 02/11/2026. A lista vigente está em `builds/composicao.cmake`.
 
 ## Princípio
@@ -69,6 +69,12 @@ Funcionalidade nova entra primeiro no catálogo, quando o módulo correspondente
 | `RADIO_UART_EXTERNO` | Sim (UART de comunicação externa) | Não | Confirmado em 02/11/2026 |
 | `MQTT` | Sim | Sim | Confirmado em 02/11/2026 |
 
+## Módulos que não são funcionalidade do catálogo
+
+- `lib/energia` (gerência de energia em Stop 2) existe só para o STM32L4 e entra no build `ologgermulti` pelo CMake, conforme o MCU. O STM32L0 do y7080 usa outra API de baixo consumo, ainda não implementada. Não é uma funcionalidade nova do catálogo.
+- `lib/io` tem a leitura das entradas digitais, o filtro, o contador de pulsos, o totalizador (nos registradores de backup do STM32L4) e a tarefa. Entra com a funcionalidade `ENTRADA_DIGITAL`.
+- Os modos da entrada digital (discreto, contador de pulsos e frequência) são configuração de cada entrada, não funcionalidades separadas.
+
 ## Pinagem
 
 A pinagem de cada placa está em `devices/<build>/pinos.h` (FW-003), com um par `PINO_<FUNCAO>_PORTA` e `PINO_<FUNCAO>_NUM` por função. O CMake inclui a pasta do build escolhido, e o código usa só esses nomes.
@@ -84,13 +90,15 @@ A pinagem de cada placa está em `devices/<build>/pinos.h` (FW-003), com um par 
 - Validar no manual AT do SIM7080G os comandos do cliente MQTT, que roda no modem (decidido em 02/11/2026).
 - Rádio externo do OloggerMulti na UART1 do STM32 (PA9/PA10), decidido em 02/11/2026: o STM32 é o cérebro e recebe todos os dados externos. O conector ligado à UART0 do ESP32 fica fora do uso do firmware até confirmação do seu uso.
 - Integrador por tipo de rádio externo: fase futura. `lib/radio_externo` só repassa bytes, sem interpretar (decidido em 02/11/2026).
-- Medir flash e RAM de cada build (FW-006).
+- Medir flash e RAM de cada build (FW-006). Em 03/11/2026: `ologgermulti` com 24 952 bytes de código e `y7080` com 4 944.
+- Gerência de energia do y7080 (STM32L0): o módulo `lib/energia` só existe para o L4.
 
 ## Histórico
 
 | Data | Versão | Alteração |
 |---|---|---|
-| 02/11/2026 | 0.1.0 | Criado com o princípio de um projeto e um build por device, o arquivo `builds/composicao.cmake`, o catálogo de funcionalidades e a composição proposta |
+| 03/11/2026 | 0.2.3 | Registrados os módulos que não são funcionalidade do catálogo (`lib/energia`, `lib/io`), o tamanho dos builds em 03/11/2026 e a pendência de energia do y7080 |
 | 02/11/2026 | 0.2.2 | Mapa preliminar de pinos substituído pela pinagem em `devices/<build>/pinos.h`, conferida contra as netlists |
 | 02/11/2026 | 0.2.1 | Códigos de MCU confirmados pela compra: STM32L412C8U6 (OloggerMulti) e STM32L071CBU6 (y7080), ambos em UFQFPN48 |
 | 02/11/2026 | 0.2.0 | Composição confirmada: saída em frequência no OloggerMulti, UART de rádio externo (`RADIO_UART_EXTERNO`), y7080 com entrada diferencial, celular e MQTT; sem digitais no y7080; mapa de pinos preliminar incluído |
+| 02/11/2026 | 0.1.0 | Criado com o princípio de um projeto e um build por device, o arquivo `builds/composicao.cmake`, o catálogo de funcionalidades e a composição proposta |

@@ -1,6 +1,6 @@
 ﻿# Telemetria, modos de operação e armazenamento — oLoggerIOT
 
-> **Criado em:** 30/10/2026 · **Última modificação:** 01/11/2026 · **Versão:** 0.1.27
+> **Criado em:** 30/10/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.1.28
 
 ## Origem e estado
 
@@ -29,6 +29,14 @@ A configuração por sensor e os valores dos intervalos ainda serão detalhados.
 O comportamento de recepção pela rede foi informado pelo usuário como intenção de operação com o módulo NB-IoT utilizado. Não foi definido o modo exato de baixo consumo, o sinal que desperta o STM32 nem a latência de atendimento. Sleep do rádio não significa automaticamente desligar sua alimentação.
 
 **Condição técnica a validar na integração:** em PSM o dispositivo não é alcançável por paging durante o período de sono. Em eDRX, a recepção ocorre em janelas periódicas negociadas com a rede. Portanto, a recepção solicitada depende do módulo real, do modo negociado, da operadora e do caminho MQTT. Não foi selecionado PSM ou eDRX nesta etapa nem prometido despertar imediato a qualquer momento. Referências: [GSMA — guia NB-IoT](https://www.gsma.com/IC/wp-content/uploads/2018/04/NB-IoT_Deployment_Guide_v2_5Apr2018.pdf) e [Cisco — recepção eDRX/indisponibilidade PSM](https://www.cisco.com/c/en/us/td/docs/wireless/asr_5000/21-28/mme-admin/21-28-mme-admin/m_edrx.html).
+
+## Contador de pulsos e sleep (03/11/2026)
+
+- O STM32 pode ser usado como contador de pulsos em Stop 2. O pulso o acorda, ele fica acordado contando e só dorme de novo depois de um tempo sem pulso (60 s, configurável). Com pulso constante não acorda e dorme a cada pulso.
+- O ESP32 só é acordado para transmitir: 1, 2 ou 5 vezes ao dia, ou por uma entrada analógica. O despertar para transmitir e o RTC são de outra sprint.
+- Cada entrada tem um totalizador de 32 bits que só soma, guardado fora da RAM. Os dados enviados levam o total absoluto, e o servidor calcula as diferenças. Nenhum pulso pode ser perdido antes da transmissão.
+- Dormindo, a aquisição analógica 4–20 mA para. O consumo em sleep ainda não foi medido.
+- Regras completas em `documentacao/configuracao_do_dispositivo.md`; estado em `planejamento/sprints/SPRINT_01B.md`.
 
 ## Formas de envio
 
@@ -103,6 +111,7 @@ Dados sem horário válido não têm validade para a telemetria. Ao detectar hor
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 03/11/2026 | 0.1.28 | Adicionada a seção de contador de pulsos e sleep: despertar por pulso, ESP32 só para transmitir e totalizador absoluto |
 | 01/11/2026 | 0.1.27 | Usuário definiu 300 alertas como capacidade do espaço de alertas |
 | 01/11/2026 | 0.1.26 | Usuário definiu que o teste NB-IoT entra no protótipo de bancada do primeiro mês |
 | 01/11/2026 | 0.1.25 | Usuário definiu que o envio usa média móvel dos valores de 1 segundo, com janela a definir |
