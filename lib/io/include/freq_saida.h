@@ -13,9 +13,12 @@
  * - **Falha do sensor:** a saída vai para 0 Hz.
  * - **Limite:** o cadastro aceita frequências de 0 Hz a FREQ_SAIDA_MAX_HZ (faixa de projeto).
  *
- * Este módulo só calcula a frequência. A geração do sinal (timer de software, largura de pulso,
- * estado elétrico em 0 Hz) e a exclusão com o modo sleep (FW-061) ficam para os próximos
- * passos do FW-023.
+ * Decidido em 04/11/2026: em **0 Hz a saída fica em nível baixo** (transistor desligado) e o
+ * sinal tem **duty cycle de 50%** (FREQ_SAIDA_DUTY_PERCENTUAL). Só as saídas 2, 3 e 4 (PB13,
+ * PB14 e PB15, com canal de timer) têm modo frequência; a saída 1 (PB12) não (tipo_saida.h).
+ *
+ * Este módulo só calcula a frequência. A geração do sinal (timer) fica para o próximo passo do
+ * FW-023. A exclusão com o modo sleep está em tipo_saida.h (FW-061).
  *
  * @date criacao 04/11/2026
  * @date modificacao 04/11/2026
@@ -39,6 +42,8 @@
 
 /** Frequência máxima aceita no cadastro, em Hz (faixa de projeto de 0 a 20 kHz). */
 #define FREQ_SAIDA_MAX_HZ 20000.0F
+/** Duty cycle do sinal gerado, em percentual (decidido em 04/11/2026). */
+#define FREQ_SAIDA_DUTY_PERCENTUAL 50U
 /** Corrente que corresponde à frequência de 4 mA, em miliampères. */
 #define FREQ_SAIDA_MA_MINIMO 4.0F
 /** Corrente que corresponde à frequência de 20 mA, em miliampères. */

@@ -88,6 +88,14 @@ target_include_directories(test_freq_saida PRIVATE ../lib/io/include .)
 target_link_libraries(test_freq_saida PRIVATE m)
 add_test(NAME freq_saida COMMAND test_freq_saida)
 
+# Módulo io: tipo das saídas e exclusão entre frequência e sleep.
+add_executable(test_tipo_saida
+  io/test_tipo_saida.c
+  ../lib/io/src/tipo_saida.c
+)
+target_include_directories(test_tipo_saida PRIVATE ../lib/io/include .)
+add_test(NAME tipo_saida COMMAND test_tipo_saida)
+
 # Módulo io: totalizador de pulsos com duas cópias e complemento.
 add_executable(test_io_totalizador
   io/test_io_totalizador.c

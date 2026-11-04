@@ -31,6 +31,10 @@
   #include "io_saidas.h"
 #endif
 
+#ifdef OLOG_TEM_SAIDA_FREQUENCIA
+  #include "io_frequencia.h"
+#endif
+
 #ifdef OLOG_TEM_ENERGIA
   #include "energia.h"
 #endif
@@ -58,7 +62,11 @@ static const energia_ganchos_t ganchos_energia = {
   io_tarefa_pode_dormir,
   prepara_sleep,
   retoma_do_sleep,
-  NULL, /* sleep_permitido: a saída em frequência (FW-023) passa a impedi-lo quando existir. */
+#ifdef OLOG_TEM_SAIDA_FREQUENCIA
+  io_frequencia_sleep_permitido, /* Recusa o sleep com saída em frequência (FW-061). */
+#else
+  NULL,
+#endif
 };
 #endif
 

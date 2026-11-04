@@ -1,6 +1,6 @@
 # tests/ — testes
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.11
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.12
 
 Testes de unidade da lógica, compilados e executados no PC, sem hardware. Cada módulo tem seu teste em `tests/<modulo>/`. Testes que dependem de placa ficam no roteiro de bancada, e não aqui.
 
@@ -14,7 +14,7 @@ cmake --build build/tests
 ctest --test-dir build/tests --output-on-failure
 ```
 
-Módulos testados em 03/11/2026: `sensor` (57 verificações), `io_filtro` (135), `io_pulsos` (25), `io_totalizador` (36, com queda de energia em cada gravação) `saida` (36, com o retardo de acionamento) e `controle_saida` (82, modo manual e automático, regra do sensor, agenda, CCO e espera de 5 minutos) `agenda` (57, formato e consulta da agenda semanal) e `regra_sensor` (9 testes, sentidos 0 e 1 com histerese) e `freq_saida` (9 testes, proporcionalidade, relação invertida e falha). As macros de teste estão em `tests/teste.h`. Em uma máquina com política de Controle de Aplicativo do Windows, o executável recém-linkado pode ser bloqueado; aconteceu uma vez com `test_sensor.exe` em 03/11/2026, e recompilar resolveu.
+Módulos testados em 03/11/2026: `sensor` (57 verificações), `io_filtro` (135), `io_pulsos` (25), `io_totalizador` (36, com queda de energia em cada gravação) `saida` (36, com o retardo de acionamento) e `controle_saida` (82, modo manual e automático, regra do sensor, agenda, CCO e espera de 5 minutos) `agenda` (57, formato e consulta da agenda semanal) e `regra_sensor` (9 testes, sentidos 0 e 1 com histerese) `freq_saida` (9 testes, proporcionalidade, relação invertida e falha) e `tipo_saida` (8 testes, exclusão entre frequência e sleep). As macros de teste estão em `tests/teste.h`. Em uma máquina com política de Controle de Aplicativo do Windows, o executável recém-linkado pode ser bloqueado; aconteceu uma vez com `test_sensor.exe` em 03/11/2026, e recompilar resolveu.
 
 Referência de testes: `planejamento/PLANO_IMPLANTACAO_FIRMWARE.md`, seção "Testes (transversais)".
 
@@ -22,6 +22,7 @@ Referência de testes: `planejamento/PLANO_IMPLANTACAO_FIRMWARE.md`, seção "Te
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.12 | Adicionado o módulo `tipo_saida` aos testes |
 | 04/11/2026 | 0.2.11 | Adicionado o módulo `freq_saida` aos testes |
 | 04/11/2026 | 0.2.10 | Adicionado o módulo `regra_sensor` aos testes |
 | 04/11/2026 | 0.2.9 | Adicionado o módulo `agenda` aos testes |
