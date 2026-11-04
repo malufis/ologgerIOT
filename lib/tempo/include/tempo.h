@@ -11,7 +11,7 @@
  *
  * @date criacao 04/11/2026
  * @date modificacao 04/11/2026
- * @version 0.1.0
+ * @version 0.2.0
  */
 
 #ifndef TEMPO_H
@@ -26,6 +26,8 @@
 #define TEMPO_ERRO_PARAMETRO  (-1)
 /** Código de retorno: fuso fora de -720 a +840 minutos. */
 #define TEMPO_ERRO_FUSO       (-2)
+/** Código de retorno: data ou hora inexistente, ou fora de 1970 a 2105. */
+#define TEMPO_ERRO_DATA       (-3)
 
 /** Menor fuso aceito, em minutos (UTC-12:00). */
 #define TEMPO_FUSO_MIN        (-720)
@@ -53,6 +55,18 @@ typedef struct
  * @return TEMPO_OK, TEMPO_ERRO_PARAMETRO ou TEMPO_ERRO_FUSO.
  */
 int32_t tempo_para_local(uint32_t epoch_s, int16_t fuso_min, tempo_local_t *local);
+
+/**
+ * @brief Converte data e hora em UTC nos segundos desde 01/01/1970 (o inverso com fuso zero).
+ *
+ * Valida a data: mês de 1 a 12, dia existente no mês (com ano bissexto), hora, minuto e segundo
+ * dentro da faixa, e o resultado dentro de 32 bits sem sinal. O campo `dia_semana` é ignorado.
+ *
+ * @param utc Data e hora em UTC.
+ * @param epoch_s Recebe os segundos desde 01/01/1970 00:00:00 UTC.
+ * @return TEMPO_OK, TEMPO_ERRO_PARAMETRO ou TEMPO_ERRO_DATA.
+ */
+int32_t tempo_de_utc(const tempo_local_t *utc, uint32_t *epoch_s);
 
 /**
  * @brief Diz se o instante local é o início de um intervalo de 30 minutos da agenda.

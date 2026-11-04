@@ -35,6 +35,10 @@
   #include "io_frequencia.h"
 #endif
 
+#ifdef OLOG_TEM_RELOGIO
+  #include "rtc.h"
+#endif
+
 #ifdef OLOG_TEM_ENERGIA
   #include "energia.h"
 #endif
@@ -152,6 +156,11 @@ int main(void)
 
 #ifdef OLOG_TEM_AQUISICAO
   adc_diagnostico(); /* Antes das tarefas: o tick ainda corre. */
+#endif
+
+#ifdef OLOG_TEM_RELOGIO
+  /* Sem cristal ou com defeito o relógio fica sem hora válida, e o firmware segue sem ele. */
+  (void)rtc_inicia();
 #endif
 
   if (cria_tarefas() == 0)

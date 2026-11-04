@@ -29,6 +29,7 @@ set(OLOG_FEATURES_CATALOGO
   RADIO_CELULAR        # Modem celular (lib/modem)
   RADIO_UART_EXTERNO   # Rádio externo em UART, modo transparente (lib/radio_externo)
   MQTT                 # Comunicação MQTT com o broker (lib/mqtt, esp32/)
+  RELOGIO              # RTC com cristal de 32,768 kHz (lib/rtc); só o OloggerMulti tem o cristal
 )
 
 # -----------------------------------------------------------------------------
@@ -48,6 +49,7 @@ if(DEVICE STREQUAL "ologgermulti")
     RADIO_WIFI           # ESP32-C6-MINI-1, único rádio da placa
     RADIO_UART_EXTERNO   # UART de comunicação externa, para outro rádio em modo transparente
     MQTT
+    RELOGIO              # RTC com o cristal LSE; o y7080 não tem cristal
   )
 
 # -----------------------------------------------------------------------------

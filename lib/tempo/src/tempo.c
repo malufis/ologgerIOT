@@ -4,7 +4,7 @@
  *
  * @date criacao 04/11/2026
  * @date modificacao 04/11/2026
- * @version 0.1.0
+ * @version 0.2.0
  */
 
 #include "tempo.h"
@@ -89,6 +89,74 @@ int32_t tempo_para_local(uint32_t epoch_s, int16_t fuso_min, tempo_local_t *loca
   local->hora = (uint8_t)(resto / SEGUNDOS_POR_HORA);
   local->minuto = (uint8_t)((resto % SEGUNDOS_POR_HORA) / SEGUNDOS_POR_MINUTO);
   local->segundo = (uint8_t)(resto % SEGUNDOS_POR_MINUTO);
+  return TEMPO_OK;
+}
+
+/**
+ * @brief Diz se o ano é bissexto no calendário gregoriano.
+ *
+ * @param ano Ano.
+ * @return true se bissexto.
+ */
+static bool ano_bissexto(uint16_t ano)
+{
+  return (((ano % 4U) == 0U) && ((ano % 100U) != 0U)) || ((ano % 400U) == 0U);
+}
+
+/**
+ * @brief Dias de um mês.
+ *
+ * @param ano Ano.
+ * @param mes Mês de 1 a 12.
+ * @return Quantidade de dias.
+ */
+static uint8_t dias_do_mes(uint16_t ano, uint8_t mes)
+{
+  static const uint8_t dias[12] = {31U, 28U, 31U, 30U, 31U, 30U, 31U, 31U, 30U, 31U, 30U, 31U};
+
+  if ((mes == 2U) && ano_bissexto(ano))
+  {
+    return 29U;
+  }
+  return dias[mes - 1U];
+}
+
+int32_t tempo_de_utc(const tempo_local_t *utc, uint32_t *epoch_s)
+{
+  int64_t y;
+  int64_t era;
+  int64_t yoe;
+  int64_t mp;
+  int64_t doy;
+  int64_t doe;
+  int64_t dias;
+  int64_t segundos;
+
+  if ((utc == NULL) || (epoch_s == NULL))
+  {
+    return TEMPO_ERRO_PARAMETRO;
+  }
+  if ((utc->ano < 1970U) || (utc->mes < 1U) || (utc->mes > 12U) || (utc->dia_mes < 1U) ||
+      (utc->dia_mes > dias_do_mes(utc->ano, utc->mes)) || (utc->hora > 23U) ||
+      (utc->minuto > 59U) || (utc->segundo > 59U))
+  {
+    return TEMPO_ERRO_DATA;
+  }
+
+  y = (int64_t)utc->ano - ((utc->mes <= 2U) ? 1 : 0);
+  era = divide_para_baixo(y, 400);
+  yoe = y - (era * 400);
+  mp = (utc->mes > 2U) ? ((int64_t)utc->mes - 3) : ((int64_t)utc->mes + 9);
+  doy = (((153 * mp) + 2) / 5) + (int64_t)utc->dia_mes - 1;
+  doe = (yoe * 365) + (yoe / 4) - (yoe / 100) + doy;
+  dias = (era * DIAS_EM_400_ANOS) + doe - DIAS_ATE_1970;
+  segundos = (dias * SEGUNDOS_POR_DIA) + ((int64_t)utc->hora * SEGUNDOS_POR_HORA) +
+             ((int64_t)utc->minuto * SEGUNDOS_POR_MINUTO) + (int64_t)utc->segundo;
+  if ((segundos < 0) || (segundos > (int64_t)UINT32_MAX))
+  {
+    return TEMPO_ERRO_DATA;
+  }
+  *epoch_s = (uint32_t)segundos;
   return TEMPO_OK;
 }
 

@@ -110,6 +110,65 @@ static void inicio_de_intervalo_so_nos_minutos_0_e_30_com_segundo_zero(void)
   VERIFICA(tempo_inicio_de_intervalo(&t) == true);
 }
 
+/* Monta uma data UTC. */
+static tempo_local_t data(uint16_t ano, uint8_t mes, uint8_t dia, uint8_t h, uint8_t m, uint8_t s)
+{
+  tempo_local_t t = {ano, mes, dia, 0U, h, m, s};
+
+  return t;
+}
+
+static void de_utc_rejeita_nulos_e_datas_inexistentes(void)
+{
+  uint32_t e = 0U;
+  tempo_local_t t = data(2026U, 11U, 4U, 12U, 30U, 0U);
+
+  VERIFICA(tempo_de_utc(NULL, &e) == TEMPO_ERRO_PARAMETRO);
+  VERIFICA(tempo_de_utc(&t, NULL) == TEMPO_ERRO_PARAMETRO);
+  t = data(2026U, 2U, 29U, 0U, 0U, 0U);
+  VERIFICA(tempo_de_utc(&t, &e) == TEMPO_ERRO_DATA);
+  t = data(2026U, 13U, 1U, 0U, 0U, 0U);
+  VERIFICA(tempo_de_utc(&t, &e) == TEMPO_ERRO_DATA);
+  t = data(2026U, 4U, 31U, 0U, 0U, 0U);
+  VERIFICA(tempo_de_utc(&t, &e) == TEMPO_ERRO_DATA);
+  t = data(2026U, 4U, 30U, 24U, 0U, 0U);
+  VERIFICA(tempo_de_utc(&t, &e) == TEMPO_ERRO_DATA);
+  t = data(1969U, 12U, 31U, 23U, 59U, 59U);
+  VERIFICA(tempo_de_utc(&t, &e) == TEMPO_ERRO_DATA);
+  t = data(2106U, 2U, 7U, 6U, 28U, 16U); /* Um segundo além de 32 bits. */
+  VERIFICA(tempo_de_utc(&t, &e) == TEMPO_ERRO_DATA);
+}
+
+static void de_utc_converte_as_datas_conhecidas(void)
+{
+  uint32_t e = 0U;
+  tempo_local_t t;
+
+  t = data(1970U, 1U, 1U, 0U, 0U, 0U);
+  VERIFICA(tempo_de_utc(&t, &e) == TEMPO_OK && e == 0U);
+  t = data(2000U, 2U, 29U, 23U, 59U, 59U);
+  VERIFICA(tempo_de_utc(&t, &e) == TEMPO_OK && e == 951868799U);
+  t = data(2026U, 11U, 4U, 12U, 30U, 0U);
+  VERIFICA(tempo_de_utc(&t, &e) == TEMPO_OK && e == 1793795400U);
+  t = data(2100U, 3U, 1U, 0U, 0U, 0U);
+  VERIFICA(tempo_de_utc(&t, &e) == TEMPO_OK && e == 4107542400U);
+  t = data(2106U, 2U, 7U, 6U, 28U, 15U);
+  VERIFICA(tempo_de_utc(&t, &e) == TEMPO_OK && e == 4294967295U);
+}
+
+static void de_utc_e_para_local_sao_inversos(void)
+{
+  uint32_t e;
+  uint32_t volta = 0U;
+  tempo_local_t t;
+
+  for (e = 0U; e < 4294000000U; e += 3333331U)
+  {
+    VERIFICA(tempo_para_local(e, 0, &t) == TEMPO_OK);
+    VERIFICA(tempo_de_utc(&t, &volta) == TEMPO_OK && volta == e);
+  }
+}
+
 int main(void)
 {
   EXECUTA(rejeita_nulo_e_fuso_invalido);
@@ -124,5 +183,8 @@ int main(void)
   EXECUTA(fuso_com_meia_hora);
   EXECUTA(fuso_negativo_antes_de_1970_nao_quebra);
   EXECUTA(inicio_de_intervalo_so_nos_minutos_0_e_30_com_segundo_zero);
+  EXECUTA(de_utc_rejeita_nulos_e_datas_inexistentes);
+  EXECUTA(de_utc_converte_as_datas_conhecidas);
+  EXECUTA(de_utc_e_para_local_sao_inversos);
   return RESULTADO();
 }

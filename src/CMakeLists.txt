@@ -30,6 +30,11 @@ if(TARGET io)
     target_compile_definitions(ologgeriot_stm32 PRIVATE OLOG_TEM_SAIDA_FREQUENCIA=1)
   endif()
 endif()
+# Relógio de tempo real: só nos builds com RELOGIO (hoje, o OloggerMulti).
+if(TARGET rtc)
+  target_link_libraries(ologgeriot_stm32 PRIVATE rtc)
+  target_compile_definitions(ologgeriot_stm32 PRIVATE OLOG_TEM_RELOGIO=1)
+endif()
 # Gerência de energia: só nos builds com driver de Stop 2 (hoje, o OloggerMulti).
 if(TARGET energia)
   target_link_libraries(ologgeriot_stm32 PRIVATE energia)
