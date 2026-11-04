@@ -1,6 +1,6 @@
 # lib/ — bibliotecas por módulo
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.11
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.12
 
 Cada módulo fica em `lib/<modulo>/`, com `include/<modulo>.h` (interface pública) e `src/<modulo>.c` (implementação). Um módulo não acessa o estado de outro diretamente; usa a interface pública. Módulo novo entra em `lib/CMakeLists.txt`; módulo de funcionalidade opcional entra dentro de `if(<FUNCIONALIDADE> IN_LIST OLOG_FEATURES)`.
 
@@ -21,7 +21,7 @@ Cada módulo fica em `lib/<modulo>/`, com `include/<modulo>.h` (interface públi
 | `tipo_saida` | Tipo de cada saída (discreto ou frequência) e a exclusão com o sleep; `io_frequencia` guarda os tipos, liga o gerador ao TIM6 e aos pinos e dá o gancho do sleep (`tipo_saida` é lógica pura, testada no PC) | `SAIDA_FREQUENCIA` | FW-061, FW-023 |
 | `tempo` | Conversão do tempo UTC em data, hora e dia da semana locais com o fuso da instalação, e a conversão inversa em UTC (lógica pura, testada no PC) | `SAIDA_DISCRETA`, `RELOGIO` | FW-030 |
 | `rtc` | RTC do STM32L412 com o cristal de 32,768 kHz: hora em UTC, sem reiniciar o domínio de backup (sem teste em hardware) | `RELOGIO` | FW-030 |
-| `agenda` | Agenda semanal de 336 intervalos de 30 minutos por saída: validação da cadeia hexadecimal recebida do CCO e consulta do estado de um instante, mais a aplicação pelo horário atual em `agenda_aplicador` (lógica pura, testada no PC) | `SAIDA_DISCRETA` | FW-032 |
+| `agenda` | Agenda semanal de 336 intervalos de 30 minutos por saída: validação da cadeia hexadecimal recebida do CCO e consulta do estado de um instante, mais a aplicação pelo horário atual em `agenda_aplicador` (lógica pura, testada no PC) e a tarefa `agenda_tarefa`, que a liga ao RTC e às saídas (build com `SAIDA_DISCRETA` e `RELOGIO`; sem teste em hardware) | `SAIDA_DISCRETA` | FW-032 |
 
 Módulos previstos pelo backlog e ainda não iniciados: `fila`, `modbus`, `agenda`, `sessao`, `mqtt`, entre outros das fases 3 a 9.
 
@@ -33,6 +33,7 @@ Regras: `documentacao/padrao_codigo_c.md`.
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.12 | `agenda_tarefa` no módulo `agenda` |
 | 04/11/2026 | 0.2.11 | Adicionado o módulo `rtc`; `tempo` ganha a conversão inversa |
 | 04/11/2026 | 0.2.10 | `agenda_aplicador` no módulo `agenda` |
 | 04/11/2026 | 0.2.9 | Adicionado o módulo `tempo` |

@@ -52,6 +52,13 @@ if(RELOGIO IN_LIST OLOG_FEATURES)
   target_link_libraries(rtc PUBLIC ${OLOG_HAL_TARGET} tempo)
 endif()
 
+# Tarefa que aplica as agendas pelo horário do RTC: precisa das saídas digitais e do relógio.
+if((SAIDA_DISCRETA IN_LIST OLOG_FEATURES) AND (RELOGIO IN_LIST OLOG_FEATURES))
+  add_library(agenda_tarefa STATIC agenda/src/agenda_tarefa.c)
+  target_include_directories(agenda_tarefa PUBLIC agenda/include)
+  target_link_libraries(agenda_tarefa PUBLIC agenda io rtc tempo rtos freertos)
+endif()
+
 # Gerência de energia com Stop 2. Existe só para o STM32L4; o do STM32L0 (y7080) é a fazer.
 if(OLOG_MCU STREQUAL "STM32L412C8")
   add_library(energia STATIC energia/src/energia.c)

@@ -240,6 +240,20 @@ static void saidas_tem_agendas_independentes(void)
   VERIFICA(s.estados[3] == AGENDA_SEM_AGENDA);
 }
 
+static void reavaliar_pede_o_estado_de_todas_as_saidas_no_mesmo_intervalo(void)
+{
+  agenda_aplicador_t ap;
+  saida_t s;
+
+  VERIFICA(agenda_aplicador_reavalia(NULL) == AGENDA_ERRO_PARAMETRO);
+  (void)agenda_aplicador_limpa(&ap);
+  (void)avalia(&ap, true, QUARTA, 9U, 30U, &s);
+  VERIFICA(avalia(&ap, true, QUARTA, 9U, 40U, &s) == 0U);
+  VERIFICA(agenda_aplicador_reavalia(&ap) == AGENDA_OK);
+  VERIFICA(avalia(&ap, true, QUARTA, 9U, 41U, &s) == 4U);
+  VERIFICA(avalia(&ap, true, QUARTA, 9U, 42U, &s) == 0U);
+}
+
 int main(void)
 {
   EXECUTA(rejeita_nulos_e_canais_invalidos);
@@ -255,5 +269,6 @@ int main(void)
   EXECUTA(cadeia_invalida_mantem_a_agenda_e_nao_reavalia);
   EXECUTA(so_a_ultima_agenda_enviada_vale);
   EXECUTA(saidas_tem_agendas_independentes);
+  EXECUTA(reavaliar_pede_o_estado_de_todas_as_saidas_no_mesmo_intervalo);
   return RESULTADO();
 }

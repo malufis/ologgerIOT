@@ -29,7 +29,7 @@
  *
  * @date criacao 04/11/2026
  * @date modificacao 04/11/2026
- * @version 0.1.0
+ * @version 0.2.0
  */
 
 #ifndef AGENDA_APLICADOR_H
@@ -75,6 +75,16 @@ int32_t agenda_aplicador_limpa(agenda_aplicador_t *ap);
  */
 int32_t agenda_aplicador_carrega(agenda_aplicador_t *ap, uint8_t canal, const char *hex,
                                  size_t tamanho);
+
+/**
+ * @brief Marca todas as saídas para serem avaliadas de novo na próxima atualização.
+ *
+ * Serve quando algo muda o horário local sem mudar o relógio, como o fuso horário.
+ *
+ * @param ap Aplicador.
+ * @return AGENDA_OK, ou AGENDA_ERRO_PARAMETRO se @p ap for nulo.
+ */
+int32_t agenda_aplicador_reavalia(agenda_aplicador_t *ap);
 
 /**
  * @brief Avalia as agendas no horário atual e informa as saídas com um estado a pedir.

@@ -4,7 +4,7 @@
  *
  * @date criacao 04/11/2026
  * @date modificacao 04/11/2026
- * @version 0.1.0
+ * @version 0.2.0
  */
 
 #include "agenda_aplicador.h"
@@ -48,6 +48,21 @@ int32_t agenda_aplicador_carrega(agenda_aplicador_t *ap, uint8_t canal, const ch
     ap->reavalia[canal - 1U] = true;
   }
   return resultado;
+}
+
+int32_t agenda_aplicador_reavalia(agenda_aplicador_t *ap)
+{
+  uint8_t i;
+
+  if (ap == NULL)
+  {
+    return AGENDA_ERRO_PARAMETRO;
+  }
+  for (i = 0U; i < AGENDA_APLICADOR_SAIDAS; i++)
+  {
+    ap->reavalia[i] = true;
+  }
+  return AGENDA_OK;
 }
 
 uint8_t agenda_aplicador_atualiza(agenda_aplicador_t *ap, bool hora_valida, uint8_t dia_semana,

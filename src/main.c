@@ -39,6 +39,10 @@
   #include "rtc.h"
 #endif
 
+#ifdef OLOG_TEM_AGENDA
+  #include "agenda_tarefa.h"
+#endif
+
 #ifdef OLOG_TEM_ENERGIA
   #include "energia.h"
 #endif
@@ -76,7 +80,7 @@ static const energia_ganchos_t ganchos_energia = {
 
 #ifdef OLOG_TEM_SAIDA_DISCRETA
 /**
- * @brief Cria a tarefa das saídas digitais e configura o timer das saídas em frequência.
+ * @brief Cria as tarefas das saídas digitais (e da agenda) e configura o timer das saídas em frequência.
  *
  * @return 0 em sucesso, código negativo se alguma falhar.
  */
@@ -86,6 +90,12 @@ static int32_t inicia_saidas(void)
   {
     return -1;
   }
+#ifdef OLOG_TEM_AGENDA
+  if (agenda_tarefa_inicia() != AGENDA_TAREFA_OK)
+  {
+    return -1;
+  }
+#endif
 #ifdef OLOG_TEM_SAIDA_FREQUENCIA
   if (io_frequencia_inicia() != IO_FREQUENCIA_OK)
   {
