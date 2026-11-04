@@ -4,7 +4,7 @@
  *
  * @date criacao 03/11/2026
  * @date modificacao 04/11/2026
- * @version 0.3.0
+ * @version 0.4.0
  */
 
 #include "io_saidas.h"
@@ -161,7 +161,7 @@ int32_t io_saidas_sensor_falha(uint8_t canal, bool falha)
   return IO_SAIDAS_OK;
 }
 
-int32_t io_saidas_define_regra_local(uint8_t canal, bool definida)
+int32_t io_saidas_define_regra_sensor(uint8_t canal, bool definida)
 {
   if (!canal_valido(canal))
   {
@@ -169,8 +169,22 @@ int32_t io_saidas_define_regra_local(uint8_t canal, bool definida)
   }
 
   taskENTER_CRITICAL();
-  controle_saida_define_regra_local(&saidas[canal - 1U], definida, agora_ms());
+  controle_saida_define_regra_sensor(&saidas[canal - 1U], definida, agora_ms());
   aplica_no_pino((uint8_t)(canal - 1U));
+  taskEXIT_CRITICAL();
+  return IO_SAIDAS_OK;
+}
+
+int32_t io_saidas_define_conectividade(bool online)
+{
+  uint8_t i;
+
+  taskENTER_CRITICAL();
+  for (i = 0U; i < IO_SAIDAS_QTD; i++)
+  {
+    controle_saida_define_conectividade(&saidas[i], online, agora_ms());
+    aplica_no_pino(i);
+  }
   taskEXIT_CRITICAL();
   return IO_SAIDAS_OK;
 }

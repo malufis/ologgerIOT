@@ -16,7 +16,7 @@
  *
  * @date criacao 03/11/2026
  * @date modificacao 04/11/2026
- * @version 0.3.0
+ * @version 0.4.0
  */
 
 #ifndef IO_SAIDAS_H
@@ -78,11 +78,11 @@ int32_t io_saidas_comando_manual(uint8_t canal, bool liga, bool *mudou_de_modo);
 int32_t io_saidas_modo_automatico(uint8_t canal);
 
 /**
- * @brief Registra o pedido de uma fonte automática: local (regra cadastrada) ou remota (CCO).
+ * @brief Registra o pedido de uma fonte automática: sensor, agenda ou CCO.
  *
  * Em modo automático é aplicado na hora; em manual fica guardado para a volta ao automático. Com
- * regra local definida (io_saidas_define_regra_local), vale só o pedido local e o remoto fica
- * guardado, sem efeito. Sem regra local, vale o pedido remoto do CCO.
+ * regra do sensor definida (io_saidas_define_regra_sensor), vale só o pedido do sensor. Sem ela,
+ * vale o pedido do CCO com o device online e o da agenda com o device offline.
  *
  * @param canal Saída de 1 a IO_SAIDAS_QTD.
  * @param fonte Fonte do pedido.
@@ -103,16 +103,27 @@ int32_t io_saidas_pedido(uint8_t canal, controle_fonte_t fonte, controle_pedido_
 int32_t io_saidas_sensor_falha(uint8_t canal, bool falha);
 
 /**
- * @brief Informa se a saída tem uma regra local cadastrada (entrada analógica para a saída).
+ * @brief Informa se a saída tem uma regra do sensor cadastrada (entrada analógica para a saída).
  *
- * Com regra local, a saída segue só o pedido dela (fonte local) e ignora os comandos remotos
- * do CCO. Sem regra local, vale o comando automático remoto.
+ * Com regra do sensor, a saída segue só o pedido dela e ignora a agenda e o CCO. Sem regra do
+ * sensor, vale a agenda (offline) ou o comando do CCO (online).
  *
  * @param canal Saída de 1 a IO_SAIDAS_QTD.
- * @param definida true se há regra local cadastrada para a saída.
+ * @param definida true se há regra do sensor cadastrada para a saída.
  * @return IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO.
  */
-int32_t io_saidas_define_regra_local(uint8_t canal, bool definida);
+int32_t io_saidas_define_regra_sensor(uint8_t canal, bool definida);
+
+/**
+ * @brief Informa se o device tem conectividade com o CCO, para todas as saídas.
+ *
+ * Online, vale o comando automático do CCO; offline, vale a agenda local. Ao ficar online, as
+ * saídas mantêm o último estado e esperam um novo comando do CCO.
+ *
+ * @param online true se há conectividade.
+ * @return IO_SAIDAS_OK.
+ */
+int32_t io_saidas_define_conectividade(bool online);
 
 /**
  * @brief Define o tempo de estabilidade do sensor depois de uma falha.

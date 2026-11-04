@@ -8,11 +8,14 @@
  * - **Manual:** um comando manual direto prevalece sobre qualquer regra automática. A saída
  *   passa a operar em modo manual e fica assim até receber o comando de modo automático. Em
  *   manual, os pedidos automáticos são guardados, mas não são aplicados.
- * - **Automático local:** quando a saída tem uma **regra local cadastrada** (entrada analógica,
- *   máximo, mínimo e, para a saída em frequência, a frequência), a saída segue só o pedido
- *   dessa regra, e os comandos remotos são ignorados.
- * - **Automático remoto:** quando **não há regra local definida**, a saída segue os comandos
- *   automáticos do CCO (regra da plataforma ou agenda offline, que tem origem no CCO).
+ * - **Comandos automáticos locais:** a **regra do sensor**, cadastrada no device (entrada
+ *   analógica, máximo, mínimo e, para a saída em frequência, a frequência), e a **agenda**, que
+ *   funciona sem conectividade. Quando a saída tem regra do sensor, vale só o pedido dela.
+ *   Sem regra do sensor, a agenda vale **só com o device offline**.
+ * - **Comando automático remoto:** o do **CCO**. Vale **só com o device online** e sem regra do
+ *   sensor: com conectividade, em automático, o comando que vale é o do CCO. Ao ficar online, a
+ *   saída mantém o último estado e espera um novo comando do CCO; o pedido antigo é descartado.
+ *   Ao ficar offline, a saída aplica na hora o pedido da agenda.
  * - **Falha do sensor:** em automático, a saída desliga. Depois que a falha termina, a saída só
  *   volta a operar pelo sensor quando ele ficar **estável por 5 minutos** (configurável); até lá
  *   continua desligada. Em manual, o comando manual se mantém.
@@ -26,7 +29,7 @@
  *
  * @date criacao 04/11/2026
  * @date modificacao 04/11/2026
- * @version 0.2.0
+ * @version 0.3.0
  */
 
 #ifndef CONTROLE_SAIDA_H
@@ -63,12 +66,13 @@ typedef enum
 /** Fontes de pedidos automáticos. */
 typedef enum
 {
-  CONTROLE_FONTE_LOCAL = 0, /**< Regra local cadastrada: entrada analógica para a saída digital. */
-  CONTROLE_FONTE_REMOTA = 1 /**< Comando automático do CCO: regra da plataforma ou agenda offline. */
+  CONTROLE_FONTE_SENSOR = 0, /**< Local: regra cadastrada, entrada analógica para a saída digital. */
+  CONTROLE_FONTE_AGENDA = 1, /**< Local: agenda, que funciona sem conectividade e só vale offline. */
+  CONTROLE_FONTE_CCO = 2     /**< Remota: comando automático do CCO, que só vale online. */
 } controle_fonte_t;
 
 /** Quantidade de fontes automáticas. */
-#define CONTROLE_FONTES 2U
+#define CONTROLE_FONTES 3U
 
 /** Controle de uma saída. */
 typedef struct
@@ -76,7 +80,8 @@ typedef struct
   saida_t saida;                              /**< Estado da saída, com o retardo. */
   controle_modo_t modo;                       /**< Quem manda na saída. */
   controle_pedido_t pedido[CONTROLE_FONTES];  /**< Último pedido de cada fonte automática. */
-  bool regra_local;                           /**< true se a saída tem regra local cadastrada. */
+  bool regra_sensor;                          /**< true se a saída tem regra do sensor cadastrada. */
+  bool online;                                /**< true se o device tem conectividade com o CCO. */
   bool sensor_falha;                          /**< true se o sensor que controla a saída falhou. */
   bool recuperando;                           /**< true na espera de estabilidade depois da falha. */
   uint32_t fim_falha_ms;                      /**< Instante em que a falha terminou. */
@@ -84,8 +89,8 @@ typedef struct
 } controle_saida_t;
 
 /**
- * @brief Inicia o controle: saída desligada, em modo automático, sem regra local, sem pedidos e
- *        sem falha, com a estabilidade padrão de 5 minutos.
+ * @brief Inicia o controle: saída desligada, em modo automático, sem regra do sensor, offline,
+ *        sem pedidos e sem falha, com a estabilidade padrão de 5 minutos.
  *
  * @param controle Controle a iniciar.
  * @return CONTROLE_SAIDA_OK ou CONTROLE_SAIDA_ERRO_PARAMETRO.
@@ -109,16 +114,29 @@ void controle_saida_define_atraso(controle_saida_t *controle, uint32_t atraso_ms
 void controle_saida_define_estabilidade(controle_saida_t *controle, uint32_t estabilidade_ms);
 
 /**
- * @brief Informa se a saída tem uma regra local cadastrada.
+ * @brief Informa se a saída tem uma regra do sensor cadastrada.
  *
- * Com regra local, a saída segue só o pedido dela e ignora os comandos remotos. Sem regra local,
- * vale o comando automático remoto do CCO.
+ * Com regra do sensor, a saída segue só o pedido dela e ignora a agenda e o CCO. Sem regra do
+ * sensor, vale a agenda (offline) ou o CCO (online).
  *
  * @param controle Controle iniciado com controle_saida_inicia().
- * @param definida true se há regra local cadastrada para a saída.
+ * @param definida true se há regra do sensor cadastrada para a saída.
  * @param agora_ms Instante atual, em milissegundos.
  */
-void controle_saida_define_regra_local(controle_saida_t *controle, bool definida, uint32_t agora_ms);
+void controle_saida_define_regra_sensor(controle_saida_t *controle, bool definida, uint32_t agora_ms);
+
+/**
+ * @brief Informa se o device tem conectividade com o CCO.
+ *
+ * Ao ficar online, o pedido antigo do CCO é descartado: a saída mantém o último estado e espera um
+ * novo comando. Chamar antes de registrar os comandos que chegam depois da conexão. Ao ficar
+ * offline, a saída aplica na hora o pedido da agenda.
+ *
+ * @param controle Controle iniciado com controle_saida_inicia().
+ * @param online true se há conectividade.
+ * @param agora_ms Instante atual, em milissegundos.
+ */
+void controle_saida_define_conectividade(controle_saida_t *controle, bool online, uint32_t agora_ms);
 
 /**
  * @brief Comando manual direto: passa a saída ao modo manual e liga ou desliga.
@@ -148,8 +166,9 @@ void controle_saida_modo_automatico(controle_saida_t *controle, uint32_t agora_m
  * @brief Registra o pedido de uma fonte automática e, em modo automático, o aplica.
  *
  * Em modo manual o pedido é só guardado, para valer na volta ao automático. O pedido continua
- * valendo até a fonte mudá-lo; a fonte pede "nenhum" quando não tem opinião. Com regra local
- * definida, o pedido remoto fica guardado e não é aplicado.
+ * valendo até a fonte mudá-lo; a fonte pede "nenhum" quando não tem opinião. Com regra do sensor
+ * definida, os pedidos da agenda e do CCO ficam guardados e não são aplicados; sem ela, vale o da
+ * agenda offline ou o do CCO online, e o da outra fonte fica guardado.
  *
  * @param controle Controle iniciado com controle_saida_inicia().
  * @param fonte Fonte do pedido.

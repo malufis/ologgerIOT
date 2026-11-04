@@ -4,7 +4,7 @@
  *
  * @date criacao 04/11/2026
  * @date modificacao 04/11/2026
- * @version 0.2.0
+ * @version 0.3.0
  */
 
 #include "controle_saida.h"
@@ -15,7 +15,8 @@
  * @brief Pedido vencedor, na ordem de prioridade.
  *
  * O sensor indisponível (em falha ou esperando a estabilidade) vence tudo e pede para desligar.
- * Com regra local definida, vale só o pedido dela. Sem regra local, vale o pedido remoto do CCO.
+ * Com regra do sensor definida, vale só o pedido dela. Sem regra do sensor, vale o pedido do CCO
+ * com o device online e o da agenda com o device offline.
  *
  * @param controle Controle iniciado com controle_saida_inicia().
  * @return O pedido a aplicar, ou CONTROLE_PEDIDO_NENHUM se ninguém pede nada.
@@ -26,11 +27,12 @@ static controle_pedido_t pedido_vencedor(const controle_saida_t *controle)
   {
     return CONTROLE_PEDIDO_DESLIGA;
   }
-  if (controle->regra_local)
+  if (controle->regra_sensor)
   {
-    return controle->pedido[CONTROLE_FONTE_LOCAL];
+    return controle->pedido[CONTROLE_FONTE_SENSOR];
   }
-  return controle->pedido[CONTROLE_FONTE_REMOTA];
+  return controle->online ? controle->pedido[CONTROLE_FONTE_CCO]
+                          : controle->pedido[CONTROLE_FONTE_AGENDA];
 }
 
 /**
@@ -74,7 +76,8 @@ int32_t controle_saida_inicia(controle_saida_t *controle)
 
   (void)saida_inicia(&controle->saida);
   controle->modo = CONTROLE_MODO_AUTOMATICO;
-  controle->regra_local = false;
+  controle->regra_sensor = false;
+  controle->online = false;
   controle->sensor_falha = false;
   controle->recuperando = false;
   controle->fim_falha_ms = 0U;
@@ -96,9 +99,20 @@ void controle_saida_define_estabilidade(controle_saida_t *controle, uint32_t est
   controle->estabilidade_ms = estabilidade_ms;
 }
 
-void controle_saida_define_regra_local(controle_saida_t *controle, bool definida, uint32_t agora_ms)
+void controle_saida_define_regra_sensor(controle_saida_t *controle, bool definida, uint32_t agora_ms)
 {
-  controle->regra_local = definida;
+  controle->regra_sensor = definida;
+  reavalia(controle, agora_ms);
+}
+
+void controle_saida_define_conectividade(controle_saida_t *controle, bool online, uint32_t agora_ms)
+{
+  if (online && !controle->online)
+  {
+    /* Reconexão: mantém o último estado e espera um novo comando do CCO. */
+    controle->pedido[CONTROLE_FONTE_CCO] = CONTROLE_PEDIDO_NENHUM;
+  }
+  controle->online = online;
   reavalia(controle, agora_ms);
 }
 
