@@ -48,6 +48,10 @@
   #include "regras_tarefa.h"
 #endif
 
+#ifdef OLOG_TEM_MODBUS
+  #include "modbus_tarefa.h"
+#endif
+
 #ifdef OLOG_TEM_ENERGIA
   #include "energia.h"
 #endif
@@ -112,7 +116,7 @@ static int32_t inicia_saidas(void)
 #endif
 
 /**
- * @brief Inicia a gerência de energia e, por último, a configuração e as regras.
+ * @brief Inicia a gerência de energia e, por último, a configuração, as regras e o escravo Modbus.
  *
  * A configuração lê o registro gravado e o aplica a tudo o que foi iniciado antes dela.
  *
@@ -129,6 +133,13 @@ static int32_t inicia_energia_e_config(void)
 
 #ifdef OLOG_TEM_CONFIG
   if ((config_tarefa_inicia() != CONFIG_TAREFA_OK) || (regras_tarefa_inicia() != REGRAS_TAREFA_OK))
+  {
+    return -1;
+  }
+#endif
+
+#ifdef OLOG_TEM_MODBUS
+  if (modbus_tarefa_inicia() != MODBUS_TAREFA_OK)
   {
     return -1;
   }

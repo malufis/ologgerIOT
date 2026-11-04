@@ -30,6 +30,8 @@ static tipos_saida_t tipos;
 static gerador_freq_t geradores[TIPO_SAIDA_QTD];
 /** Frequências de 4 mA e de 20 mA de cada saída. */
 static freq_saida_t conversoes[TIPO_SAIDA_QTD];
+/** Frequência de cada saída, em Hz, para consulta (registradores de entrada do Modbus). */
+static float hz_atual[TIPO_SAIDA_QTD];
 /** Último nível escrito no pino de cada saída, para só escrever nas mudanças. */
 static bool niveis[TIPO_SAIDA_QTD];
 
@@ -93,6 +95,7 @@ int32_t io_frequencia_define_tipo(uint8_t canal, uint16_t tipo, bool sleep_ativo
   {
     (void)gerador_freq_limpa(&geradores[canal - 1U]);
     niveis[canal - 1U] = false;
+    hz_atual[canal - 1U] = 0.0F;
     atualiza_timer();
   }
   taskEXIT_CRITICAL();
@@ -141,6 +144,7 @@ int32_t io_frequencia_define_hz(uint8_t canal, float hz)
     }
     else
     {
+      hz_atual[canal - 1U] = hz;
       atualiza_timer();
     }
   }
@@ -190,6 +194,19 @@ int32_t io_frequencia_atualiza(uint8_t canal, float ma, bool falha)
     return IO_FREQUENCIA_ERRO_SEM_CADASTRO;
   }
   return io_frequencia_define_hz(canal, hz);
+}
+
+float io_frequencia_hz_atual(uint8_t canal)
+{
+  float hz = 0.0F;
+
+  if ((canal >= 1U) && (canal <= TIPO_SAIDA_QTD))
+  {
+    taskENTER_CRITICAL();
+    hz = hz_atual[canal - 1U];
+    taskEXIT_CRITICAL();
+  }
+  return hz;
 }
 
 bool io_frequencia_sleep_permitido(void)

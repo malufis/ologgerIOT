@@ -18,7 +18,9 @@
  * vai a 0 Hz; a volta ao sensor só depois de 5 minutos estáveis (controle_saida.h). Sem leitura
  * ainda (primeiro segundo depois da partida), a passada é pulada sem declarar falha.
  *
- * O valor de engenharia usa o zero, o span e o offset da entrada (sensor.h).
+ * O valor de engenharia usa o zero, o span e o offset da entrada (sensor.h). A tarefa lê as quatro
+ * entradas a cada passada, associadas a uma saída ou não, e guarda a última leitura de cada uma
+ * (regras_tarefa_leitura()) para os registradores de entrada do Modbus.
  *
  * Sem teste em hardware.
  *
@@ -30,6 +32,7 @@
 #ifndef REGRAS_TAREFA_H
 #define REGRAS_TAREFA_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 /** Período da tarefa, em milissegundos. */
@@ -46,6 +49,24 @@
 #define REGRAS_TAREFA_OK             0
 /** Código de retorno: a tarefa não foi criada. */
 #define REGRAS_TAREFA_ERRO_TAREFA    (-1)
+
+/** Última leitura de uma entrada analógica. */
+typedef struct
+{
+  float ma;      /**< Corrente em mA. */
+  float valor;   /**< Valor de engenharia (zero, span e offset da entrada). */
+  bool falha;    /**< true se a corrente indica falha do sensor. */
+  bool valida;   /**< true se já houve leitura desde a partida. */
+} regras_leitura_t;
+
+/**
+ * @brief Última leitura de uma entrada analógica, para o Modbus.
+ *
+ * @param entrada Entrada de 1 a 4.
+ * @param leitura Recebe a leitura.
+ * @return REGRAS_TAREFA_OK, ou REGRAS_TAREFA_ERRO_TAREFA se a entrada for inválida (com `valida` falso).
+ */
+int32_t regras_tarefa_leitura(uint8_t entrada, regras_leitura_t *leitura);
 
 /**
  * @brief Cria a tarefa das regras, com memória estática.

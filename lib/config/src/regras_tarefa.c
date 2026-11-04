@@ -34,6 +34,8 @@ typedef struct
   bool ativa;
 } cadastro_t;
 static cadastro_t cadastrados[CONFIG_QTD_SAIDAS];
+/** Última leitura de cada entrada analógica. */
+static regras_leitura_t leituras[CONFIG_QTD_ENTRADAS_ANALOGICAS];
 /** true se a saída estava em frequência com sensor na passada anterior. */
 static bool em_frequencia[CONFIG_QTD_SAIDAS];
 
@@ -115,33 +117,53 @@ static void aplica_regra(const config_t *cfg, uint8_t i, bool falha, float valor
 static void trata_saida(const config_t *cfg, uint8_t i)
 {
   uint8_t entrada = (uint8_t)config_inteiro(cfg, CFG_SAI_ENTRADA, i);
-  uint8_t e;
-  float ma = 0.0F;
-  float valor = 0.0F;
-  bool falha;
+  regras_leitura_t l;
 
   if ((entrada == 0U) || (entrada > CONFIG_QTD_ENTRADAS_ANALOGICAS))
   {
     solta_saida(i);
     return;
   }
-  e = (uint8_t)(entrada - 1U);
-  if (aquisicao_ma(e, &ma) != AQUISICAO_OK)
+  (void)regras_tarefa_leitura(entrada, &l);
+  if (!l.valida)
   {
     return; /* Ainda sem leitura: não declara falha. */
   }
-  falha = corrente_em_falha(ma);
-  (void)sensor_ma_para_valor(ma, config_float(cfg, CFG_ENT_ZERO, e), config_float(cfg, CFG_ENT_SPAN, e),
-                             config_float(cfg, CFG_ENT_OFFSET, e), &valor);
-
   if (config_inteiro(cfg, CFG_SAI_TIPO, i) == 1)
   {
     em_frequencia[i] = true;
-    (void)io_frequencia_atualiza((uint8_t)(i + 1U), ma, falha);
+    (void)io_frequencia_atualiza((uint8_t)(i + 1U), l.ma, l.falha);
   }
   else
   {
-    aplica_regra(cfg, i, falha, valor);
+    aplica_regra(cfg, i, l.falha, l.valor);
+  }
+}
+
+/**
+ * @brief Lê as quatro entradas analógicas e guarda a última leitura de cada uma.
+ *
+ * @param cfg Configuração (zero, span e offset).
+ */
+static void le_entradas(const config_t *cfg)
+{
+  uint8_t e;
+  float ma = 0.0F;
+  float valor = 0.0F;
+
+  for (e = 0U; e < CONFIG_QTD_ENTRADAS_ANALOGICAS; e++)
+  {
+    if (aquisicao_ma(e, &ma) == AQUISICAO_OK)
+    {
+      (void)sensor_ma_para_valor(ma, config_float(cfg, CFG_ENT_ZERO, e), config_float(cfg, CFG_ENT_SPAN, e),
+                                 config_float(cfg, CFG_ENT_OFFSET, e), &valor);
+      taskENTER_CRITICAL();
+      leituras[e].ma = ma;
+      leituras[e].valor = valor;
+      leituras[e].falha = corrente_em_falha(ma);
+      leituras[e].valida = true;
+      taskEXIT_CRITICAL();
+    }
   }
 }
 
@@ -160,12 +182,25 @@ static void tarefa_regras(void *argumento)
   for (;;)
   {
     config_tarefa_copia(&cfg);
+    le_entradas(&cfg);
     for (i = 0U; i < CONFIG_QTD_SAIDAS; i++)
     {
       trata_saida(&cfg, i);
     }
     vTaskDelayUntil(&ultimo, pdMS_TO_TICKS(REGRAS_TAREFA_PERIODO_MS));
   }
+}
+
+int32_t regras_tarefa_leitura(uint8_t entrada, regras_leitura_t *leitura)
+{
+  if ((leitura == NULL) || (entrada < 1U) || (entrada > CONFIG_QTD_ENTRADAS_ANALOGICAS))
+  {
+    return REGRAS_TAREFA_ERRO_TAREFA;
+  }
+  taskENTER_CRITICAL();
+  *leitura = leituras[entrada - 1U];
+  taskEXIT_CRITICAL();
+  return REGRAS_TAREFA_OK;
 }
 
 int32_t regras_tarefa_inicia(void)

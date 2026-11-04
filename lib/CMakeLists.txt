@@ -78,6 +78,15 @@ if((SAIDA_DISCRETA IN_LIST OLOG_FEATURES) AND (SAIDA_FREQUENCIA IN_LIST OLOG_FEA
     aquisicao sensor rtos freertos)
 endif()
 
+# Escravo Modbus RTU: o quadro e as funções são lógica pura (testada no PC em tests/modbus); o driver da
+# RS-485, o mapa e a tarefa só no STM32L4 com a configuração persistente (hoje, o OloggerMulti).
+add_library(modbus STATIC modbus/src/modbus_rtu.c)
+target_include_directories(modbus PUBLIC modbus/include)
+if(OLOG_MCU STREQUAL "STM32L412C8" AND (RS485_MODBUS IN_LIST OLOG_FEATURES) AND TARGET config_tarefa)
+  add_library(modbus_tarefa STATIC modbus/src/rs485.c modbus/src/modbus_mapa.c modbus/src/modbus_tarefa.c)
+  target_link_libraries(modbus_tarefa PUBLIC modbus config_tarefa io rtc tempo ${OLOG_HAL_TARGET} rtos freertos)
+endif()
+
 # Gerência de energia com Stop 2. Existe só para o STM32L4; o do STM32L0 (y7080) é a fazer.
 if(OLOG_MCU STREQUAL "STM32L412C8")
   add_library(energia STATIC energia/src/energia.c)

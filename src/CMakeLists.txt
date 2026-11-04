@@ -45,6 +45,11 @@ if(TARGET config_tarefa)
   target_link_libraries(ologgeriot_stm32 PRIVATE config_tarefa)
   target_compile_definitions(ologgeriot_stm32 PRIVATE OLOG_TEM_CONFIG=1)
 endif()
+# Escravo Modbus na RS-485: só nos builds que o têm (hoje, o OloggerMulti).
+if(TARGET modbus_tarefa)
+  target_link_libraries(ologgeriot_stm32 PRIVATE modbus_tarefa)
+  target_compile_definitions(ologgeriot_stm32 PRIVATE OLOG_TEM_MODBUS=1)
+endif()
 # Gerência de energia: só nos builds com driver de Stop 2 (hoje, o OloggerMulti).
 if(TARGET energia)
   target_link_libraries(ologgeriot_stm32 PRIVATE energia)

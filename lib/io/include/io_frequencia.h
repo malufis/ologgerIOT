@@ -115,6 +115,14 @@ int32_t io_frequencia_cadastra(uint8_t canal, float hz_4ma, float hz_20ma);
 int32_t io_frequencia_atualiza(uint8_t canal, float ma, bool falha);
 
 /**
+ * @brief Frequência que a saída está gerando agora.
+ *
+ * @param canal Saída de 1 a TIPO_SAIDA_QTD.
+ * @return Frequência em Hz; 0 se a saída não está em modo frequência ou está parada.
+ */
+float io_frequencia_hz_atual(uint8_t canal);
+
+/**
  * @brief Gancho `sleep_permitido` de energia.h.
  *
  * @return false se alguma saída está em frequência (o sleep não pode ligar).

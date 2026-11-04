@@ -71,6 +71,14 @@ target_include_directories(test_config PRIVATE ../lib/config/include .)
 target_link_libraries(test_config PRIVATE m)
 add_test(NAME config COMMAND test_config)
 
+# Módulo modbus: escravo Modbus RTU (quadro, CRC, funções e exceções).
+add_executable(test_modbus_rtu
+  modbus/test_modbus_rtu.c
+  ../lib/modbus/src/modbus_rtu.c
+)
+target_include_directories(test_modbus_rtu PRIVATE ../lib/modbus/include .)
+add_test(NAME modbus_rtu COMMAND test_modbus_rtu)
+
 # Módulo armazem: configuração persistente em dois espaços de flash, com flash simulada.
 add_executable(test_armazem
   armazem/test_armazem.c
