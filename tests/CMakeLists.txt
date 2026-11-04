@@ -51,6 +51,14 @@ add_executable(test_saida
 target_include_directories(test_saida PRIVATE ../lib/io/include .)
 add_test(NAME saida COMMAND test_saida)
 
+# Módulo tempo: conversão do tempo UTC em data e hora locais com o fuso da instalação.
+add_executable(test_tempo
+  tempo/test_tempo.c
+  ../lib/tempo/src/tempo.c
+)
+target_include_directories(test_tempo PRIVATE ../lib/tempo/include .)
+add_test(NAME tempo COMMAND test_tempo)
+
 # Módulo agenda: agenda semanal de 336 intervalos de 30 minutos de uma saída.
 add_executable(test_agenda
   agenda/test_agenda.c

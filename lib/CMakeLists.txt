@@ -38,6 +38,13 @@ if(SAIDA_DISCRETA IN_LIST OLOG_FEATURES)
   target_include_directories(agenda PUBLIC agenda/include)
 endif()
 
+# Conversão do tempo UTC em data e hora locais (lógica pura, testada no PC em tests/tempo). Serve à
+# agenda e ao RTC.
+if(SAIDA_DISCRETA IN_LIST OLOG_FEATURES)
+  add_library(tempo STATIC tempo/src/tempo.c)
+  target_include_directories(tempo PUBLIC tempo/include)
+endif()
+
 # Gerência de energia com Stop 2. Existe só para o STM32L4; o do STM32L0 (y7080) é a fazer.
 if(OLOG_MCU STREQUAL "STM32L412C8")
   add_library(energia STATIC energia/src/energia.c)
