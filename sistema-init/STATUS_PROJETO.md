@@ -1,6 +1,6 @@
 # Status do Projeto — oLoggerIOT
 
-> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.163
+> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.164
 > **Repositório:** https://github.com/malufis/ologgerIOT
 
 ## Fase atual
@@ -47,7 +47,7 @@
 | P-027 | Amostragem de 10 a 1000 amostras/s com média simples por segundo; envio por média móvel de janela de um envio; falha por dente de serra com inversão acima de 2% sem inversor e 10% com inversor, em 5 s; falha vai para 0 Hz; primeira leitura após zero sem comparação; escala logarítmica não é requisito | B4 | CONCLUÍDO em 01/11/2026 |
 | P-028 | HW-007: soldar a ferrite L2 na placa de bancada, conferir o VDDA (3,25 V) e refazer a calibração em 4, 8, 12, 16 e 20 mA | Fase 1 | PENDENTE — bloqueia o FW-012 |
 | P-029 | HW-008: entrada digital com D1 retirada e limite de 12 V na bancada; resistor de 4K7 em 0402 passa a 0603 no próximo layout, e 24 V ainda pede potência maior; avaliar supressor de ~30 V para campo industrial | Fase 1B | PARCIAL — 12 V na bancada; decidir o layout |
-| P-030 | Confirmar bateria no pino VBAT: os registradores de backup do totalizador só sobrevivem à falta de energia com ela | Fase 1B | PENDENTE |
+| P-030 | Bateria no pino VBAT e cristais do relógio | Fase 1B | RESOLVIDO em 04/11/2026 — a bateria é opcional, conforme a implantação; o OloggerMulti tem os dois cristais (LSE para o RTC) e o y7080 não tem cristal. Sem bateria, o totalizador e a hora se perdem na falta de energia (hora restaurada pelo NTP, totalizador recomeça); com bateria, sobrevivem |
 | P-031 | Confirmar que os leitores geram pulsos mais largos que 20 ms (com folga) e a taxa de 5 a 10 pulsos por segundo | Fase 1B | PENDENTE — confirmar com os leitores |
 | P-032 | Mapa Modbus: definir os modos da entrada digital (discreto, contador de pulsos e frequência) e o endereço do totalizador; hoje o mapa diz "discreto ou pulsado" | Fase 1B | PENDENTE |
 | P-033 | Frequência em Hz (FW-054): limite do pino no datasheet e do optoacoplador TLP291, faixa de 0 a 20 kHz, janela de medição e filtro próprio do modo | Fase 1B | PENDENTE — ajuste fica para depois |
@@ -361,6 +361,7 @@ A entrevista está encerrada e o firmware está em desenvolvimento. Os dois buil
 ## Histórico de atualizações
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.164 | P-030 resolvida: bateria VBAT opcional; cristais só no OloggerMulti |
 | 04/11/2026 | 0.3.163 | FW-032: aplicador da agenda pelo horário atual pronto |
 | 04/11/2026 | 0.3.162 | FW-030 parcial: módulo `tempo` pronto |
 | 04/11/2026 | 0.3.161 | Saída em frequência: o sensor manda; teste na bancada |

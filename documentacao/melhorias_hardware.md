@@ -1,6 +1,6 @@
 # Melhorias de hardware — próxima revisão das placas
 
-> **Criado em:** 03/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.3
+> **Criado em:** 03/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.4
 
 Lista das mudanças de hardware que apareceram durante o desenvolvimento do firmware e que o responsável técnico quer tratar na **próxima revisão das placas**. Cada item aponta o achado de origem em `analise_hardware_ologgeriot.md`. Este documento só registra; a decisão de entrar no layout e a priorização são do responsável técnico. As placas de bancada atuais seguem com os contornos descritos em cada item.
 
@@ -13,7 +13,7 @@ Lista das mudanças de hardware que apareceram durante o desenvolvimento do firm
 | 3 | Resistor de entrada digital (R3 a R6, 4K7) em 0603, com potência maior que 100 mW se a entrada for de 24 V | HW-008 | O 4K7 em 0402 dissipa ~110 mW em 24 V. Em 12 V (~25 mW) cabe | O responsável técnico decidiu 0603 no próximo layout. Para 24 V ainda pede 0805 ou 1206 de 0,25 W, ou subir o valor para ~10k. Bancada limitada a 12 V |
 | 4 | Supressor de surto e ESD nas entradas digitais com tensão de operação acima de 24 V (família SMAJ ou SM5S, de ~30 V), no nó `IN-Dx` | HW-008 | A D1 original (ESDA6V1SC5, ruptura de 6,1 V) conflitava com a fonte de 12 a 24 V e foi retirada na bancada. Sem ela, a entrada fica sem proteção de surto | A decidir, se a placa for para campo industrial |
 | 5 | Proteção contra inversão de polaridade nas entradas digitais (por exemplo, diodo em série com o LED) | HW-008 | O LED do optoacoplador suporta cerca de 5 V reversos e não tem diodo em série | A decidir |
-| 6 | Confirmar a bateria no pino VBAT | Pendência P-030 | Os registradores de backup do totalizador de pulsos só sobrevivem à falta de energia com bateria no VBAT | A confirmar na placa; pode virar mudança de layout |
+| 6 | Bateria no pino VBAT | Pendência P-030 (resolvida) | Os registradores de backup do totalizador e o RTC só sobrevivem à falta de energia com bateria no VBAT | A bateria é **opcional** (04/11/2026): depende de onde o device for implantado; o layout deve prever o suporte da bateria, sem exigi-la |
 | 7 | Avaliar remapear a saída 1 (PB12) para um pino com canal de timer, se a saída em frequência precisar de PWM de hardware nas quatro saídas | Pendência do FW-023 | Só PB13, PB14 e PB15 têm canal de timer; PB12 só tem `TIM1_BKIN`. Pela decisão atual a frequência será gerada por temporizador com tratador, o que dispensa a mudança | Opcional, a decidir |
 | 8 | Avaliar o STM32L412**CB** (128 KB de flash) no lugar do L412**C8** (64 KB), mantendo o encapsulamento UFQFPN48 | ADR-0003, P-038 | O C8 tem 64 KB e a imagem já usa 25,8 KB. A base do CubeMX lista os dois no mesmo encapsulamento; conferir no datasheet e na lista de materiais | **Não adotado** em 04/11/2026: o ADR-0003 escolheu imagem na flash externa com bootloader. Fica como contingência, se o bootloader e a aplicação não couberem em 64 KB |
 
@@ -33,6 +33,7 @@ Lista das mudanças de hardware que apareceram durante o desenvolvimento do firm
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.4 | Item 6: bateria no VBAT opcional |
 | 04/11/2026 | 0.1.3 | Item 8 (L412CB): não adotado pelo ADR-0003; contingência |
 | 04/11/2026 | 0.1.2 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |
 | 04/11/2026 | 0.1.1 | Adicionado o item 10: avaliar o STM32L412CB de 128 KB |

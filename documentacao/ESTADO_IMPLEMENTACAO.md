@@ -1,6 +1,6 @@
 # Estado da implementação — oLoggerIOT
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.21
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.22
 
 Documento vivo. Diz o que existe no código, o que está em teste e o que falta. Agentes e desenvolvedores leem aqui antes de começar um item. Atualizado pela skill `doc-sync` a cada item fechado e revisado pela skill `sprint-close`.
 
@@ -71,7 +71,7 @@ Legenda de estado: **Não iniciado**, **Em desenvolvimento**, **Em teste**, **Im
 - **Saídas digitais sem pull-down na base (HW-009):** durante o reset e o bootloader o pino flutua e o estado da saída não é garantido. Anotado em `documentacao/melhorias_hardware.md` para a próxima revisão (pull-down de ~10 kΩ). O firmware leva o pino a desligado logo depois do `HAL_Init`.
 - **Saída em frequência (FW-023):** só PB13, PB14 e PB15 têm canal de timer; a saída 1 (PB12) não. Frequências independentes pedem temporizador com tratador, que não roda em Stop 2: por isso a frequência só habilita com o sleep desligado e o sleep só liga sem saída em frequência (decidido em 03/11/2026).
 - **Mapa Modbus das saídas (P-037, resolvida em 03/11/2026):** tipo da saída 0 = discreto, 1 = frequência (pulsada) e 2 reservado; o tempo de acionamento (40271–40285) ficou reservado, porque é o mesmo retardo de acionamento (40256–40270).
-- **Bateria no pino VBAT:** os registradores de backup do totalizador só sobrevivem à falta de energia se o VBAT tiver bateria. Confirmar na placa.
+- **Bateria no pino VBAT (decidido em 04/11/2026):** é **opcional**, conforme a implantação. Com bateria, o totalizador (registradores de backup) e o RTC sobrevivem à falta de energia; sem bateria, perdem-se e a hora volta pelo NTP. O OloggerMulti tem os dois cristais (o de 32,768 kHz serve ao RTC); o y7080 não tem cristal.
 - **Largura mínima do pulso:** o filtro de 20 ms exige que o medidor gere pulsos mais largos que isso. Confirmar com os leitores.
 - **Frequência em Hz (FW-054):** faixa de projeto de 0 a 20 kHz, mas o limite real é o optoacoplador TLP291 com o 10k; confirmar o limite do pino no datasheet e medir em bancada. Ajuste fica para depois.
 - **Contagem em hardware na D4 (FW-059):** só a D4 (PB5) tem `LPTIM1_IN1`, pela base do STM32CubeMX; confirmar no RM0394.
@@ -99,6 +99,7 @@ Legenda de estado: **Não iniciado**, **Em desenvolvimento**, **Em teste**, **Im
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.22 | Bateria VBAT opcional e cristais registrados |
 | 04/11/2026 | 0.2.21 | Aplicador da agenda pelo horário atual pronto (FW-032 parcial) |
 | 04/11/2026 | 0.2.20 | Módulo `tempo` pronto (FW-030 parcial) |
 | 04/11/2026 | 0.2.19 | Saída em frequência: o sensor manda; teste na bancada |

@@ -1,6 +1,6 @@
 # Roteiro de bancada — entrada digital e contador de pulsos
 
-> **Criado em:** 03/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.1.1
+> **Criado em:** 03/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.2
 
 Roteiro do item FW-056, para o build `ologgermulti`. Nenhum dos testes abaixo foi executado: todo o código descrito aqui só foi compilado e testado no PC. Cada passo tem o resultado esperado e um campo para registrar o resultado medido. O que contradisser o esperado vira achado, não é ajustado no roteiro.
 
@@ -10,7 +10,7 @@ Roteiro do item FW-056, para o build `ologgermulti`. Nenhum dos testes abaixo fo
 - Fonte de bancada **limitada em corrente** (por exemplo, 20 mA), com o terra de campo ligado ao terra de campo da placa.
 - A proteção D1 (ESDA6V1SC5) deve estar **retirada** das entradas, conforme a decisão de 03/11/2026. Com ela montada, não aplicar mais que 5 V.
 - Não inverter a polaridade: o LED do optoacoplador não tem diodo de proteção em série.
-- Antes de medir consumo, conferir se o pino VBAT da placa tem bateria (necessária para o totalizador sobreviver à falta de energia).
+- Antes de medir consumo, conferir se o pino VBAT da placa tem bateria (opcional; necessária só para o totalizador sobreviver à falta de energia).
 
 ## Material
 
@@ -61,5 +61,6 @@ Roteiro do item FW-056, para o build `ologgermulti`. Nenhum dos testes abaixo fo
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.2 | Bateria no VBAT é opcional |
 | 03/11/2026 | 0.1.1 | Corrigida a numeração dos testes de sleep (8 a 12) e do consumo (teste 8) |
 | 03/11/2026 | 0.1.0 | Criado o roteiro com 12 testes para a entrada digital, o contador de pulsos, o totalizador e o sleep |

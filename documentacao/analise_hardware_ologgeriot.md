@@ -1,6 +1,6 @@
 # Análise dos hardwares OloggerMulti e y7080
 
-> **Criado em:** 29/10/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.3.7
+> **Criado em:** 29/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.8
 > **Estado:** parte elétrica resolvida conforme confirmação de Rodrigo Maluf; análise dos arquivos preservada como histórico documental.
 
 ## Resultado
@@ -198,6 +198,10 @@ Confirmar o módulo celular montado, os sensores PC11/K8, a seleção dos jumper
 
 **Limite de frequência:** só PB13 (`TIM1_CH1N`), PB14 (`TIM15_CH1`, `TIM1_CH2N`) e PB15 (`TIM15_CH2`, `TIM1_CH3N`) têm canal de timer; PB12 só tem `TIM1_BKIN`. Fonte: base do STM32CubeMX (`STM32L412C8Ux.xml`). Afeta a saída em frequência (FW-023).
 
+### Cristais e bateria de backup (informado em 04/11/2026)
+
+Informado pelo responsável técnico em 04/11/2026: a placa **OloggerMulti tem os dois cristais** (alta velocidade e 32,768 kHz), e a **y7080 não tem cristal**. A **bateria de backup no VBAT é opcional**: usá-la ou não depende de onde o device será implantado. Efeito no firmware: o RTC do OloggerMulti usa o cristal de 32,768 kHz (LSE); o y7080 não tem como manter o RTC com precisão sem cristal (o oscilador interno de baixa frequência erra cerca de 5%), então ele depende do NTP e do relógio de quem o alimenta, se vier a ter agenda.
+
 ## Resultado do cruzamento dos Gerbers
 
 | Verificação | OloggerMulti | y7080 |
@@ -242,6 +246,7 @@ Para concluir o B2, já há evidência da origem dos dados e do armazenamento. F
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.8 | Cristais e bateria de backup informados pelo responsável técnico |
 | 03/11/2026 | 0.3.7 | HW-009: recomendação do pull-down anotada na lista de melhorias de hardware |
 | 03/11/2026 | 0.3.6 | Achado HW-009: saídas digitais sem pull-down na base do transistor e limites de timer por pino |
 | 03/11/2026 | 0.3.5 | HW-008: D1 retirada na bancada, limite de 12 V e resistor de 4K7 em 0402 mantido até o novo layout |
