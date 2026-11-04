@@ -40,6 +40,11 @@ if(TARGET agenda_tarefa)
   target_link_libraries(ologgeriot_stm32 PRIVATE agenda_tarefa)
   target_compile_definitions(ologgeriot_stm32 PRIVATE OLOG_TEM_AGENDA=1)
 endif()
+# Configuração persistente e regras do sensor: só nos builds que têm tudo o que ela configura.
+if(TARGET config_tarefa)
+  target_link_libraries(ologgeriot_stm32 PRIVATE config_tarefa)
+  target_compile_definitions(ologgeriot_stm32 PRIVATE OLOG_TEM_CONFIG=1)
+endif()
 # Gerência de energia: só nos builds com driver de Stop 2 (hoje, o OloggerMulti).
 if(TARGET energia)
   target_link_libraries(ologgeriot_stm32 PRIVATE energia)

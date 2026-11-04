@@ -61,6 +61,16 @@ add_executable(test_agenda_config
 target_include_directories(test_agenda_config PRIVATE ../lib/agenda/include .)
 add_test(NAME agenda_config COMMAND test_agenda_config)
 
+# Módulo config: tabela de parâmetros de configuração com endereços do mapa Modbus.
+add_executable(test_config
+  config/test_config.c
+  ../lib/config/src/config.c
+  ../lib/config/src/config_carga.c
+)
+target_include_directories(test_config PRIVATE ../lib/config/include .)
+target_link_libraries(test_config PRIVATE m)
+add_test(NAME config COMMAND test_config)
+
 # Módulo armazem: configuração persistente em dois espaços de flash, com flash simulada.
 add_executable(test_armazem
   armazem/test_armazem.c

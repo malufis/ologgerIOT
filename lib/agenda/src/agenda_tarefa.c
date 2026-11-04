@@ -4,7 +4,7 @@
  *
  * @date criacao 04/11/2026
  * @date modificacao 04/11/2026
- * @version 0.1.0
+ * @version 0.2.0
  */
 
 #include "agenda_tarefa.h"
@@ -14,8 +14,6 @@
 
 #include "agenda_aplicador.h"
 #include "agenda_config.h"
-#include "armazem.h"
-#include "flash_interna.h"
 #include "energia.h"
 #include "io_saidas.h"
 #include "rtc.h"
@@ -27,14 +25,10 @@ static StackType_t pilha_agenda[AGENDA_TAREFA_PILHA_PALAVRAS];
 
 /** Agendas das saídas e o último intervalo avaliado. */
 static agenda_aplicador_t aplicador;
-/** Fuso da instalação, em minutos em relação ao UTC; começa em Brasília até o CCO enviar outro. */
+/** Fuso da instalação, em minutos em relação ao UTC; começa em Brasília até a configuração mudar. */
 static int16_t fuso_min = AGENDA_TAREFA_FUSO_PADRAO_MIN;
-/** Armazém persistente da agenda e do fuso. */
-static armazem_t armazem;
-/** true se há mudança ainda não gravada. */
-static bool pendente;
-/** Segundos desde a última mudança, para gravar só depois de um intervalo sem novas mudanças. */
-static uint32_t segundos_parado;
+/** Quantas vezes a agenda foi alterada desde a partida (para quem a grava). */
+static uint32_t alteracoes;
 
 /**
  * @brief Traduz o estado da agenda no pedido da fonte agenda.
@@ -107,76 +101,6 @@ static void aplica_agendas(void)
 }
 
 /**
- * @brief Carrega a agenda e o fuso gravados, se houver registro válido.
- *
- * Sem registro (primeira partida) ou com registro inválido, ficam a agenda vazia e o fuso de
- * Brasília.
- */
-static void carrega_gravados(void)
-{
-  uint8_t carga[ARMAZEM_CARGA_MAX];
-  size_t tamanho = 0U;
-  agenda_aplicador_t lido;
-  int16_t fuso = 0;
-
-  if (armazem_inicia(&armazem, flash_interna_ops()) != ARMAZEM_OK)
-  {
-    return;
-  }
-  if ((armazem_le(&armazem, carga, sizeof(carga), &tamanho) == ARMAZEM_OK) &&
-      (agenda_config_desempacota(&lido, &fuso, carga, tamanho) == AGENDA_CONFIG_OK) &&
-      (fuso >= TEMPO_FUSO_MIN) && (fuso <= TEMPO_FUSO_MAX))
-  {
-    aplicador = lido;
-    fuso_min = fuso;
-  }
-}
-
-/** Marca que há mudança a gravar e reinicia a contagem do intervalo sem mudanças. */
-static void marca_pendente(void)
-{
-  pendente = true;
-  segundos_parado = 0U;
-}
-
-/**
- * @brief Grava a agenda e o fuso na flash quando houve mudança e ela está parada há algum tempo.
- *
- * A espera junta várias mudanças seguidas do CCO (as quatro agendas, por exemplo) numa só
- * gravação, e poupa a flash. A gravação fica fora de seção crítica: ela bloqueia o processador.
- */
-static void grava_se_pendente(void)
-{
-  uint8_t carga[AGENDA_CONFIG_TAMANHO];
-  size_t tamanho = 0U;
-  agenda_aplicador_t copia;
-  int16_t fuso;
-  bool gravar;
-
-  taskENTER_CRITICAL();
-  gravar = pendente && (segundos_parado >= AGENDA_TAREFA_ESPERA_GRAVAR_S);
-  if (pendente && !gravar)
-  {
-    segundos_parado++;
-  }
-  copia = aplicador;
-  fuso = fuso_min;
-  if (gravar)
-  {
-    pendente = false;
-  }
-  taskEXIT_CRITICAL();
-
-  if (gravar && (agenda_config_empacota(&copia, fuso, carga, sizeof(carga), &tamanho) == AGENDA_CONFIG_OK) &&
-      (armazem_grava(&armazem, carga, tamanho) != ARMAZEM_OK))
-  {
-    taskENTER_CRITICAL();
-    marca_pendente(); /* Tenta de novo depois de outra espera. */
-    taskEXIT_CRITICAL();
-  }
-}
-
-/**
  * @brief Corpo da tarefa: aplica as agendas a cada período.
  *
  * @param[in] argumento Não usado.
@@ -189,7 +113,6 @@ static void tarefa_agenda(void *argumento)
   for (;;)
   {
     aplica_agendas();
-    grava_se_pendente();
     vTaskDelayUntil(&ultimo, pdMS_TO_TICKS(AGENDA_TAREFA_PERIODO_MS));
   }
 }
@@ -199,7 +122,6 @@ int32_t agenda_tarefa_inicia(void)
   TaskHandle_t tarefa;
 
   (void)agenda_aplicador_limpa(&aplicador);
-  carrega_gravados();
   tarefa = xTaskCreateStatic(tarefa_agenda, "agenda", AGENDA_TAREFA_PILHA_PALAVRAS, NULL,
                              RTOS_PRIO_REGRAS, pilha_agenda, &tcb_agenda);
   return (tarefa == NULL) ? AGENDA_TAREFA_ERRO_TAREFA : AGENDA_TAREFA_OK;
@@ -214,7 +136,6 @@ int32_t agenda_tarefa_define_fuso(int16_t fuso)
   taskENTER_CRITICAL();
   fuso_min = fuso;
   (void)agenda_aplicador_reavalia(&aplicador);
-  marca_pendente();
   taskEXIT_CRITICAL();
   return AGENDA_TAREFA_OK;
 }
@@ -227,8 +148,39 @@ int32_t agenda_tarefa_carrega(uint8_t canal, const char *hex, size_t tamanho)
   resultado = agenda_aplicador_carrega(&aplicador, canal, hex, tamanho);
   if (resultado == AGENDA_OK)
   {
-    marca_pendente();
+    alteracoes++;
   }
+  taskEXIT_CRITICAL();
+  return resultado;
+}
+
+uint32_t agenda_tarefa_alteracoes(void)
+{
+  uint32_t n;
+
+  taskENTER_CRITICAL();
+  n = alteracoes;
+  taskEXIT_CRITICAL();
+  return n;
+}
+
+int32_t agenda_tarefa_exporta(uint8_t *carga, size_t capacidade, size_t *tamanho)
+{
+  int32_t resultado;
+
+  taskENTER_CRITICAL();
+  resultado = agenda_config_empacota(&aplicador, 0, carga, capacidade, tamanho);
+  taskEXIT_CRITICAL();
+  return resultado;
+}
+
+int32_t agenda_tarefa_importa(const uint8_t *carga, size_t tamanho)
+{
+  int32_t resultado;
+  int16_t fuso_ignorado = 0;
+
+  taskENTER_CRITICAL();
+  resultado = agenda_config_desempacota(&aplicador, &fuso_ignorado, carga, tamanho);
   taskEXIT_CRITICAL();
   return resultado;
 }

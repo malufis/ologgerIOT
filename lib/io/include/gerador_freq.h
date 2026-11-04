@@ -9,7 +9,7 @@
  * dos pinos PB13 a PB15 dividem o período entre si).
  *
  * - **Frequência:** o passo do acumulador vale `f / GERADOR_FREQ_TICK_HZ` de volta por tick. A
- *   frequência média é exata (resolução de 0,001 Hz); cada borda pode atrasar até um tick.
+ *   frequência média é exata dentro de 2 mHz (resolução do passo em ponto flutuante); cada borda pode atrasar até um tick.
  * - **Duty cycle:** 50% (a fase abaixo da metade da volta fica em nível alto).
  * - **0 Hz:** a saída fica em nível baixo (transistor desligado).
  * - **Limite:** de 0 a GERADOR_FREQ_MAX_HZ, a faixa de projeto de 20 kHz. Com 100 kHz de tick, um

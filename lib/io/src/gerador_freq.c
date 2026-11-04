@@ -14,8 +14,8 @@
 
 /** Metade da volta do acumulador: abaixo dela o nível é alto (duty de 50%). */
 #define METADE_DA_VOLTA 0x80000000UL
-/** Resolução da frequência: milésimos de hertz. */
-#define MILI_POR_HZ     1000U
+/** Passo do acumulador por hertz: 2^32 / GERADOR_FREQ_TICK_HZ (100 kHz). */
+#define PASSOS_POR_HZ   42949.67296F
 
 int32_t gerador_freq_limpa(gerador_freq_t *gerador)
 {
@@ -30,7 +30,7 @@ int32_t gerador_freq_limpa(gerador_freq_t *gerador)
 
 int32_t gerador_freq_define(gerador_freq_t *gerador, float hz)
 {
-  uint64_t mili_hz;
+  float passo;
 
   if (gerador == NULL)
   {
@@ -40,12 +40,14 @@ int32_t gerador_freq_define(gerador_freq_t *gerador, float hz)
   {
     return GERADOR_FREQ_ERRO_FREQUENCIA;
   }
-  mili_hz = (uint64_t)((hz * (float)MILI_POR_HZ) + 0.5F);
-  if (mili_hz == 0U)
+  /* Passo = hz * 2^32 / tick, em ponto flutuante de 32 bits: evita a aritmética de 64 bits, que
+   * custa vários quilobytes de flash. Em 20 kHz o passo cabe em 32 bits (8,6e8). */
+  passo = (hz * PASSOS_POR_HZ) + 0.5F;
+  if (passo < 1.0F)
   {
     return gerador_freq_limpa(gerador);
   }
-  gerador->passo = (uint32_t)((mili_hz << 32) / ((uint64_t)GERADOR_FREQ_TICK_HZ * MILI_POR_HZ));
+  gerador->passo = (uint32_t)passo;
   return GERADOR_FREQ_OK;
 }
 

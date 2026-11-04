@@ -36,7 +36,7 @@
 /** Tamanho do cabeçalho do registro, em bytes. */
 #define ARMAZEM_CABECALHO    16U
 /** Maior carga aceita, em bytes. */
-#define ARMAZEM_CARGA_MAX    256U
+#define ARMAZEM_CARGA_MAX    512U
 /** A gravação na flash é em múltiplos deste tamanho, em bytes (palavra dupla do STM32L4). */
 #define ARMAZEM_ALINHAMENTO  8U
 

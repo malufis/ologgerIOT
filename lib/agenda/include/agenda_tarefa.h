@@ -14,15 +14,15 @@
  * **Sem hora válida, nada é pedido** e as saídas mantêm o estado. O fuso é configuração enviada
  * pelo CCO (40403, proposta); até chegar, vale o de Brasília (UTC−3), que é o padrão da partida.
  *
- * **Persistência (decidido em 04/11/2026): a agenda e o fuso gravados persistem ao reinício.** A
- * tarefa os grava no armazém (armazem.h), nas duas últimas páginas da flash interna, 5 segundos
- * depois da última mudança, e os carrega na partida. Uma queda de energia nesses 5 segundos perde a
- * mudança mais recente; o registro anterior continua válido. Sem registro, valem a agenda vazia e o
- * fuso de Brasília. Sem teste em hardware.
+ * **Persistência (decidido em 04/11/2026):** a agenda e o fuso gravados persistem ao reinício, mas
+ * quem os grava é o módulo de configuração (config_tarefa.h), junto com todos os outros parâmetros:
+ * ele lê a agenda por agenda_tarefa_exporta(), a devolve por agenda_tarefa_importa() e percebe as
+ * mudanças por agenda_tarefa_alteracoes(). O fuso vem da configuração (40403). Sem teste em
+ * hardware.
  *
  * @date criacao 04/11/2026
  * @date modificacao 04/11/2026
- * @version 0.1.0
+ * @version 0.2.0
  */
 
 #ifndef AGENDA_TAREFA_H
@@ -35,9 +35,6 @@
 #define AGENDA_TAREFA_PERIODO_MS     1000U
 /** Tamanho da pilha da tarefa, em palavras de 32 bits. */
 #define AGENDA_TAREFA_PILHA_PALAVRAS 192U
-
-/** Segundos sem novas mudanças antes de gravar a agenda e o fuso na flash. */
-#define AGENDA_TAREFA_ESPERA_GRAVAR_S 5U
 
 /** Fuso horário inicial, em minutos em relação ao UTC: Brasília (decidido em 04/11/2026). */
 #define AGENDA_TAREFA_FUSO_PADRAO_MIN (-180)
@@ -66,6 +63,32 @@ int32_t agenda_tarefa_inicia(void);
  * @return AGENDA_TAREFA_OK ou AGENDA_TAREFA_ERRO_FUSO.
  */
 int32_t agenda_tarefa_define_fuso(int16_t fuso_min);
+
+/**
+ * @brief Quantas vezes uma agenda foi alterada desde a partida.
+ *
+ * @return Contador de alterações; o módulo de configuração o compara para saber quando gravar.
+ */
+uint32_t agenda_tarefa_alteracoes(void);
+
+/**
+ * @brief Empacota as agendas para a gravação (formato de agenda_config.h).
+ *
+ * @param carga Recebe a carga.
+ * @param capacidade Tamanho de @p carga; pelo menos AGENDA_CONFIG_TAMANHO.
+ * @param tamanho Recebe o tamanho da carga.
+ * @return AGENDA_CONFIG_OK ou AGENDA_CONFIG_ERRO_PARAMETRO.
+ */
+int32_t agenda_tarefa_exporta(uint8_t *carga, size_t capacidade, size_t *tamanho);
+
+/**
+ * @brief Restaura as agendas gravadas, só se a carga for válida por inteiro.
+ *
+ * @param carga Carga lida do armazém.
+ * @param tamanho Tamanho da carga.
+ * @return AGENDA_CONFIG_OK ou o erro de agenda_config.h (as agendas ficam como estavam).
+ */
+int32_t agenda_tarefa_importa(const uint8_t *carga, size_t tamanho);
 
 /**
  * @brief Carrega a agenda de uma saída, recebida do CCO.

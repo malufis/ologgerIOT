@@ -54,12 +54,28 @@ endif()
 
 # Tarefa que aplica as agendas pelo horário do RTC: precisa das saídas digitais e do relógio.
 if((SAIDA_DISCRETA IN_LIST OLOG_FEATURES) AND (RELOGIO IN_LIST OLOG_FEATURES))
-  add_library(armazem STATIC armazem/src/armazem.c armazem/src/flash_interna.c)
-  target_include_directories(armazem PUBLIC armazem/include)
-  target_link_libraries(armazem PUBLIC ${OLOG_HAL_TARGET})
   add_library(agenda_tarefa STATIC agenda/src/agenda_tarefa.c)
   target_include_directories(agenda_tarefa PUBLIC agenda/include)
-  target_link_libraries(agenda_tarefa PUBLIC agenda armazem io rtc tempo energia rtos freertos)
+  target_link_libraries(agenda_tarefa PUBLIC agenda io rtc tempo energia rtos freertos)
+endif()
+
+# Configuração do device (tabela com os endereços do mapa Modbus, lógica pura testada no PC em
+# tests/config) e o armazém persistente em dois espaços de flash (tests/armazem).
+add_library(armazem STATIC armazem/src/armazem.c)
+target_include_directories(armazem PUBLIC armazem/include)
+add_library(config STATIC config/src/config.c config/src/config_carga.c)
+target_include_directories(config PUBLIC config/include)
+
+# No firmware, a configuração liga a tabela às saídas, à agenda, ao relógio, às entradas digitais e
+# analógicas e à flash interna: só no build que tem todas essas funcionalidades (hoje, o OloggerMulti).
+if((SAIDA_DISCRETA IN_LIST OLOG_FEATURES) AND (SAIDA_FREQUENCIA IN_LIST OLOG_FEATURES) AND
+   (RELOGIO IN_LIST OLOG_FEATURES) AND (ENTRADA_DIGITAL IN_LIST OLOG_FEATURES) AND
+   (ENTRADA_4_20MA IN_LIST OLOG_FEATURES))
+  add_library(flash_interna STATIC armazem/src/flash_interna.c)
+  target_link_libraries(flash_interna PUBLIC armazem ${OLOG_HAL_TARGET})
+  add_library(config_tarefa STATIC config/src/config_tarefa.c config/src/regras_tarefa.c)
+  target_link_libraries(config_tarefa PUBLIC config armazem flash_interna agenda_tarefa io energia
+    aquisicao sensor rtos freertos)
 endif()
 
 # Gerência de energia com Stop 2. Existe só para o STM32L4; o do STM32L0 (y7080) é a fazer.

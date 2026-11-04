@@ -1,6 +1,6 @@
 # lib/ — bibliotecas por módulo
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.13
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.14
 
 Cada módulo fica em `lib/<modulo>/`, com `include/<modulo>.h` (interface pública) e `src/<modulo>.c` (implementação). Um módulo não acessa o estado de outro diretamente; usa a interface pública. Módulo novo entra em `lib/CMakeLists.txt`; módulo de funcionalidade opcional entra dentro de `if(<FUNCIONALIDADE> IN_LIST OLOG_FEATURES)`.
 
@@ -19,6 +19,7 @@ Cada módulo fica em `lib/<modulo>/`, com `include/<modulo>.h` (interface públi
 | `freq_saida` | Frequência da saída "pulsada" proporcional à corrente 4–20 mA, com 0 Hz na falha (lógica pura, testada no PC) | `SAIDA_FREQUENCIA` | FW-023 |
 | `gerador_freq` | Onda quadrada de 50% por acumulador de fase, uma frequência independente por saída (lógica pura, testada no PC) | `SAIDA_FREQUENCIA` | FW-023 |
 | `tipo_saida` | Tipo de cada saída (discreto ou frequência) e a exclusão com o sleep; `io_frequencia` guarda os tipos, liga o gerador ao TIM6 e aos pinos e dá o gancho do sleep (`tipo_saida` é lógica pura, testada no PC) | `SAIDA_FREQUENCIA` | FW-061, FW-023 |
+| `config` | Tabela de parâmetros de configuração com os endereços do mapa Modbus, limites, padrões, escrita atômica e regras de exclusão (lógica pura, testada no PC); `config_tarefa` e `regras_tarefa` a ligam ao firmware (sem teste em hardware) | `SAIDA_DISCRETA`, `SAIDA_FREQUENCIA`, `RELOGIO`, `ENTRADA_DIGITAL` e `ENTRADA_4_20MA` | FW-064 |
 | `armazem` | Configuração persistente em dois espaços de flash com CRC-32, segura contra queda de energia (`armazem`, lógica pura testada no PC) e as duas últimas páginas da flash interna (`flash_interna`, sem teste em hardware) | `SAIDA_DISCRETA` e `RELOGIO` | FW-032 |
 | `tempo` | Conversão do tempo UTC em data, hora e dia da semana locais com o fuso da instalação, e a conversão inversa em UTC (lógica pura, testada no PC) | `SAIDA_DISCRETA`, `RELOGIO` | FW-030 |
 | `rtc` | RTC do STM32L412 com o cristal de 32,768 kHz: hora em UTC, sem reiniciar o domínio de backup (sem teste em hardware) | `RELOGIO` | FW-030 |
@@ -26,7 +27,7 @@ Cada módulo fica em `lib/<modulo>/`, com `include/<modulo>.h` (interface públi
 
 Módulos previstos pelo backlog e ainda não iniciados: `fila`, `modbus`, `agenda`, `sessao`, `mqtt`, entre outros das fases 3 a 9.
 
-Os módulos de lógica pura (`sensor`, `io_filtro`, `io_pulsos`, `io_totalizador`, `saida`, `controle_saida`, `regra_sensor`, `freq_saida`, `gerador_freq`, `tipo_saida`, `tempo`, `armazem`, `agenda`) têm testes no PC em `tests/`. Os que acessam hardware só são verificados por compilação e em bancada.
+Os módulos de lógica pura (`sensor`, `io_filtro`, `io_pulsos`, `io_totalizador`, `saida`, `controle_saida`, `regra_sensor`, `freq_saida`, `gerador_freq`, `tipo_saida`, `tempo`, `armazem`, `config`, `agenda`) têm testes no PC em `tests/`. Os que acessam hardware só são verificados por compilação e em bancada.
 
 Regras: `documentacao/padrao_codigo_c.md`.
 
@@ -34,6 +35,7 @@ Regras: `documentacao/padrao_codigo_c.md`.
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.14 | Adicionado o módulo `config` |
 | 04/11/2026 | 0.2.13 | Adicionado o módulo `armazem`; `agenda_config` no módulo `agenda` |
 | 04/11/2026 | 0.2.12 | `agenda_tarefa` no módulo `agenda` |
 | 04/11/2026 | 0.2.11 | Adicionado o módulo `rtc`; `tempo` ganha a conversão inversa |

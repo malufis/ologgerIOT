@@ -43,6 +43,11 @@
   #include "agenda_tarefa.h"
 #endif
 
+#ifdef OLOG_TEM_CONFIG
+  #include "config_tarefa.h"
+  #include "regras_tarefa.h"
+#endif
+
 #ifdef OLOG_TEM_ENERGIA
   #include "energia.h"
 #endif
@@ -107,6 +112,32 @@ static int32_t inicia_saidas(void)
 #endif
 
 /**
+ * @brief Inicia a gerência de energia e, por último, a configuração e as regras.
+ *
+ * A configuração lê o registro gravado e o aplica a tudo o que foi iniciado antes dela.
+ *
+ * @return 0 em sucesso, código negativo se alguma falhar.
+ */
+static int32_t inicia_energia_e_config(void)
+{
+#if defined(OLOG_TEM_ENERGIA) && defined(OLOG_TEM_ENTRADA_DIGITAL)
+  if (energia_inicia(&ganchos_energia) != ENERGIA_OK)
+  {
+    return -1;
+  }
+#endif
+
+#ifdef OLOG_TEM_CONFIG
+  if ((config_tarefa_inicia() != CONFIG_TAREFA_OK) || (regras_tarefa_inicia() != REGRAS_TAREFA_OK))
+  {
+    return -1;
+  }
+#endif
+
+  return 0;
+}
+
+/**
  * @brief Cria as tarefas do firmware.
  *
  * @return 0 em sucesso, código negativo se alguma tarefa não puder ser criada.
@@ -139,14 +170,7 @@ static int32_t cria_tarefas(void)
   }
 #endif
 
-#if defined(OLOG_TEM_ENERGIA) && defined(OLOG_TEM_ENTRADA_DIGITAL)
-  if (energia_inicia(&ganchos_energia) != ENERGIA_OK)
-  {
-    return -1;
-  }
-#endif
-
-  return 0;
+  return inicia_energia_e_config();
 }
 
 /**
