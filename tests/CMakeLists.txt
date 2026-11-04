@@ -88,6 +88,15 @@ target_include_directories(test_freq_saida PRIVATE ../lib/io/include .)
 target_link_libraries(test_freq_saida PRIVATE m)
 add_test(NAME freq_saida COMMAND test_freq_saida)
 
+# Módulo io: gerador de onda quadrada por acumulador de fase (saída em frequência).
+add_executable(test_gerador_freq
+  io/test_gerador_freq.c
+  ../lib/io/src/gerador_freq.c
+)
+target_include_directories(test_gerador_freq PRIVATE ../lib/io/include .)
+target_link_libraries(test_gerador_freq PRIVATE m)
+add_test(NAME gerador_freq COMMAND test_gerador_freq)
+
 # Módulo io: tipo das saídas e exclusão entre frequência e sleep.
 add_executable(test_tipo_saida
   io/test_tipo_saida.c
