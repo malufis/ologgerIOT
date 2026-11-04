@@ -51,6 +51,15 @@ add_executable(test_saida
 target_include_directories(test_saida PRIVATE ../lib/io/include .)
 add_test(NAME saida COMMAND test_saida)
 
+# Módulo io: modo manual e automático de uma saída e a prioridade entre as fontes.
+add_executable(test_controle_saida
+  io/test_controle_saida.c
+  ../lib/io/src/controle_saida.c
+  ../lib/io/src/saida.c
+)
+target_include_directories(test_controle_saida PRIVATE ../lib/io/include .)
+add_test(NAME controle_saida COMMAND test_controle_saida)
+
 # Módulo io: totalizador de pulsos com duas cópias e complemento.
 add_executable(test_io_totalizador
   io/test_io_totalizador.c

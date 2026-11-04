@@ -1,20 +1,22 @@
 /**
  * @file io_saidas.h
- * @brief Controle das quatro saídas digitais discretas, com retardo de acionamento (relé de tempo).
+ * @brief Controle das quatro saídas digitais discretas: modo manual e automático e retardo.
  *
- * Reúne o estado de cada saída (saida.h) e o driver dos pinos (io_saida.h). Os comandos
- * ligar e desligar valem na hora, e uma tarefa de baixa prioridade liga as saídas cujo retardo
- * de acionamento chegou ao fim. As saídas começam desligadas.
+ * Reúne o controle de cada saída (controle_saida.h), que decide quem manda nela e aplica o
+ * retardo de acionamento (relé de tempo), e o driver dos pinos (io_saida.h). Uma tarefa de baixa
+ * prioridade liga as saídas cujo retardo de acionamento chegou ao fim. As saídas começam
+ * desligadas e em modo automático.
  *
- * Toda saída aceita o comando direto e pode ter retardo de acionamento (relé de tempo, FW-024);
- * o "acionamento por tempo" do requisito é esse retardo. Quem manda na saída (modo manual ou
- * automático, sensor, agenda) entra no item FW-025, e a saída em frequência (pulsada), no
+ * Os comandos que chegam do sistema são **manuais** (io_saidas_comando_manual) ou de **modo
+ * automático** (io_saidas_modo_automatico). Os pedidos da regra do sensor local, da agenda
+ * offline e da regra da plataforma entram por io_saidas_pedido(). O "acionamento por tempo" do
+ * requisito é o retardo de acionamento (FW-024). A saída em frequência (pulsada) entra no
  * FW-023. Com o STM32 em Stop 2 o pino mantém o estado, mas o retardo não corre, porque o tick
  * do FreeRTOS para.
  *
  * @date criacao 03/11/2026
- * @date modificacao 03/11/2026
- * @version 0.2.0
+ * @date modificacao 04/11/2026
+ * @version 0.3.0
  */
 
 #ifndef IO_SAIDAS_H
@@ -23,6 +25,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "controle_saida.h"
 #include "io_saida.h"
 
 /** Período da tarefa que liga as saídas ao fim do retardo, em milissegundos. */
@@ -54,27 +57,70 @@ int32_t io_saidas_prepara(void);
 int32_t io_saidas_inicia(void);
 
 /**
- * @brief Liga uma saída sem prazo, respeitando o retardo de acionamento configurado.
+ * @brief Comando manual direto: passa a saída ao modo manual e a liga ou desliga.
  *
- * Com retardo, a saída continua desligada durante a espera e liga ao fim dela; um comando de
- * desligar durante a espera cancela a partida.
+ * Prevalece sobre qualquer pedido automático e respeita o retardo de acionamento. A chegada de
+ * todo comando manual gera um alerta ao CCO, que ainda não existe: ver `mudou_de_modo`.
+ *
+ * @param canal Saída de 1 a IO_SAIDAS_QTD.
+ * @param liga true para ligar, false para desligar.
+ * @param mudou_de_modo Saída opcional (pode ser nula): true se a saída estava em automático.
+ * @return IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO.
+ */
+int32_t io_saidas_comando_manual(uint8_t canal, bool liga, bool *mudou_de_modo);
+
+/**
+ * @brief Comando de modo automático: a saída avalia e executa a regra válida na hora.
  *
  * @param canal Saída de 1 a IO_SAIDAS_QTD.
  * @return IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO.
  */
-int32_t io_saidas_liga(uint8_t canal);
+int32_t io_saidas_modo_automatico(uint8_t canal);
+
+/**
+ * @brief Registra o pedido de uma fonte automática (sensor local, ou agenda e plataforma).
+ *
+ * Em modo automático é aplicado na hora; em manual fica guardado para a volta ao automático. O
+ * pedido do sensor local prevalece sobre o da fonte externa.
+ *
+ * @param canal Saída de 1 a IO_SAIDAS_QTD.
+ * @param fonte Fonte do pedido.
+ * @param pedido O que a fonte pede; "nenhum" quando não tem opinião.
+ * @return IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO.
+ */
+int32_t io_saidas_pedido(uint8_t canal, controle_fonte_t fonte, controle_pedido_t pedido);
+
+/**
+ * @brief Informa se o sensor que controla a saída falhou.
+ *
+ * Em automático a falha desliga a saída; em manual o comando manual se mantém.
+ *
+ * @param canal Saída de 1 a IO_SAIDAS_QTD.
+ * @param falha true se o sensor falhou.
+ * @return IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO.
+ */
+int32_t io_saidas_sensor_falha(uint8_t canal, bool falha);
 
 /**
  * @brief Define o retardo de acionamento (relé de tempo) de uma saída.
  *
- * Vale para os próximos comandos de ligar. Um retardo já em curso não
- * muda. Corresponde ao atraso de partida por saída do mapa Modbus (40256 a 40270).
+ * Vale para os próximos comandos que ligam a saída. Um retardo já em curso não muda. Corresponde
+ * ao retardo de acionamento do mapa Modbus (40256 a 40270).
  *
  * @param canal Saída de 1 a IO_SAIDAS_QTD.
  * @param segundos Retardo em segundos, de 0 (liga na hora) a 4 294 967.
  * @return IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO.
  */
 int32_t io_saidas_define_atraso(uint8_t canal, uint32_t segundos);
+
+/**
+ * @brief Lê o estado de uma saída.
+ *
+ * @param canal Saída de 1 a IO_SAIDAS_QTD.
+ * @param ligada Saída: true se a saída está ligada.
+ * @return IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO.
+ */
+int32_t io_saidas_estado(uint8_t canal, bool *ligada);
 
 /**
  * @brief Informa se uma saída está esperando o retardo de acionamento.
@@ -86,20 +132,12 @@ int32_t io_saidas_define_atraso(uint8_t canal, uint32_t segundos);
 int32_t io_saidas_aguardando(uint8_t canal, bool *aguardando);
 
 /**
- * @brief Desliga uma saída.
+ * @brief Lê o modo de uma saída (manual ou automático).
  *
  * @param canal Saída de 1 a IO_SAIDAS_QTD.
+ * @param modo Saída: modo atual da saída.
  * @return IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO.
  */
-int32_t io_saidas_desliga(uint8_t canal);
-
-/**
- * @brief Lê o estado de uma saída.
- *
- * @param canal Saída de 1 a IO_SAIDAS_QTD.
- * @param ligada Saída: true se a saída está ligada.
- * @return IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO.
- */
-int32_t io_saidas_estado(uint8_t canal, bool *ligada);
+int32_t io_saidas_modo(uint8_t canal, controle_modo_t *modo);
 
 #endif /* IO_SAIDAS_H */
