@@ -67,6 +67,15 @@ add_executable(test_agenda
 target_include_directories(test_agenda PRIVATE ../lib/agenda/include .)
 add_test(NAME agenda COMMAND test_agenda)
 
+# Módulo agenda: aplicação das agendas pelo horário atual.
+add_executable(test_agenda_aplicador
+  agenda/test_agenda_aplicador.c
+  ../lib/agenda/src/agenda_aplicador.c
+  ../lib/agenda/src/agenda.c
+)
+target_include_directories(test_agenda_aplicador PRIVATE ../lib/agenda/include .)
+add_test(NAME agenda_aplicador COMMAND test_agenda_aplicador)
+
 # Módulo io: modo manual e automático de uma saída e a prioridade entre as fontes.
 add_executable(test_controle_saida
   io/test_controle_saida.c

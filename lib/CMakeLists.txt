@@ -34,7 +34,7 @@ endif()
 # Agenda semanal das saídas (lógica pura, testada no PC em tests/agenda). Só serve a quem tem
 # saída digital discreta.
 if(SAIDA_DISCRETA IN_LIST OLOG_FEATURES)
-  add_library(agenda STATIC agenda/src/agenda.c)
+  add_library(agenda STATIC agenda/src/agenda.c agenda/src/agenda_aplicador.c)
   target_include_directories(agenda PUBLIC agenda/include)
 endif()
 
