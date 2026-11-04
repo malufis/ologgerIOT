@@ -1,6 +1,6 @@
 # lib/ — bibliotecas por módulo
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.4
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.5
 
 Cada módulo fica em `lib/<modulo>/`, com `include/<modulo>.h` (interface pública) e `src/<modulo>.c` (implementação). Um módulo não acessa o estado de outro diretamente; usa a interface pública. Módulo novo entra em `lib/CMakeLists.txt`; módulo de funcionalidade opcional entra dentro de `if(<FUNCIONALIDADE> IN_LIST OLOG_FEATURES)`.
 
@@ -16,11 +16,12 @@ Cada módulo fica em `lib/<modulo>/`, com `include/<modulo>.h` (interface públi
 | `io` | Entradas digitais: leitura (`io_entrada`), filtro (`io_filtro`), contador de pulsos (`io_pulsos`), totalizador (`io_totalizador`, `io_backup`) e tarefa (`io_tarefa`). Saídas digitais: estado e retardo (`saida`), modo manual e automático (`controle_saida`), pinos (`io_saida`) e as quatro saídas (`io_saidas`) | `ENTRADA_DIGITAL`, `SAIDA_DISCRETA` | FW-022, FW-052 a FW-060 |
 | `energia` | Gerência de energia em Stop 2, só no STM32L4, desabilitada por padrão | MCU | FW-058 |
 | `regra_sensor` | Regra do sensor: limiares mínimo e máximo, sentido e histerese de uma entrada analógica que ligam e desligam uma saída (lógica pura, testada no PC) | `SAIDA_DISCRETA` | FW-063 |
+| `freq_saida` | Frequência da saída "pulsada" proporcional à corrente 4–20 mA, com 0 Hz na falha (lógica pura, testada no PC) | `SAIDA_DISCRETA` | FW-023 |
 | `agenda` | Agenda semanal de 336 intervalos de 30 minutos por saída: validação da cadeia hexadecimal recebida do CCO e consulta do estado de um instante (lógica pura, testada no PC) | `SAIDA_DISCRETA` | FW-032 |
 
 Módulos previstos pelo backlog e ainda não iniciados: `fila`, `modbus`, `agenda`, `sessao`, `mqtt`, entre outros das fases 3 a 9.
 
-Os módulos de lógica pura (`sensor`, `io_filtro`, `io_pulsos`, `io_totalizador`, `saida`, `controle_saida`, `regra_sensor`, `agenda`) têm testes no PC em `tests/`. Os que acessam hardware só são verificados por compilação e em bancada.
+Os módulos de lógica pura (`sensor`, `io_filtro`, `io_pulsos`, `io_totalizador`, `saida`, `controle_saida`, `regra_sensor`, `freq_saida`, `agenda`) têm testes no PC em `tests/`. Os que acessam hardware só são verificados por compilação e em bancada.
 
 Regras: `documentacao/padrao_codigo_c.md`.
 
@@ -28,6 +29,7 @@ Regras: `documentacao/padrao_codigo_c.md`.
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.5 | Adicionado o módulo `freq_saida` |
 | 04/11/2026 | 0.2.4 | Adicionado o módulo `regra_sensor` |
 | 04/11/2026 | 0.2.3 | Adicionado o módulo `agenda` |
 | 04/11/2026 | 0.2.2 | Módulo `io` inclui o `controle_saida` (modo manual e automático) |

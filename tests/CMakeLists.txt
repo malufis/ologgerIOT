@@ -79,6 +79,15 @@ target_include_directories(test_regra_sensor PRIVATE ../lib/io/include .)
 target_link_libraries(test_regra_sensor PRIVATE m)
 add_test(NAME regra_sensor COMMAND test_regra_sensor)
 
+# Módulo io: frequência da saída em frequência a partir da corrente 4-20 mA.
+add_executable(test_freq_saida
+  io/test_freq_saida.c
+  ../lib/io/src/freq_saida.c
+)
+target_include_directories(test_freq_saida PRIVATE ../lib/io/include .)
+target_link_libraries(test_freq_saida PRIVATE m)
+add_test(NAME freq_saida COMMAND test_freq_saida)
+
 # Módulo io: totalizador de pulsos com duas cópias e complemento.
 add_executable(test_io_totalizador
   io/test_io_totalizador.c
