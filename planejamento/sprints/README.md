@@ -1,6 +1,6 @@
 # Sprints do firmware — índice
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.12
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.13
 
 Sprints de uma semana. Cada sprint tem um arquivo com meta, itens do backlog, estado e critério de encerramento. Itens concluídos são marcados no arquivo da sprint e no `BACKLOG.md`.
 
@@ -11,7 +11,7 @@ Sprints de uma semana. Cada sprint tem um arquivo com meta, itens do backlog, es
 | `SPRINT_01B` | 03/11/2026 (paralela) | Entrada digital e contador de pulsos | FW-052 a FW-060 | Código pronto, lógica testada no PC; bancada pendente |
 | `SPRINT_02` | 16/11/2026 | Regras de sensor | FW-013 a FW-016 | Planejada |
 | `SPRINT_03` | 23/11/2026 | Média móvel, fila e alertas | FW-017 a FW-021 | Planejada |
-| `SPRINT_04` | 30/11/2026 | Saídas e controle | FW-022 a FW-025, FW-061 e FW-063 | Em andamento: FW-022, FW-024 e FW-025 em código pronto; FW-061 com os dois lados prontos (falta o comando Modbus); FW-063 e FW-023 parciais (avaliador e cálculo da frequência prontos) |
+| `SPRINT_04` | 30/11/2026 | Saídas e controle | FW-022 a FW-025, FW-061 e FW-063 | Em andamento: FW-022, FW-024 e FW-025 em código pronto; FW-061 com os dois lados prontos (falta o comando Modbus); FW-063 e FW-023 parciais (avaliador pronto; saída em frequência ligada ao TIM6, sem teste em hardware) |
 | `SPRINT_05` | 07/12/2026 | Modbus RTU | FW-026 a FW-029 e FW-047 a FW-050 | Planejada |
 | `SPRINT_06` | 14/12/2026 | Relógio e agenda offline | FW-030 a FW-032 | Planejada |
 | `SPRINT_07` | 21/12/2026 | MQTT e ESP32 | FW-007 e FW-033 a FW-036 | Planejada; o ESP32 só começa depois da validação do STM32 |
@@ -26,6 +26,7 @@ As datas são a sequência de semanas a partir de 02/11/2026. O protótipo de ba
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.13 | SPRINT_04 com o FW-023 ligado ao timer |
 | 04/11/2026 | 0.2.12 | SPRINT_04 com o FW-061 pronto nos dois lados |
 | 04/11/2026 | 0.2.11 | SPRINT_04 com o FW-023 parcial |
 | 04/11/2026 | 0.2.10 | SPRINT_04 com o FW-063 parcial |

@@ -1,6 +1,6 @@
 # Dicionário de funções — firmware oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.9
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.10
 
 ## Como manter
 
@@ -75,7 +75,10 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `io_filtro_amostras_do_tempo` | io_filtro | `lib/io/include/io_filtro.h` | Converte um tempo de estabilidade em número de amostras, arredondando para cima. | IO_FILTRO_OK ou IO_FILTRO_ERRO_PARAMETRO (nulo, zero ou número fora de uint16_t). | ativa |
 | `io_filtro_atualiza` | io_filtro | `lib/io/include/io_filtro.h` | Recebe uma amostra do nível da entrada e devolve o estado aceito. | Estado aceito após esta amostra. | ativa |
 | `io_filtro_inicia` | io_filtro | `lib/io/include/io_filtro.h` | Inicia o filtro com o estado aceito e o número de amostras de estabilidade. | IO_FILTRO_OK ou IO_FILTRO_ERRO_PARAMETRO. | ativa |
+| `io_frequencia_define_hz` | io_frequencia | `lib/io/include/io_frequencia.h` | Define a frequência de uma saída em modo frequência. | IO_FREQUENCIA_OK, TIPO_SAIDA_ERRO_PARAMETRO, IO_FREQUENCIA_ERRO_NAO_FREQUENCIA ou IO_FREQUENCIA_ERRO_FREQUENCIA. | ativa |
 | `io_frequencia_define_tipo` | io_frequencia | `lib/io/include/io_frequencia.h` | Define o tipo de uma saída, respeitando a exclusão com o sleep. | TIPO_SAIDA_OK ou o código de erro de tipo_saida.h. | ativa |
+| `io_frequencia_inicia` | io_frequencia | `lib/io/include/io_frequencia.h` | Configura o TIM6 para interromper a 100 kHz, sem iniciá-lo. | IO_FREQUENCIA_OK ou IO_FREQUENCIA_ERRO_TIMER. | ativa |
+| `io_frequencia_irq` | io_frequencia | `lib/io/include/io_frequencia.h` | Atende a interrupção do TIM6: avança os geradores e escreve os pinos. | void | ativa |
 | `io_frequencia_sleep_permitido` | io_frequencia | `lib/io/include/io_frequencia.h` | Gancho sleep_permitido de energia.h. | false se alguma saída está em frequência (o sleep não pode ligar). | ativa |
 | `io_frequencia_tipo` | io_frequencia | `lib/io/include/io_frequencia.h` | Lê o tipo de uma saída. | TIPO_SAIDA_OK ou TIPO_SAIDA_ERRO_PARAMETRO. | ativa |
 | `io_pulsos_atualiza` | io_pulsos | `lib/io/include/io_pulsos.h` | Recebe o estado filtrado da entrada e conta a transição para ativo. | void | ativa |
@@ -88,6 +91,7 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `io_saida_inicia` | io_saida | `lib/io/include/io_saida.h` | Configura os pinos das saídas, todos desligados. | IO_SAIDA_OK. | ativa |
 | `io_saida_le` | io_saida | `lib/io/include/io_saida.h` | Lê o estado que o pino de uma saída está comandando. | IO_SAIDA_OK ou IO_SAIDA_ERRO_PARAMETRO. | ativa |
 | `io_saidas_aguardando` | io_saidas | `lib/io/include/io_saidas.h` | Informa se uma saída está esperando o retardo de acionamento. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
+| `io_saidas_cede_pino` | io_saidas | `lib/io/include/io_saidas.h` | Cede o pino da saída ao gerador de frequência, ou o devolve ao controle discreto. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
 | `io_saidas_comando_manual` | io_saidas | `lib/io/include/io_saidas.h` | Comando manual direto: passa a saída ao modo manual e a liga ou desliga. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
 | `io_saidas_define_atraso` | io_saidas | `lib/io/include/io_saidas.h` | Define o retardo de acionamento (relé de tempo) de uma saída. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
 | `io_saidas_define_conectividade` | io_saidas | `lib/io/include/io_saidas.h` | Informa se o device tem conectividade com o CCO, para todas as saídas. | IO_SAIDAS_OK. | ativa |
@@ -144,6 +148,7 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.10 | Tabela regenerada com 117 funções públicas: entram `io_frequencia_inicia`, `_define_hz`, `_irq` e `io_saidas_cede_pino` |
 | 04/11/2026 | 0.3.9 | Tabela regenerada com 113 funções públicas: entram as de `gerador_freq` |
 | 04/11/2026 | 0.3.8 | Tabela regenerada com 110 funções públicas: entram as de `tipo_saida` e `io_frequencia` |
 | 04/11/2026 | 0.3.7 | Tabela regenerada com 103 funções públicas: entram `freq_saida_limpa`, `freq_saida_cadastra` e `freq_saida_calcula` |

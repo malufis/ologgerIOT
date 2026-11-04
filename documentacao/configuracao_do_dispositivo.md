@@ -1,6 +1,6 @@
 ﻿# Configuração do dispositivo — oLoggerIOT
 
-> **Criado em:** 29/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.60
+> **Criado em:** 29/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.61
 
 ## Origem e estado
 
@@ -135,7 +135,7 @@ A frequência de atualização e a relação entre quantidade de entradas e saí
 - **Implementado em parte:** o cálculo da frequência da saída em frequência está em `freq_saida` (FW-023, parcial: proporcional entre as frequências de 4 mA e de 20 mA, 0 Hz na falha). **Ainda não implementado:** gerar o sinal e o alerta ao CCO na chegada do comando manual.
 - **"Pulsada" é a saída em frequência (decidido em 03/11/2026):** não é acionamento por tempo. A saída discreta é só ligada ou desligada, com o retardo de acionamento. O tipo da saída no mapa Modbus ficou 0 = discreto e 1 = frequência.
 - **Sleep e frequência (decidido em 03/11/2026):** a saída em frequência só pode ser habilitada se o modo sleep não estiver ativo, e o sleep só liga se nenhuma saída estiver em frequência. O sleep tem uma função de ligar e desligar (modo de operação 40412). **Implementado em 04/11/2026** em `tipo_saida` e `io_frequencia`: a frequência é recusada com o sleep ligado e o gancho `sleep_permitido` recusa ligar o sleep com saída em frequência.
-- **Saída em frequência (decidido em 04/11/2026):** A saída em frequência só pode ser usada com o módulo fora do modo sleep (decidido em 04/11/2026). Em **0 Hz a saída fica em nível baixo** (transistor desligado); o **duty cycle é de 50%**; **só as saídas 2, 3 e 4 (PB13, PB14 e PB15, os pinos com canal de timer) têm o modo frequência**. A saída 1 (PB12) não tem canal de timer e fica só discreta: pedir frequência para ela é recusado. O sinal é gerado por acumulador de fase em `gerador_freq` (uma frequência independente por saída, avançado a 100 kHz por um timer); a 20 kHz o duty fica em 40% ou 60%, e abaixo disso se aproxima de 50%.
+- **Saída em frequência (decidido em 04/11/2026):** A saída em frequência só pode ser usada com o módulo fora do modo sleep (decidido em 04/11/2026). Em **0 Hz a saída fica em nível baixo** (transistor desligado); o **duty cycle é de 50%**; **só as saídas 2, 3 e 4 (PB13, PB14 e PB15, os pinos com canal de timer) têm o modo frequência**. A saída 1 (PB12) não tem canal de timer e fica só discreta: pedir frequência para ela é recusado. Em modo frequência a saída cede o pino ao gerador: os comandos manual e automático seguem calculando o estado, mas não chegam ao pino (a interação do modo manual com a saída em frequência segue em aberto). O sinal é gerado por acumulador de fase em `gerador_freq`, avançado pelo TIM6 em `io_frequencia` (uma frequência independente por saída, avançado a 100 kHz por um timer); a 20 kHz o duty fica em 40% ou 60%, e abaixo disso se aproxima de 50%.
 - **Carga indutiva:** o diodo de roda livre fica no relé externo, instalado pelo responsável técnico.
 - **Stop 2:** o pino mantém o estado, mas o retardo não corre durante o sleep.
 
@@ -212,6 +212,7 @@ Depois de estabelecida a conectividade do dispositivo, a configuração continua
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.61 | Saída em frequência: cessão do pino ao gerador e TIM6 |
 | 04/11/2026 | 0.1.60 | Saída em frequência: só fora do sleep; gerador por acumulador de fase implementado |
 | 04/11/2026 | 0.1.59 | Saída em frequência: 0 Hz em nível baixo, duty de 50%, só as saídas 2 a 4; exclusão com o sleep implementada |
 | 04/11/2026 | 0.1.58 | Saída em frequência: cálculo implementado (FW-023 parcial) |
