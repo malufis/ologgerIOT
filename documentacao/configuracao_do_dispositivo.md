@@ -1,6 +1,6 @@
 ﻿# Configuração do dispositivo — oLoggerIOT
 
-> **Criado em:** 29/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.51
+> **Criado em:** 29/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.52
 
 ## Origem e estado
 
@@ -131,7 +131,8 @@ A frequência de atualização e a relação entre quantidade de entradas e saí
 - **Estado na partida:** todas as saídas partem desligadas. Não religam sozinhas depois de falta de energia: aguardam novo comando, conforme a regra do B4.
 - **Comandos implementados:** ligar e desligar. O "acionamento por tempo" é o retardo de acionamento (próximo item).
 - **Retardo de acionamento (relé de tempo, confirmado em 03/11/2026):** a saída discreta pode ter um retardo configurável por saída, em segundos. **Todo comando que liga a saída espera o retardo**; retardo zero liga na hora. Um comando de desligar durante a espera cancela a partida. Com o retardo em andamento, outro comando de ligar é descartado e a contagem continua. Com a saída já ligada, outro comando de ligar é descartado (o retardo não é reaplicado).
-- **Ainda não implementado:** modo manual e automático e prioridade do sensor (FW-025) e saída em frequência (FW-023).
+- **Modo manual e automático (FW-025, 04/11/2026):** cada saída tem o seu modo. O comando manual direto prevalece, põe a saída em manual e vale até o comando de modo automático. Em automático, o pedido do sensor local prevalece sobre o da fonte externa (agenda, só offline, ou regra da plataforma). Falha do sensor: em automático desliga, em manual mantém o comando manual. A volta ao automático avalia e executa a regra válida na hora. Não especificado e tratado de forma conservadora, a confirmar (P-040): fim da falha reaplica o pedido válido; volta ao automático sem pedido mantém o estado; depois de reinício a saída volta desligada e em automático; o alerta ao CCO na chegada do comando manual depende do espaço de alertas e ainda não existe.
+- **Ainda não implementado:** saída em frequência (FW-023) e o alerta ao CCO na chegada do comando manual.
 - **"Pulsada" é a saída em frequência (decidido em 03/11/2026):** não é acionamento por tempo. A saída discreta é só ligada ou desligada, com o retardo de acionamento. O tipo da saída no mapa Modbus ficou 0 = discreto e 1 = frequência.
 - **Sleep e frequência (decidido em 03/11/2026):** a saída em frequência só pode ser habilitada se o modo sleep não estiver ativo, e o sleep só liga se nenhuma saída estiver em frequência. O sleep tem uma função de ligar e desligar (modo de operação 40412).
 - **Carga indutiva:** o diodo de roda livre fica no relé externo, instalado pelo responsável técnico.
@@ -193,6 +194,7 @@ Depois de estabelecida a conectividade do dispositivo, a configuração continua
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.52 | FW-025: modo manual e automático por saída, prioridade do sensor local e falha do sensor |
 | 04/11/2026 | 0.1.51 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |
 | 03/11/2026 | 0.1.50 | O "acionamento por tempo" é o retardo de acionamento; ligar com a saída ligada ou aguardando é descartado; mapa Modbus das saídas ajustado (P-037) |
 | 03/11/2026 | 0.1.49 | Saídas digitais: "pulsada" é a saída em frequência, retardo de acionamento (relé de tempo), exclusão mútua entre frequência e sleep e diodo no relé externo |

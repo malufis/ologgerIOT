@@ -1,6 +1,6 @@
 # Status do Projeto — oLoggerIOT
 
-> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.149
+> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.151
 > **Repositório:** https://github.com/malufis/ologgerIOT
 
 ## Fase atual
@@ -55,8 +55,9 @@
 | P-035 | HW-009: saídas digitais sem pull-down na base do transistor; estado durante reset e bootloader não garantido | Fase 4 | ANOTADO em 03/11/2026 em `documentacao/melhorias_hardware.md` para a próxima revisão; pull-down de ~10 kΩ |
 | P-036 | Saída em frequência (FW-023): PB12 não tem canal de timer e o temporizador de software não roda em Stop 2 | Fase 4 | RESOLVIDO em 03/11/2026 — a frequência só habilita com o sleep desligado e o sleep só liga sem saída em frequência (FW-061); falta implementar o lado das saídas |
 | P-037 | Mapa Modbus: o tipo da saída (40166–40180) tinha 1 = pulsado e 2 = frequência, que são a mesma coisa | Fase 4 | RESOLVIDO em 03/11/2026 — 0 = discreto, 1 = frequência (pulsada), 2 reservado; 40271–40285 reservado (o tempo de acionamento é o retardo de 40256–40270) |
-| P-038 | Espaço de flash do STM32L412C8: 64 KB, com a imagem atual em 25,8 KB. A atualização com recuperação (FW-040 a FW-042) pede uma decisão de arquitetura (imagem na flash externa com bootloader, ou L412CB de 128 KB na próxima revisão) | Fase 9 | PENDENTE — `documentacao/adr/ADR-0003-atualizacao-e-protecao.md` |
+| P-038 | Espaço de flash do STM32L412C8: 64 KB, com a imagem atual em 25,8 KB | Fase 9 | RESOLVIDO em 04/11/2026 — ADR-0003: imagem na flash externa com bootloader; novo FW-062 reserva o espaço e mede a folga por fase |
 | P-039 | ADR-0001 (versão do FreeRTOS nos dois builds) e ADR-0002 (ferramenta MISRA): propostas aguardando decisão | Fase 0 | PENDENTE |
+| P-040 | Modo manual e automático das saídas (FW-025): confirmar o que o B4 não especifica — o fim da falha do sensor reaplica o pedido válido; a volta ao automático sem pedido mantém o estado; depois de reinício a saída volta desligada e em automático (o modo manual não é guardado); o alerta ao CCO na chegada do comando manual depende do espaço de alertas (FW-021) | Fase 4 | PENDENTE — confirmar |
 
 ## Decisões tomadas
 B0 — Identificação: respostas e resumo confirmados pelo usuário em 29/10/2026.
@@ -314,7 +315,7 @@ Regra de processo: a entrevista do firmware só pergunta o que é do device. O q
 ## Processo de desenvolvimento (01/11/2026)
 - **Git:** repositório local iniciado em `firmware/`, com remoto `origin` para `https://github.com/malufis/ologgerIOT.git`. Em 03/11/2026 o branch `feat/fw-002-cmake-raiz` tem commits enviados ao remoto e o PR #1 está aberto para `main`; commit e push seguem dependendo de ordem explícita do usuário.
 - **Documentação:** índice em `documentacao/README.md`. Dicionário de funções, padrão de código C (base MISRA C:2012), contrato de integração e manual de operação criados como esqueletos.
-- **Backlog:** `planejamento/BACKLOG.md`, com 61 itens (FW-001 a FW-061) em 12 fases, incluindo a fase 1B. Sprints de uma semana, de SPRINT_00 a SPRINT_09, em `planejamento/sprints/`.
+- **Backlog:** `planejamento/BACKLOG.md`, com 62 itens (FW-001 a FW-062) em 12 fases, incluindo a fase 1B. Sprints de uma semana, de SPRINT_00 a SPRINT_09, em `planejamento/sprints/`.
 - **Skills:** `c-firmware-standards`, `doc-sync`, `device-profile-build` e `sprint-task` em `firmware/.claude/skills/`.
 - **Agentes:** `firmware-dev` e `doc-keeper` em `firmware/.claude/agents/`.
 - **Scripts prontos (02/11/2026):** `tools/verifica_padrao.py` e `tools/gera_dicionario.py` (FW-004 e FW-008), citados pelas skills.
@@ -344,7 +345,7 @@ Regra de processo: a entrevista do firmware só pergunta o que é do device. O q
 
 ## Saídas digitais (03/11/2026)
 - **Circuito:** NPN BC847 em coletor aberto por saída; pino em nível alto liga e puxa `OUT-n` ao terra; base com 1k e sem pull-down (HW-009).
-- **Implementado (FW-022 e FW-024):** ligar, desligar e retardo de acionamento (relé de tempo), com as saídas desligadas na partida. O "acionamento por tempo" é o retardo; não há desligamento automático. Todo comando de ligar espera o retardo; com a saída ligada ou com o retardo em andamento, outro ligar é descartado; desligar cancela a partida. Falta modo manual e automático (FW-025) e saída em frequência (FW-023). "Pulsada" é a saída em frequência.
+- **Implementado (FW-022, FW-024 e FW-025):** ligar, desligar e retardo de acionamento (relé de tempo), com as saídas desligadas na partida. O "acionamento por tempo" é o retardo; não há desligamento automático. Todo comando de ligar espera o retardo; com a saída ligada ou com o retardo em andamento, outro ligar é descartado; desligar cancela a partida. Modo manual e automático por saída, com prioridade do sensor local e falha do sensor (FW-025), em código. Falta a saída em frequência (FW-023) e o alerta ao CCO. "Pulsada" é a saída em frequência.
 - **Sleep e frequência:** a saída em frequência só habilita com o sleep desligado, e o sleep só liga sem saída em frequência (FW-061). Diodo de roda livre no relé externo. Melhorias de hardware em `documentacao/melhorias_hardware.md`.
 - Detalhes em `planejamento/sprints/SPRINT_04.md` e `documentacao/configuracao_do_dispositivo.md`.
 
@@ -354,6 +355,8 @@ A entrevista está encerrada e o firmware está em desenvolvimento. Os dois buil
 ## Histórico de atualizações
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.151 | FW-025 em código pronto; pendência P-040 com o que o B4 não especifica |
+| 04/11/2026 | 0.3.150 | ADR-0003 decidido (imagem na flash externa com bootloader); P-038 resolvida; novo FW-062 |
 | 04/11/2026 | 0.3.149 | SPRINT_00 concluída em 04/11/2026 (changelog 0.2.0); cinco regras do padrão de código confirmadas; ADR-0003 escolhido como o primeiro a decidir |
 | 04/11/2026 | 0.3.148 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |
 | 04/11/2026 | 0.3.147 | Pendências P-038 (espaço de flash do STM32L412C8) e P-039 (ADRs de FreeRTOS e MISRA); criada a pasta `documentacao/adr/` |

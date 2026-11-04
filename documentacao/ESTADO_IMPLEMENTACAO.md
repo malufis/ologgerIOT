@@ -1,17 +1,17 @@
 # Estado da implementação — oLoggerIOT
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.8
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.10
 
 Documento vivo. Diz o que existe no código, o que está em teste e o que falta. Agentes e desenvolvedores leem aqui antes de começar um item. Atualizado pela skill `doc-sync` a cada item fechado e revisado pela skill `sprint-close`.
 
 ## Situação atual
 
 - **Sprints em andamento:** SPRINT_01B (entrada digital e contador de pulsos) e SPRINT_04 (saídas), em código pronto. A SPRINT_01 (aquisição analógica) está bloqueada pela ferrite L2. A SPRINT_00 foi concluída em 04/11/2026.
-- **Dois builds compilam sem avisos com `-Werror`** (03/11/2026): `ologgermulti` com 25 792 bytes de código e `y7080` com 4 944. O `y7080` não leva `ENTRADA_DIGITAL`, nem a gerência de energia.
-- **Testes no PC (03/11/2026):** sensor (57 verificações), filtro de ruído (135), contador de pulsos (25), totalizador (36) e estado da saída digital (36); verificadores das ferramentas (27 testes). Todos passam. O executável do `sensor` foi bloqueado uma vez pela política de Controle de Aplicativo do Windows depois de um relink, mas recompilado rodou e passou.
+- **Dois builds compilam sem avisos com `-Werror`** (03/11/2026): `ologgermulti` com 25 908 bytes de código e `y7080` com 4 944. O `y7080` não leva `ENTRADA_DIGITAL`, nem a gerência de energia.
+- **Testes no PC (03/11/2026):** sensor (57 verificações), filtro de ruído (135), contador de pulsos (25), totalizador (36) estado da saída digital (36) e controle manual e automático (42); verificadores das ferramentas (27 testes). Todos passam. O executável do `sensor` foi bloqueado uma vez pela política de Controle de Aplicativo do Windows depois de um relink, mas recompilado rodou e passou.
 - **Hardware verificado em 02/11/2026:** a imagem do OloggerMulti executa no STM32L412 real, com FreeRTOS e a tarefa de vida. A aquisição analógica mede a entrada 4 com 8 mA injetados e mostra 8,007 mA.
 - **Nada da entrada digital, do contador de pulsos, do totalizador e da gerência de energia foi testado em hardware.** Só compilam e têm testes de lógica no PC. O roteiro de bancada está em `documentacao/roteiro_bancada_entrada_digital.md`.
-- **Saídas digitais (FW-022 e FW-024, 03/11/2026):** ligar, desligar e retardo de acionamento (relé de tempo, o "acionamento por tempo") em código, com 36 verificações no PC. O que falta: quem manda na saída (manual, automático, sensor), saída em frequência (a "pulsada") e a ligação com comandos. Sem teste em hardware. A saída em frequência só habilita com o sleep desligado, e o sleep só liga sem saída em frequência (FW-061).
+- **Saídas digitais (FW-022, FW-024 e FW-025, 04/11/2026):** ligar, desligar, retardo de acionamento (relé de tempo, o "acionamento por tempo") e modo manual e automático por saída, com prioridade do sensor local e falha do sensor, em código, com 36 e 42 verificações no PC. O que falta: saída em frequência (a "pulsada"), alerta ao CCO na chegada do comando manual e a ligação com comandos. Sem teste em hardware. A saída em frequência só habilita com o sleep desligado, e o sleep só liga sem saída em frequência (FW-061).
 - **Bancada de 03/11/2026:** D1 retirada das entradas digitais, limite de 12 V na entrada, resistor de 4K7 em 0402 mantido até o novo layout (achado HW-008).
 - **Bloqueio da fase 1 (HW-007):** a ferrite L2 não foi soldada na placa de bancada. Sem ela, o VDDA cai para ~2,37 V e o ADC satura em ~15,8 mA. Soldar a L2, conferir a resistência (quase 0 Ω) e o VDDA (3,25 V), voltar a referência do firmware para 3,25 V e refazer a calibração em 4, 8, 12, 16 e 20 mA.
 - **Risco no FreeRTOS:** entre a criação da primeira tarefa e `vTaskStartScheduler` o SysTick fica mascarado. Chamada do HAL com *timeout* nessa janela nunca expira. Inicializar hardware antes de criar tarefas, ou dentro delas.
@@ -28,7 +28,7 @@ Documento vivo. Diz o que existe no código, o que está em teste e o que falta.
 | Tarefa de vida | `lib/vida/` | Implementada; executa no L412 real | FW-046 | Contador subindo no chip; 101 de 128 palavras de pilha livres |
 | Pinagem por placa | `devices/ologgermulti/pinos.h`, `devices/y7080/pinos.h`, `tools/verifica_pinos.py` | Implementada | FW-003 | Conferida contra as netlists (31 e 26 funções); compila com o HAL real; 7 testes do verificador |
 | Configuração CMake (raiz, toolchain, CPU por MCU) | `CMakeLists.txt`, `cmake/` | Implementada | FW-002 | Configura os dois builds e recusa device inválido |
-| Imagem STM32 do OloggerMulti (L412) | `src/`, `cmake/hal-stm32l4.cmake`, `include/stm32l4xx_hal_conf.h`, `devices/ologgermulti/` | Compila e linka sem avisos (25 792 bytes de código em 03/11/2026). Executa no STM32L412 real com a versão de 02/11/2026 | FW-006 | Build com `-Werror`; em hardware, PC em `0x0800....` e SysTick contando |
+| Imagem STM32 do OloggerMulti (L412) | `src/`, `cmake/hal-stm32l4.cmake`, `include/stm32l4xx_hal_conf.h`, `devices/ologgermulti/` | Compila e linka sem avisos (25 908 bytes de código em 03/11/2026). Executa no STM32L412 real com a versão de 02/11/2026 | FW-006 | Build com `-Werror`; em hardware, PC em `0x0800....` e SysTick contando |
 | Imagem STM32 do y7080 (L071) | `cmake/hal-stm32l0.cmake`, `include/stm32l0xx_hal_conf.h`, `devices/y7080/` | Compila e linka sem avisos (4 944 bytes de código em 03/11/2026). Sem teste em hardware | FW-006 | Build com `-Werror` |
 | Build ESP32 | `esp32/` | Não iniciado; depois da validação do STM32 (SPRINT_07) | FW-007 | — |
 | Doxygen e dicionário de funções | `Doxyfile`, `tools/gera_dicionario.py` | Implementado; 73 funções no dicionário | FW-004 | 8 testes do gerador; Doxygen barra função e parâmetro sem documentação |
@@ -51,7 +51,7 @@ Documento vivo. Diz o que existe no código, o que está em teste e o que falta.
 | Saída em frequência (a "pulsada") | `lib/io/` | Não iniciado; PB12 não tem canal de timer; só habilita com o sleep desligado | FW-023 | — |
 | Retardo de acionamento (relé de tempo) | `lib/io/` (`saida`, `io_saidas`) | Código pronto; bancada pendente | FW-024 | 36 verificações no PC |
 | Ligar e desligar o sleep | `lib/energia/` | Lado do sleep pronto (`energia_define_habilitada` pode recusar); falta o lado das saídas e o comando | FW-061 | Sem teste em hardware |
-| Modo manual e automático por saída | `lib/io/` | Não iniciado | FW-025 | — |
+| Modo manual e automático por saída | `lib/io/` (`controle_saida`, `io_saidas`) | Lógica implementada e ligada às quatro saídas; sem alerta ao CCO | FW-025 | 42 verificações no PC; sem teste em hardware |
 | Modo de frequência em Hz | `lib/io/` | Não iniciado; faixa de 0 a 20 kHz, ajuste fica para depois | FW-054 | — |
 | Contagem em hardware (LPTIM1, D4) | `lib/io/` | Não iniciado; a confirmar | FW-059 | — |
 | Fila de telemetria | `lib/fila/` | Não iniciado | FW-019 | — |
@@ -75,7 +75,7 @@ Legenda de estado: **Não iniciado**, **Em desenvolvimento**, **Em teste**, **Im
 - **Contagem em hardware na D4 (FW-059):** só a D4 (PB5) tem `LPTIM1_IN1`, pela base do STM32CubeMX; confirmar no RM0394.
 - **Modo do despertar e debug:** em Stop 2 a conexão SWD cai. Habilitar o sleep na bancada exige o clock de depuração do Stop ou uso por pulso.
 - **Mapa Modbus:** o modo da entrada digital (40151–40165) hoje é "discreto ou pulsado". Falta definir os modos (discreto, contador de pulsos e frequência) e o endereço do totalizador.
-- **Espaço de flash do STM32L412C8: 64 KB (verificado na base do CubeMX em 04/11/2026), com 40 KB de RAM.** A imagem do OloggerMulti já usa 25,8 KB de flash e 8,6 KB de RAM, e ainda faltam Modbus, fila, agenda, sessão e o protocolo com o ESP32. A atualização com recuperação da versão anterior (FW-040 a FW-042) não cabe em dois espaços internos quando a imagem passar de ~28 KB. O L412CB tem 128 KB. Decidir cedo: `documentacao/adr/ADR-0003-atualizacao-e-protecao.md` e `documentacao/melhorias_hardware.md`.
+- **Espaço de flash do STM32L412C8: 64 KB (verificado na base do CubeMX em 04/11/2026), com 40 KB de RAM.** A imagem do OloggerMulti já usa 25,8 KB de flash e 8,6 KB de RAM, e ainda faltam Modbus, fila, agenda, sessão e o protocolo com o ESP32. A atualização com recuperação da versão anterior (FW-040 a FW-042) não cabe em dois espaços internos quando a imagem passar de ~28 KB. **Decidido em 04/11/2026 (ADR-0003):** a imagem nova fica na flash externa, validada ali, e um bootloader a copia para a flash interna; o FW-062 reserva o espaço do bootloader e mede a folga por fase. A troca para o L412CB (128 KB) ficou só como contingência (`documentacao/melhorias_hardware.md`, item 8).
 - Versão do FreeRTOS: os pacotes da ST trazem V10.3.1 (L4) e V10.2.0 (L0), então os dois builds usam kernels diferentes. Decidir se fixa uma só versão para os dois, copiada para o repositório (proposta em `documentacao/adr/ADR-0001-versao-freertos.md`).
 - Ferramenta de verificação estática MISRA e o ADR de escolha, previstos no padrão de código (FW-008 entregou só o verificador do projeto). Proposta em `documentacao/adr/ADR-0002-analise-estatica-misra.md`.
 - Protocolo do rádio externo na UART do OloggerMulti (`RADIO_UART_EXTERNO`).
@@ -97,6 +97,8 @@ Legenda de estado: **Não iniciado**, **Em desenvolvimento**, **Em teste**, **Im
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.10 | FW-025: modo manual e automático por saída em código pronto |
+| 04/11/2026 | 0.2.9 | ADR-0003 decidido: atualização por imagem na flash externa com bootloader |
 | 04/11/2026 | 0.2.8 | SPRINT_00 concluída em 04/11/2026 |
 | 04/11/2026 | 0.2.7 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |
 | 04/11/2026 | 0.2.6 | Adicionados o risco do espaço de flash do STM32L412C8, as referências aos ADRs e a seção "Próxima sprint" |

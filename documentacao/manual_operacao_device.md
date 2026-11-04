@@ -1,6 +1,6 @@
 # Manual de operação do device — oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.2.3
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.4
 
 ## Para quem é
 
@@ -29,6 +29,7 @@ Quatro saídas, no conector J12. Em código e ainda sem validação em bancada.
 - **Carga:** a corrente máxima da saída ainda não foi confirmada no datasheet do transistor; não ligar carga pesada antes disso. **Carga indutiva (relé, contator) precisa de diodo de roda livre externo**, porque a saída não tem proteção; o diodo fica no relé externo.
 - **Estado:** as saídas partem desligadas e não religam sozinhas depois de falta de energia. Durante o reset e a gravação do firmware o estado da saída não é garantido (achado HW-009).
 - **Retardo de acionamento (relé de tempo):** uma saída pode ter um retardo. Todo comando de ligar espera o retardo e então liga; um comando de desligar durante a espera cancela a partida. Com a saída já ligada, ou com o retardo em andamento, outro comando de ligar é descartado. No sleep do STM32 o retardo não corre.
+- **Modo manual e automático:** cada saída tem o seu modo. Um comando manual põe a saída em manual e ela só volta ao automático com o comando de modo automático. Em automático, a saída segue o sensor local, que prevalece sobre a agenda e a regra da plataforma. Se o sensor falhar, a saída desliga em automático e mantém o comando em manual. Depois de um reinício a saída volta desligada e em modo automático.
 
 ## Seções planejadas
 
@@ -45,6 +46,7 @@ Quatro saídas, no conector J12. Em código e ainda sem validação em bancada.
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.4 | Adicionado o modo manual e automático das saídas |
 | 03/11/2026 | 0.2.3 | O "acionamento por tempo" é o retardo de acionamento; ligar com a saída ligada ou aguardando é descartado; mapa Modbus das saídas ajustado (P-037) |
 | 03/11/2026 | 0.2.2 | Saídas digitais: retardo de acionamento e diodo no relé externo |
 | 03/11/2026 | 0.2.1 | Adicionada a seção de saídas digitais (em código, sem validação em bancada) |

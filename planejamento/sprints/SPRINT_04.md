@@ -1,6 +1,6 @@
 # SPRINT_04 — Saídas e controle
 
-> **Criado em:** 03/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.5
+> **Criado em:** 03/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.6
 > **Período:** 30/11/2026 a 04/12/2026
 
 Em andamento desde 03/11/2026: o FW-022 e o FW-024 estão em código pronto; os demais itens estão pendentes. As datas são a sequência de semanas a partir de 02/11/2026 e mudam se a SPRINT_00, a SPRINT_01 ou a SPRINT_01B atrasarem.
@@ -16,14 +16,14 @@ Saídas discretas (ligar e desligar, com retardo de acionamento), saída em freq
 | FW-022 | Saídas discretas: ligar e desligar, com as saídas desligadas na partida | Código pronto em 03/11/2026: ligar e desligar (`saida`, `io_saida`, `io_saidas`), com as saídas desligadas na partida. Bancada pendente |
 | FW-023 | Saída em frequência (a "pulsada") proporcional a 4–20 mA, com 4 mA e 20 mA configuráveis; só pode ser habilitada com o sleep desligado | Pendente |
 | FW-024 | Retardo de acionamento (relé de tempo, o "acionamento por tempo") por saída discreta, com cancelamento por comando de desligar | Código pronto em 03/11/2026 (`saida_define_atraso`, `io_saidas_define_atraso`): 36 verificações no PC com o retardo, o comando descartado, o cancelamento por desligar e a volta do contador. Regras confirmadas em 03/11/2026. Bancada pendente |
-| FW-025 | Modo manual e automático por saída, com prioridade do sensor | Pendente |
+| FW-025 | Modo manual e automático por saída, com prioridade do sensor | Código pronto em 04/11/2026 (`controle_saida`, `io_saidas`): 42 verificações no PC com manual, automático, prioridade do sensor, falha do sensor e retardo. Faltam o alerta ao CCO na chegada do comando manual e a ligação com o sistema. Comportamentos não especificados, tratados de forma conservadora: ver P-040. Bancada pendente |
 | FW-061 | Ligar e desligar o modo sleep (modo de operação, registro 40412), com exclusão mútua: o sleep só liga se nenhuma saída estiver em frequência, e a saída em frequência só habilita com o sleep desligado | Lado do sleep pronto em 03/11/2026 (`energia_define_habilitada` devolve erro se um módulo impede). Falta o lado das saídas (FW-023) e o comando do Modbus |
 
 ## Estado das saídas digitais (03/11/2026)
 
 - **Hardware (netlist `extras.xml`):** cada saída é um NPN BC847 em coletor aberto. O pino do STM32 passa por 1k (R45 a R48) até a base, o emissor vai ao terra `GNDD` e o coletor vai ao conector J12 (`OUT-1` a `OUT-4`). **Pino em nível alto liga a saída**, que puxa `OUT-n` ao terra. Não há pull-down na base, nem diodo de roda livre. Pinos: PB12 a PB15.
 - **Código:** `lib/io/saida` (estado: ligada, aguardando o retardo ou desligada, em lógica pura), `lib/io/io_saida` (pinos, com o nível desligado escrito antes de virar saída) e `lib/io/io_saidas` (quatro saídas e a tarefa que liga as saídas ao fim do retardo, a cada 100 ms). `io_saidas_prepara()` roda logo depois do `HAL_Init`, e as saídas partem desligadas.
-- **Ainda não existe:** quem manda na saída (manual, automático, sensor, agenda), a saída em frequência e a ligação com comandos do sistema e do Modbus. Nada foi testado em hardware.
+- **Ainda não existe:** a saída em frequência, o alerta ao CCO na chegada do comando manual, e a ligação com os comandos do sistema e do Modbus. Nada foi testado em hardware.
 - **Stop 2:** o pino mantém o estado, mas o retardo não corre, porque o tick do FreeRTOS para.
 
 ### Decisões de 03/11/2026
@@ -36,6 +36,23 @@ Saídas discretas (ligar e desligar, com retardo de acionamento), saída em freq
 - **Sleep e saída em frequência não coexistem.** A saída em frequência só pode ser habilitada se o modo sleep não estiver ativo, e o sleep só liga se nenhuma saída estiver em frequência. Ligar e desligar o sleep é uma função (FW-061), que corresponde ao modo de operação 40412 (0 = contínuo, 1 = sleep).
 - **Diodo no relé externo.** O responsável técnico instalará o diodo de roda livre no relé externo.
 - **Melhoria de hardware.** O pull-down da base dos transistores de saída (HW-009) e os demais pontos estão em `documentacao/melhorias_hardware.md`, para a próxima revisão das placas.
+
+### Modo manual e automático (FW-025, 04/11/2026)
+
+Implementado conforme o B4 (`documentacao/configuracao_do_dispositivo.md`):
+
+- Cada saída tem modo **manual** ou **automático**, e um comando muda só o modo da saída a que se destina.
+- Um **comando manual direto** prevalece sobre agenda e regras automáticas, põe a saída em modo manual e ela fica assim até o comando de modo automático. Ele respeita o retardo de acionamento.
+- Os **pedidos automáticos** vêm de duas fontes: o **sensor local** e a **fonte externa** (agenda, que só atua offline, ou regra da plataforma). O sensor prevalece sobre a externa. Em modo manual os pedidos ficam guardados e não são aplicados.
+- **Falha do sensor:** em automático a saída desliga; em manual mantém o comando manual.
+- **Volta ao automático:** avalia e executa a regra válida na hora, sem esperar nova leitura.
+
+**Não especificado no B4 e tratado de forma conservadora, a confirmar (P-040):**
+- Quando a falha do sensor termina, o pedido válido volta a ser aplicado (se o sensor pedir ligar, liga com o retardo).
+- Na volta ao automático sem nenhum pedido válido, a saída mantém o estado em que estava, em vez de desligar.
+- Depois de um reinício, a saída volta desligada e em modo automático: o modo manual não é guardado. O B4 deixou o comportamento após reinício a detalhar.
+- O alerta ao CCO na chegada de um comando manual ainda não existe: ele depende do espaço de alertas (FW-021). `io_saidas_comando_manual` informa se houve mudança de modo, mas o alerta vale para todo comando manual que chega.
+- A interação do modo manual com a saída em frequência, e a da regra do sensor com o retardo, seguem em aberto (FW-023).
 
 ### Ainda a confirmar
 
@@ -52,6 +69,7 @@ Saídas discretas (ligar e desligar, com retardo de acionamento), saída em freq
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.6 | FW-025 em código pronto: modo manual e automático por saída, com prioridade do sensor local e falha do sensor |
 | 04/11/2026 | 0.1.5 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |
 | 03/11/2026 | 0.1.4 | O "acionamento por tempo" é o retardo de acionamento; ligar com a saída ligada ou aguardando é descartado; mapa Modbus das saídas ajustado (P-037) |
 | 03/11/2026 | 0.1.3 | Meta ajustada: "pulsada" é a saída em frequência |

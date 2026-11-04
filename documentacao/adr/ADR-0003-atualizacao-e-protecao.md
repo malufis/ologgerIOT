@@ -1,8 +1,8 @@
 # ADR-0003 — Atualização de firmware, espaço de flash e proteção do código e das credenciais
 
-> **Criado em:** 04/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.0
+> **Criado em:** 04/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.1
 
-**Estado:** Proposta, a decidir pelo responsável técnico.
+**Estado:** Decidido em 04/11/2026 pelo responsável técnico: opção 2 (imagem na flash externa e bootloader).
 
 ## Contexto
 
@@ -32,10 +32,15 @@
 
 ## Decisão
 
-Pendente. Recomendação do agente, a confirmar: opção 2 (imagem na flash externa e bootloader), com a opção 4 avaliada para a próxima revisão da placa.
+**Decidido em 04/11/2026 pelo responsável técnico: opção 2.** A imagem nova fica na flash externa de 16 MiB, é validada ali (integridade e compatibilidade, FW-040), e um bootloader a copia para a flash interna. A imagem anterior continua guardada na flash externa para a recuperação (FW-041).
+
+- **Não adotadas:** a opção 1 (dois espaços internos, não cabe), a 3 (X-CUBE-SBSFU, não verificada) e a 4 (trocar para o L412CB). A troca de chip **não** foi escolhida; fica só como contingência, em `documentacao/melhorias_hardware.md` (item 8), se o bootloader e a aplicação não couberem em 64 KB.
+- **Consequências para o backlog:** o driver da flash externa (FW-018) passa a ser pré-requisito da atualização. Novo item **FW-062**: reservar o espaço do bootloader no layout da flash interna, mover o início da aplicação no linker e registrar a folga de flash e de RAM por fase. Os itens FW-040 a FW-042 seguem como estão, agora com este mecanismo.
+- **Ainda em aberto:** o tamanho do bootloader, o formato do pacote e a assinatura (proteção da imagem), a proteção das credenciais do ESP32 (P-004 e P-006) e o secure boot do ESP32-C6. Entram nos itens FW-040 a FW-042 e na fase 7.
 
 ## Histórico
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.1 | Decisão de 04/11/2026: imagem na flash externa com bootloader (opção 2); criado o FW-062 |
 | 04/11/2026 | 0.1.0 | Criado como proposta, com o espaço de flash do STM32L412C8 verificado na base do CubeMX |

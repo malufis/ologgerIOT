@@ -1,6 +1,6 @@
 # Backlog do firmware — oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.5
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.7
 
 ## Regras
 
@@ -79,7 +79,7 @@ Entrada digital ativa com tensão no campo (de 12 a 24 V; na bancada, até 12 V)
 | ID | Tarefa | Aceite | Situação |
 |---|---|---|---|
 | FW-017 | Média móvel de um envio sobre os valores de 1 segundo | Teste no PC | Pendente |
-| FW-018 | Driver da flash SPI externa de 16 MiB (GD25Q128) | Leitura e escrita verificadas | Pendente |
+| FW-018 | Driver da flash SPI externa de 16 MiB (GD25Q128) | Leitura e escrita verificadas | Pendente; pré-requisito da atualização (ADR-0003) |
 | FW-019 | Biblioteca `lib/fila`: fila de telemetria com substituição do mais antigo | Teste de fila cheia | Pendente |
 | FW-020 | Confirmação de envio: remoção só após confirmação do servidor | Teste de envio perdido e confirmado | Pendente |
 | FW-021 | Espaço de alertas com 300 registros | Teste de substituição | Pendente |
@@ -91,7 +91,7 @@ Entrada digital ativa com tensão no campo (de 12 a 24 V; na bancada, até 12 V)
 | FW-022 | Saídas discretas: ligar e desligar, com as saídas desligadas na partida | Testes de estado | Código pronto em 03/11/2026: ligar e desligar (`saida`, `io_saida`, `io_saidas`), com as saídas desligadas na partida. Bancada pendente |
 | FW-023 | Saída em frequência (a "pulsada") proporcional a 4–20 mA, com 4 mA e 20 mA configuráveis; só pode ser habilitada com o sleep desligado | Teste de proporcionalidade | Pendente |
 | FW-024 | Retardo de acionamento (relé de tempo, o "acionamento por tempo") por saída discreta, com cancelamento por comando de desligar | Testes de temporização | Código pronto em 03/11/2026 (`saida_define_atraso`, `io_saidas_define_atraso`): 36 verificações no PC com o retardo, o comando descartado, o cancelamento por desligar e a volta do contador. Regras confirmadas em 03/11/2026. Bancada pendente |
-| FW-025 | Modo manual e automático por saída, com prioridade do sensor | Tabela de estados testada | Pendente |
+| FW-025 | Modo manual e automático por saída, com prioridade do sensor | Tabela de estados testada | Código pronto em 04/11/2026 (`controle_saida`, `io_saidas`): 42 verificações no PC com manual, automático, prioridade do sensor, falha do sensor e retardo. Faltam o alerta ao CCO na chegada do comando manual e a ligação com o sistema. Comportamentos não especificados, tratados de forma conservadora: ver P-040. Bancada pendente |
 | FW-061 | Ligar e desligar o modo sleep (modo de operação, registro 40412), com exclusão mútua: o sleep só liga se nenhuma saída estiver em frequência, e a saída em frequência só habilita com o sleep desligado | Testes: ligar o sleep com uma saída em frequência é recusado, e habilitar a frequência com o sleep ligado também | Lado do sleep pronto em 03/11/2026 (`energia_define_habilitada` devolve erro se um módulo impede). Falta o lado das saídas (FW-023) e o comando do Modbus |
 
 ### Fase 5 — Modbus RTU (SPRINT_05)
@@ -139,6 +139,7 @@ Entrada digital ativa com tensão no campo (de 12 a 24 V; na bancada, até 12 V)
 | FW-040 | Verificação de validade e compatibilidade do pacote | Teste com pacote inválido | Pendente |
 | FW-041 | Recuperação da versão anterior em falha ou queda de energia | Teste de queda durante gravação | Pendente |
 | FW-042 | Saídas desligadas durante atualização e retomada com tempo de partida | Teste de retomada | Pendente |
+| FW-062 | Layout da flash interna do STM32 com bootloader (ADR-0003): reservar o espaço do bootloader, mover o início da aplicação no linker, e medir e registrar a folga de flash e de RAM por fase | Imagem compila e executa no novo endereço; tabela de folga por fase registrada em `documentacao/ESTADO_IMPLEMENTACAO.md` | Pendente; criado em 04/11/2026 pela decisão do ADR-0003 |
 
 ### Fase 10 — Bancada e protótipo (SPRINT_09)
 
@@ -153,6 +154,8 @@ Entrada digital ativa com tensão no campo (de 12 a 24 V; na bancada, até 12 V)
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.7 | FW-025 em código pronto |
+| 04/11/2026 | 0.2.6 | Novo FW-062 (layout da flash interna com bootloader), pela decisão do ADR-0003 |
 | 04/11/2026 | 0.2.5 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |
 | 03/11/2026 | 0.2.4 | O "acionamento por tempo" é o retardo de acionamento; ligar com a saída ligada ou aguardando é descartado; mapa Modbus das saídas ajustado (P-037) |
 | 03/11/2026 | 0.2.3 | Decisões de 03/11/2026: "pulsada" é a saída em frequência (FW-023), o retardo de acionamento vale para a saída discreta (FW-024) e o sleep liga e desliga com exclusão mútua com a frequência (novo FW-061) |

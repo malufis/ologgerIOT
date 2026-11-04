@@ -1,6 +1,6 @@
 # Changelog — oLoggerIOT firmware
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.7
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.9
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versões seguem a numeração do projeto (ver `sistema-init/STATUS_PROJETO.md`). Cada entrada cita o item do backlog (`FW-###`) quando houver.
 
@@ -9,6 +9,8 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 Trabalho das sprints 01 (aquisição analógica), 01B (entrada digital) e 04 (saídas), ainda em andamento, e documentação posterior à SPRINT_00.
 
 ### Adicionado
+- FW-025: modo manual e automático por saída em `lib/io` (`controle_saida`, 42 verificações no PC) e nas quatro saídas (`io_saidas_comando_manual`, `io_saidas_modo_automatico`, `io_saidas_pedido`, `io_saidas_sensor_falha`, `io_saidas_modo`). O comando manual prevalece; em automático o sensor local prevalece sobre a fonte externa; a falha do sensor desliga em automático e mantém em manual; a volta ao automático avalia na hora. Compila no `ologgermulti` (25 908 bytes). Sem alerta ao CCO e sem teste em hardware.
+- FW-062 (backlog): layout da flash interna do STM32 com bootloader. ADR-0003 decidido em 04/11/2026: a atualização usa a imagem na flash externa com um bootloader.
 - `documentacao/desvios_misra.md`: registro do desvio DEV-001 (`MISRA-DEV` em `lib/adc/src/adc.c`), que estava marcado no código sem registro.
 - `documentacao/adr/`: três decisões de arquitetura em estado de proposta (versão do FreeRTOS, ferramenta MISRA, atualização e proteção). Registrado o risco de espaço de flash do STM32L412C8 (64 KB, imagem atual de 25,8 KB).
 - FW-024: retardo de acionamento (relé de tempo, o "acionamento por tempo") por saída discreta: `saida_define_atraso`, `io_saidas_define_atraso` e `io_saidas_aguardando`. Todo comando que liga a saída espera o retardo; desligar durante a espera cancela a partida; ligar com a saída ligada ou com o retardo em andamento é descartado. 36 verificações no PC.
@@ -36,6 +38,7 @@ Trabalho das sprints 01 (aquisição analógica), 01B (entrada digital) e 04 (sa
 - Padrão de código C (`documentacao/padrao_codigo_c.md`): as cinco regras de interrupções, sleep e armazenamento foram confirmadas pelo responsável técnico em 04/11/2026.
 
 ### Removido
+- `io_saidas_liga` e `io_saidas_desliga`, substituídas pelo comando manual e pelos pedidos automáticos (FW-025).
 - `saida_aciona_por` e `io_saidas_aciona` (acionamento que desligava sozinho depois de um tempo), por decisão de 03/11/2026: o "acionamento por tempo" é o retardo de acionamento.
 
 ## 0.2.0 — 06/11/2026 (SPRINT_00, base do projeto)
