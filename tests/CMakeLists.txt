@@ -68,6 +68,17 @@ add_executable(test_controle_saida
 target_include_directories(test_controle_saida PRIVATE ../lib/io/include .)
 add_test(NAME controle_saida COMMAND test_controle_saida)
 
+# Módulo io: regra do sensor (limiares, sentido e histerese de uma entrada analógica).
+add_executable(test_regra_sensor
+  io/test_regra_sensor.c
+  ../lib/io/src/regra_sensor.c
+  ../lib/io/src/controle_saida.c
+  ../lib/io/src/saida.c
+)
+target_include_directories(test_regra_sensor PRIVATE ../lib/io/include .)
+target_link_libraries(test_regra_sensor PRIVATE m)
+add_test(NAME regra_sensor COMMAND test_regra_sensor)
+
 # Módulo io: totalizador de pulsos com duas cópias e complemento.
 add_executable(test_io_totalizador
   io/test_io_totalizador.c
