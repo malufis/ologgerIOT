@@ -1,6 +1,6 @@
 # Changelog — oLoggerIOT firmware
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.18
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.19
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versões seguem a numeração do projeto (ver `sistema-init/STATUS_PROJETO.md`). Cada entrada cita o item do backlog (`FW-###`) quando houver.
 
@@ -10,6 +10,7 @@ Trabalho das sprints 01 (aquisição analógica), 01B (entrada digital) e 04 (sa
 
 ### Adicionado
 - FW-032 (parcial): `lib/agenda`, agenda semanal de 336 intervalos de 30 minutos por saída. `agenda_carrega_hex` valida por inteiro a cadeia de 84 caracteres hexadecimais recebida do CCO por MQTT (sem alterar a agenda anterior em caso de erro) e `agenda_estado` devolve ligada, desligada ou sem agenda para um instante. 57 verificações no PC. Falta o RTC, o armazenamento persistente, a aplicação por intervalo e o recebimento por MQTT. Formato em `documentacao/agenda_operacional_offline.md` (P-042).
+- FW-023 (parcial): `io_frequencia_cadastra` e `io_frequencia_atualiza`, que replicam na saída em frequência a leitura do sensor (frequência de 4 mA a 20 mA, 0 Hz na falha). Decidido: o sensor manda na saída em frequência e os comandos manual e automático não a influenciam.
 - FW-023 (parcial): `io_frequencia` liga o gerador ao TIM6 (interrupção a 100 kHz, que só roda com alguma saída acima de 0 Hz) e aos pinos PB13 a PB15; `io_frequencia_define_tipo` cede o pino ao gerador (`io_saidas_cede_pino`) e `io_frequencia_define_hz` define a frequência; o tratador `TIM6_IRQHandler` fica em `src/interrupcoes.c`. Compila nos dois builds; **sem teste em hardware**.
 - FW-023 (parcial): `lib/io/gerador_freq`, onda quadrada de 50% por acumulador de fase, uma frequência independente por saída (de 0 a 20 kHz, resolução de 0,001 Hz), 0 Hz em nível baixo, pensada para a interrupção de um timer a 100 kHz. 10 testes no PC. A 20 kHz o duty fica em 40% ou 60% (cinco ticks por período). Falta ligar ao timer e aos pinos.
 - FW-061 (lado das saídas): `lib/io/tipo_saida` guarda o tipo de cada saída (0 discreto, 1 frequência) e aplica a exclusão com o sleep: a frequência é recusada com o sleep ligado e na saída 1; `io_frequencia_sleep_permitido` é o gancho `sleep_permitido` de `energia`, ligado em `main.c` no build com `SAIDA_FREQUENCIA`. 8 testes no PC.

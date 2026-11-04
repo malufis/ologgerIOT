@@ -14,11 +14,12 @@
  *   frequência. O TIM6 interrompe a 100 kHz (GERADOR_FREQ_TICK_HZ) e a interrupção avança os
  *   geradores e escreve os pinos. O timer só roda quando alguma saída tem frequência diferente de
  *   zero. Em 0 Hz o pino fica em nível baixo (transistor desligado).
+ * - **Quem manda (decidido em 04/11/2026):** a saída em frequência replica a leitura do sensor
+ *   (io_frequencia_atualiza()): o **sensor manda na saída**, e os comandos manual e automático
+ *   não a influenciam. Com o sensor em falha, a saída vai para 0 Hz.
  * - **Pino:** ao entrar em modo frequência a saída cede o pino ao gerador
  *   (io_saidas_cede_pino()) e passa a 0 Hz; ao voltar a discreta, o pino é devolvido e o estado
- *   discreto é aplicado. Os comandos manual e automático seguem calculando o estado da saída em
- *   modo frequência, mas não chegam ao pino. A interação do modo manual com a saída em frequência
- *   segue em aberto.
+ *   discreto é aplicado. Os comandos manual e automático não chegam ao pino.
  *
  * O tratador da interrupção fica em src/interrupcoes.c, que chama io_frequencia_irq().
  *
@@ -43,6 +44,8 @@
 #define IO_FREQUENCIA_ERRO_NAO_FREQUENCIA (-21)
 /** Código de retorno: frequência fora de 0 a 20 kHz ou não numérica. */
 #define IO_FREQUENCIA_ERRO_FREQUENCIA    (-22)
+/** Código de retorno: a saída ainda não tem as frequências de 4 mA e 20 mA cadastradas. */
+#define IO_FREQUENCIA_ERRO_SEM_CADASTRO  (-23)
 
 /**
  * @brief Configura o TIM6 para interromper a 100 kHz, sem iniciá-lo.
@@ -86,6 +89,30 @@ int32_t io_frequencia_tipo(uint8_t canal, uint16_t *tipo);
  *         IO_FREQUENCIA_ERRO_FREQUENCIA.
  */
 int32_t io_frequencia_define_hz(uint8_t canal, float hz);
+
+/**
+ * @brief Cadastra as frequências de 4 mA e de 20 mA de uma saída em modo frequência.
+ *
+ * @param canal Saída de 1 a TIPO_SAIDA_QTD.
+ * @param hz_4ma Frequência em 4 mA, de 0 a 20 000 Hz.
+ * @param hz_20ma Frequência em 20 mA, de 0 a 20 000 Hz.
+ * @return IO_FREQUENCIA_OK, TIPO_SAIDA_ERRO_PARAMETRO ou IO_FREQUENCIA_ERRO_FREQUENCIA.
+ */
+int32_t io_frequencia_cadastra(uint8_t canal, float hz_4ma, float hz_20ma);
+
+/**
+ * @brief Replica na saída a leitura do sensor: calcula a frequência e a aplica.
+ *
+ * A saída em frequência é comandada só pelo sensor: os comandos manual e automático não a
+ * influenciam. Com o sensor em falha, a saída vai para 0 Hz.
+ *
+ * @param canal Saída de 1 a TIPO_SAIDA_QTD, em modo frequência e com cadastro.
+ * @param ma Corrente da entrada analógica associada, em miliampères.
+ * @param falha true se o sensor está em falha.
+ * @return IO_FREQUENCIA_OK, IO_FREQUENCIA_ERRO_NAO_FREQUENCIA, IO_FREQUENCIA_ERRO_SEM_CADASTRO
+ *         ou TIPO_SAIDA_ERRO_PARAMETRO (canal inválido ou corrente não numérica).
+ */
+int32_t io_frequencia_atualiza(uint8_t canal, float ma, bool falha);
 
 /**
  * @brief Gancho `sleep_permitido` de energia.h.

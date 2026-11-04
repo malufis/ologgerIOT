@@ -1,6 +1,6 @@
 # Estado da implementação — oLoggerIOT
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.18
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.19
 
 Documento vivo. Diz o que existe no código, o que está em teste e o que falta. Agentes e desenvolvedores leem aqui antes de começar um item. Atualizado pela skill `doc-sync` a cada item fechado e revisado pela skill `sprint-close`.
 
@@ -48,7 +48,7 @@ Documento vivo. Diz o que existe no código, o que está em teste e o que falta.
 | Estado da saída digital | `lib/io/` (`saida`) | Implementado; desligada, aguardando o retardo ou ligada | FW-022, FW-024 | 36 verificações no PC |
 | Driver dos pinos das saídas | `lib/io/` (`io_saida`) | Código pronto; pino em nível alto liga a saída (NPN em coletor aberto) | FW-022 | Sem teste em hardware |
 | Controle das quatro saídas | `lib/io/` (`io_saidas`) | Código pronto; tarefa de 100 ms liga as saídas ao fim do retardo | FW-022 | Sem teste em hardware |
-| Saída em frequência (a "pulsada") | `lib/io/` (`freq_saida`, `gerador_freq`, `tipo_saida`) | Parcial: cálculo da frequência (4–20 mA, 0 Hz na falha), gerador de onda quadrada por acumulador de fase e tipo por saída com a exclusão do sleep prontos e testados no PC; o gerador está ligado ao TIM6 (100 kHz) e aos pinos PB13 a PB15 por `io_frequencia`, compilado nos dois builds e **sem teste em hardware**; falta ligar a frequência à leitura da entrada analógica e o comando do Modbus. Decidido: 0 Hz em nível baixo, duty de 50%, só as saídas 2 a 4 (PB13 a PB15) | FW-023 | 04/11/2026 |
+| Saída em frequência (a "pulsada") | `lib/io/` (`freq_saida`, `gerador_freq`, `tipo_saida`) | Parcial: cálculo da frequência (4–20 mA, 0 Hz na falha), gerador de onda quadrada por acumulador de fase e tipo por saída com a exclusão do sleep prontos e testados no PC; o gerador está ligado ao TIM6 (100 kHz) e aos pinos PB13 a PB15 por `io_frequencia`, compilado nos dois builds e **sem teste em hardware**; o **sensor manda na saída** (`io_frequencia_atualiza` replica a leitura; comandos manual e automático não a influenciam; 0 Hz na falha); o sinal será testado na bancada. Falta ligar à leitura real da entrada analógica associada e ao cadastro por Modbus e MQTT. Decidido: 0 Hz em nível baixo, duty de 50%, só as saídas 2 a 4 (PB13 a PB15) | FW-023 | 04/11/2026 |
 | Retardo de acionamento (relé de tempo) | `lib/io/` (`saida`, `io_saidas`) | Código pronto; bancada pendente | FW-024 | 36 verificações no PC |
 | Ligar e desligar o sleep | `lib/energia/`, `lib/io/` (`tipo_saida`, `io_frequencia`) | Os dois lados prontos: `energia_define_habilitada` pode recusar e `io_frequencia_sleep_permitido` impede o sleep com saída em frequência; falta o comando do Modbus | FW-061 | Sem teste em hardware |
 | Modo manual e automático por saída | `lib/io/` (`controle_saida`, `io_saidas`) | Lógica implementada e ligada às quatro saídas, com regra do sensor, agenda offline, CCO online e espera de 5 minutos depois da falha; sem alerta ao CCO | FW-025 | 82 verificações no PC; sem teste em hardware |
@@ -98,6 +98,7 @@ Legenda de estado: **Não iniciado**, **Em desenvolvimento**, **Em teste**, **Im
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.19 | Saída em frequência: o sensor manda; teste na bancada |
 | 04/11/2026 | 0.2.18 | Saída em frequência ligada ao TIM6 e aos pinos (sem teste em hardware) |
 | 04/11/2026 | 0.2.17 | Gerador de frequência pronto (FW-023 parcial) |
 | 04/11/2026 | 0.2.16 | FW-061 pronto nos dois lados; decisões da saída em frequência |

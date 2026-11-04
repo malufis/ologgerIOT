@@ -1,6 +1,6 @@
 # Dicionário de funções — firmware oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.10
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.11
 
 ## Como manter
 
@@ -75,6 +75,8 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `io_filtro_amostras_do_tempo` | io_filtro | `lib/io/include/io_filtro.h` | Converte um tempo de estabilidade em número de amostras, arredondando para cima. | IO_FILTRO_OK ou IO_FILTRO_ERRO_PARAMETRO (nulo, zero ou número fora de uint16_t). | ativa |
 | `io_filtro_atualiza` | io_filtro | `lib/io/include/io_filtro.h` | Recebe uma amostra do nível da entrada e devolve o estado aceito. | Estado aceito após esta amostra. | ativa |
 | `io_filtro_inicia` | io_filtro | `lib/io/include/io_filtro.h` | Inicia o filtro com o estado aceito e o número de amostras de estabilidade. | IO_FILTRO_OK ou IO_FILTRO_ERRO_PARAMETRO. | ativa |
+| `io_frequencia_atualiza` | io_frequencia | `lib/io/include/io_frequencia.h` | Replica na saída a leitura do sensor: calcula a frequência e a aplica. | IO_FREQUENCIA_OK, IO_FREQUENCIA_ERRO_NAO_FREQUENCIA, IO_FREQUENCIA_ERRO_SEM_CADASTRO ou TIPO_SAIDA_ERRO_PARAMETRO (canal inválido ou corrente não numérica). | ativa |
+| `io_frequencia_cadastra` | io_frequencia | `lib/io/include/io_frequencia.h` | Cadastra as frequências de 4 mA e de 20 mA de uma saída em modo frequência. | IO_FREQUENCIA_OK, TIPO_SAIDA_ERRO_PARAMETRO ou IO_FREQUENCIA_ERRO_FREQUENCIA. | ativa |
 | `io_frequencia_define_hz` | io_frequencia | `lib/io/include/io_frequencia.h` | Define a frequência de uma saída em modo frequência. | IO_FREQUENCIA_OK, TIPO_SAIDA_ERRO_PARAMETRO, IO_FREQUENCIA_ERRO_NAO_FREQUENCIA ou IO_FREQUENCIA_ERRO_FREQUENCIA. | ativa |
 | `io_frequencia_define_tipo` | io_frequencia | `lib/io/include/io_frequencia.h` | Define o tipo de uma saída, respeitando a exclusão com o sleep. | TIPO_SAIDA_OK ou o código de erro de tipo_saida.h. | ativa |
 | `io_frequencia_inicia` | io_frequencia | `lib/io/include/io_frequencia.h` | Configura o TIM6 para interromper a 100 kHz, sem iniciá-lo. | IO_FREQUENCIA_OK ou IO_FREQUENCIA_ERRO_TIMER. | ativa |
@@ -148,6 +150,7 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.11 | Tabela regenerada com 119 funções públicas: entram `io_frequencia_cadastra` e `io_frequencia_atualiza` |
 | 04/11/2026 | 0.3.10 | Tabela regenerada com 117 funções públicas: entram `io_frequencia_inicia`, `_define_hz`, `_irq` e `io_saidas_cede_pino` |
 | 04/11/2026 | 0.3.9 | Tabela regenerada com 113 funções públicas: entram as de `gerador_freq` |
 | 04/11/2026 | 0.3.8 | Tabela regenerada com 110 funções públicas: entram as de `tipo_saida` e `io_frequencia` |

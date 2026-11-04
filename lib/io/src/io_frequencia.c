@@ -12,6 +12,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include "freq_saida.h"
 #include "gerador_freq.h"
 #include "hal_stm32.h"
 #include "io_saida.h"
@@ -27,6 +28,8 @@
 static tipos_saida_t tipos;
 /** Geradores das saídas; o índice 0 é a saída 1, que não tem modo frequência. */
 static gerador_freq_t geradores[TIPO_SAIDA_QTD];
+/** Frequências de 4 mA e de 20 mA de cada saída. */
+static freq_saida_t conversoes[TIPO_SAIDA_QTD];
 /** Último nível escrito no pino de cada saída, para só escrever nas mudanças. */
 static bool niveis[TIPO_SAIDA_QTD];
 
@@ -149,6 +152,44 @@ int32_t io_frequencia_define_hz(uint8_t canal, float hz)
     niveis[canal - 1U] = false;
   }
   return resultado;
+}
+
+int32_t io_frequencia_cadastra(uint8_t canal, float hz_4ma, float hz_20ma)
+{
+  int32_t resultado = TIPO_SAIDA_ERRO_PARAMETRO;
+
+  if ((canal >= 1U) && (canal <= TIPO_SAIDA_QTD))
+  {
+    taskENTER_CRITICAL();
+    resultado = (freq_saida_cadastra(&conversoes[canal - 1U], hz_4ma, hz_20ma) == FREQ_SAIDA_OK)
+                    ? IO_FREQUENCIA_OK
+                    : IO_FREQUENCIA_ERRO_FREQUENCIA;
+    taskEXIT_CRITICAL();
+  }
+  return resultado;
+}
+
+int32_t io_frequencia_atualiza(uint8_t canal, float ma, bool falha)
+{
+  float hz = 0.0F;
+  int32_t calculo;
+
+  if ((canal < 1U) || (canal > TIPO_SAIDA_QTD))
+  {
+    return TIPO_SAIDA_ERRO_PARAMETRO;
+  }
+  taskENTER_CRITICAL();
+  calculo = freq_saida_calcula(&conversoes[canal - 1U], ma, falha, &hz);
+  taskEXIT_CRITICAL();
+  if (calculo == FREQ_SAIDA_ERRO_PARAMETRO)
+  {
+    return TIPO_SAIDA_ERRO_PARAMETRO;
+  }
+  if (calculo == FREQ_SAIDA_ERRO_SEM_CADASTRO)
+  {
+    return IO_FREQUENCIA_ERRO_SEM_CADASTRO;
+  }
+  return io_frequencia_define_hz(canal, hz);
 }
 
 bool io_frequencia_sleep_permitido(void)
