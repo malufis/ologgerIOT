@@ -1,6 +1,6 @@
 ﻿# Configuração do dispositivo — oLoggerIOT
 
-> **Criado em:** 29/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.58
+> **Criado em:** 29/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.59
 
 ## Origem e estado
 
@@ -134,7 +134,8 @@ A frequência de atualização e a relação entre quantidade de entradas e saí
 - **Modo manual e automático (FW-025, 04/11/2026):** cada saída tem o seu modo. O comando manual direto prevalece, põe a saída em manual e vale até o comando de modo automático. Em automático valem os comandos locais (regra do sensor e agenda offline) ou o do CCO (online), como descrito na seção seguinte. A volta ao automático avalia e executa a regra válida na hora e, sem nenhum pedido válido, **mantém o último estado válido do comando** (confirmado em 04/11/2026). **Depois de um reinício a saída volta desligada e em modo automático** (confirmado em 04/11/2026). O alerta ao CCO na chegada do comando manual depende do espaço de alertas (FW-021) e ainda não existe.
 - **Implementado em parte:** o cálculo da frequência da saída em frequência está em `freq_saida` (FW-023, parcial: proporcional entre as frequências de 4 mA e de 20 mA, 0 Hz na falha). **Ainda não implementado:** gerar o sinal e o alerta ao CCO na chegada do comando manual.
 - **"Pulsada" é a saída em frequência (decidido em 03/11/2026):** não é acionamento por tempo. A saída discreta é só ligada ou desligada, com o retardo de acionamento. O tipo da saída no mapa Modbus ficou 0 = discreto e 1 = frequência.
-- **Sleep e frequência (decidido em 03/11/2026):** a saída em frequência só pode ser habilitada se o modo sleep não estiver ativo, e o sleep só liga se nenhuma saída estiver em frequência. O sleep tem uma função de ligar e desligar (modo de operação 40412).
+- **Sleep e frequência (decidido em 03/11/2026):** a saída em frequência só pode ser habilitada se o modo sleep não estiver ativo, e o sleep só liga se nenhuma saída estiver em frequência. O sleep tem uma função de ligar e desligar (modo de operação 40412). **Implementado em 04/11/2026** em `tipo_saida` e `io_frequencia`: a frequência é recusada com o sleep ligado e o gancho `sleep_permitido` recusa ligar o sleep com saída em frequência.
+- **Saída em frequência (decidido em 04/11/2026):** em **0 Hz a saída fica em nível baixo** (transistor desligado); o **duty cycle é de 50%**; **só as saídas 2, 3 e 4 (PB13, PB14 e PB15, os pinos com canal de timer) têm o modo frequência**. A saída 1 (PB12) não tem canal de timer e fica só discreta: pedir frequência para ela é recusado.
 - **Carga indutiva:** o diodo de roda livre fica no relé externo, instalado pelo responsável técnico.
 - **Stop 2:** o pino mantém o estado, mas o retardo não corre durante o sleep.
 
@@ -211,6 +212,7 @@ Depois de estabelecida a conectividade do dispositivo, a configuração continua
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.59 | Saída em frequência: 0 Hz em nível baixo, duty de 50%, só as saídas 2 a 4; exclusão com o sleep implementada |
 | 04/11/2026 | 0.1.58 | Saída em frequência: cálculo implementado (FW-023 parcial) |
 | 04/11/2026 | 0.1.57 | Regra do sensor: avaliador implementado; sensor tem prioridade sobre a agenda |
 | 04/11/2026 | 0.1.56 | Agenda: fuso configurado pelo CCO, só a última agenda, e aplicação pelo horário atual depois de reinício |

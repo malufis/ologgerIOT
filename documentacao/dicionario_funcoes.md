@@ -1,6 +1,6 @@
 # Dicionário de funções — firmware oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.7
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.8
 
 ## Como manter
 
@@ -72,6 +72,9 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `io_filtro_amostras_do_tempo` | io_filtro | `lib/io/include/io_filtro.h` | Converte um tempo de estabilidade em número de amostras, arredondando para cima. | IO_FILTRO_OK ou IO_FILTRO_ERRO_PARAMETRO (nulo, zero ou número fora de uint16_t). | ativa |
 | `io_filtro_atualiza` | io_filtro | `lib/io/include/io_filtro.h` | Recebe uma amostra do nível da entrada e devolve o estado aceito. | Estado aceito após esta amostra. | ativa |
 | `io_filtro_inicia` | io_filtro | `lib/io/include/io_filtro.h` | Inicia o filtro com o estado aceito e o número de amostras de estabilidade. | IO_FILTRO_OK ou IO_FILTRO_ERRO_PARAMETRO. | ativa |
+| `io_frequencia_define_tipo` | io_frequencia | `lib/io/include/io_frequencia.h` | Define o tipo de uma saída, respeitando a exclusão com o sleep. | TIPO_SAIDA_OK ou o código de erro de tipo_saida.h. | ativa |
+| `io_frequencia_sleep_permitido` | io_frequencia | `lib/io/include/io_frequencia.h` | Gancho sleep_permitido de energia.h. | false se alguma saída está em frequência (o sleep não pode ligar). | ativa |
+| `io_frequencia_tipo` | io_frequencia | `lib/io/include/io_frequencia.h` | Lê o tipo de uma saída. | TIPO_SAIDA_OK ou TIPO_SAIDA_ERRO_PARAMETRO. | ativa |
 | `io_pulsos_atualiza` | io_pulsos | `lib/io/include/io_pulsos.h` | Recebe o estado filtrado da entrada e conta a transição para ativo. | void | ativa |
 | `io_pulsos_contagem` | io_pulsos | `lib/io/include/io_pulsos.h` | Lê o total de pulsos contados. | Pulsos contados desde o início. | ativa |
 | `io_pulsos_define_timeout` | io_pulsos | `lib/io/include/io_pulsos.h` | Altera o tempo sem pulso necessário para poder dormir. | IO_PULSOS_OK ou IO_PULSOS_ERRO_PARAMETRO. | ativa |
@@ -125,6 +128,10 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `sensor_ma_para_valor` | sensor | `lib/sensor/include/sensor.h` | Converte corrente 4-20 mA em valor de engenharia, com zero, span e offset. | SENSOR_OK ou SENSOR_ERRO_PARAMETRO. | ativa |
 | `sensor_media_acumula` | sensor | `lib/sensor/include/sensor.h` | Acumula uma amostra e, ao fechar um segundo, entrega a média. | SENSOR_OK ou SENSOR_ERRO_PARAMETRO. | ativa |
 | `sensor_media_inicia` | sensor | `lib/sensor/include/sensor.h` | Inicia o acumulador para uma taxa de amostragem. | SENSOR_OK, SENSOR_ERRO_PARAMETRO ou SENSOR_ERRO_TAXA. | ativa |
+| `tipos_saida_algum_em_frequencia` | tipo_saida | `lib/io/include/tipo_saida.h` | Diz se alguma saída está em frequência. | true se há uma saída em frequência: o sleep não pode ligar. Falso se tipos for nulo. | ativa |
+| `tipos_saida_define` | tipo_saida | `lib/io/include/tipo_saida.h` | Define o tipo de uma saída, respeitando a exclusão com o sleep. | TIPO_SAIDA_OK, ou o código de erro (o tipo anterior fica como estava). | ativa |
+| `tipos_saida_limpa` | tipo_saida | `lib/io/include/tipo_saida.h` | Põe todas as saídas no tipo discreto. | TIPO_SAIDA_OK, ou TIPO_SAIDA_ERRO_PARAMETRO se tipos for nulo. | ativa |
+| `tipos_saida_tipo` | tipo_saida | `lib/io/include/tipo_saida.h` | Lê o tipo de uma saída. | TIPO_SAIDA_OK ou TIPO_SAIDA_ERRO_PARAMETRO. | ativa |
 | `vida_contador` | vida | `lib/vida/include/vida.h` | Lê o contador de ciclos da tarefa de vida. | Quantidade de ciclos executados desde a partida. | ativa |
 | `vida_inicia` | vida | `lib/vida/include/vida.h` | Cria a tarefa de vida com memória estática. | 0 em sucesso, código negativo em erro. | ativa |
 | `vida_pilha_livre_palavras` | vida | `lib/vida/include/vida.h` | Lê a menor folga de pilha medida na tarefa de vida. | Folga mínima, em palavras de 32 bits. Zero antes do primeiro ciclo. | ativa |
@@ -134,6 +141,7 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.8 | Tabela regenerada com 110 funções públicas: entram as de `tipo_saida` e `io_frequencia` |
 | 04/11/2026 | 0.3.7 | Tabela regenerada com 103 funções públicas: entram `freq_saida_limpa`, `freq_saida_cadastra` e `freq_saida_calcula` |
 | 04/11/2026 | 0.3.6 | Tabela regenerada com 100 funções públicas: entram `regra_sensor_limpa`, `regra_sensor_cadastra` e `regra_sensor_avalia` |
 | 04/11/2026 | 0.3.5 | Tabela regenerada com 97 funções públicas: entra o módulo `agenda` (4 funções) |

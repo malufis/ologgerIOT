@@ -1,6 +1,6 @@
 # Mapa Modbus do device oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.10
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.11
 
 ## Origem e estado
 
@@ -51,7 +51,7 @@ Mapa definido pelo usuário em 01/11/2026: seguir a norma Modbus, com float ocup
 |---|---|---|
 | 00001–00015 | coil | Comando e estado da saída n (1 = ligada, 0 = desligada) |
 | 30091–30120 | input float | Frequência atual da saída n em Hz (0 quando não está em modo frequência) |
-| 40166–40180 | holding uint16 | Tipo da saída n: 0 = discreto, 1 = frequência (a saída "pulsada"), 2 = reservado (ajustado em 03/11/2026) |
+| 40166–40180 | holding uint16 | Tipo da saída n: 0 = discreto, 1 = frequência (a saída "pulsada"), 2 = reservado (ajustado em 03/11/2026). Só as saídas 2 a 4 aceitam 1: a saída 1 não tem canal de timer (04/11/2026). Gravar 1 com o sleep ligado é recusado |
 | 40181–40210 | holding float | Frequência em Hz correspondente a 4 mA da saída n |
 | 40211–40240 | holding float | Frequência em Hz correspondente a 20 mA da saída n |
 | 40241–40255 | holding uint16 | Entrada analógica associada à saída n (0 = nenhuma) |
@@ -202,6 +202,7 @@ Os nomes dos grupos (analogico, digital, falhas, sistema, rede) são uma propost
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.11 | Tipo da saída: só as saídas 2 a 4 aceitam frequência e a gravação é recusada com o sleep ligado |
 | 04/11/2026 | 0.1.10 | Proposto o endereço 40403 para o fuso horário da instalação, configurado pelo CCO |
 | 04/11/2026 | 0.1.9 | Sentido da regra do sensor confirmado (0 liga no mínimo, 1 liga no máximo); registrado que a agenda não tem registradores Modbus |
 | 04/11/2026 | 0.1.8 | Propostos os endereços dos limiares máximo e mínimo e do sentido da regra do sensor (40307 a 40381) |

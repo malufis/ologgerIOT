@@ -1,6 +1,6 @@
 # Estado da implementação — oLoggerIOT
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.15
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.16
 
 Documento vivo. Diz o que existe no código, o que está em teste e o que falta. Agentes e desenvolvedores leem aqui antes de começar um item. Atualizado pela skill `doc-sync` a cada item fechado e revisado pela skill `sprint-close`.
 
@@ -8,7 +8,7 @@ Documento vivo. Diz o que existe no código, o que está em teste e o que falta.
 
 - **Sprints em andamento:** SPRINT_01B (entrada digital e contador de pulsos) e SPRINT_04 (saídas), em código pronto. A SPRINT_01 (aquisição analógica) está bloqueada pela ferrite L2. A SPRINT_00 foi concluída em 04/11/2026.
 - **Dois builds compilam sem avisos com `-Werror`** (03/11/2026): `ologgermulti` com 26 280 bytes de código e `y7080` com 4 944. O `y7080` não leva `ENTRADA_DIGITAL`, nem a gerência de energia.
-- **Testes no PC (03/11/2026):** sensor (57 verificações), filtro de ruído (135), contador de pulsos (25), totalizador (36) estado da saída digital (36), controle manual e automático (82), agenda (57) e regra do sensor (9 testes) e frequência da saída (9 testes); verificadores das ferramentas (27 testes). Todos passam. O executável do `sensor` foi bloqueado uma vez pela política de Controle de Aplicativo do Windows depois de um relink, mas recompilado rodou e passou.
+- **Testes no PC (03/11/2026):** sensor (57 verificações), filtro de ruído (135), contador de pulsos (25), totalizador (36) estado da saída digital (36), controle manual e automático (82), agenda (57) e regra do sensor (9 testes) frequência da saída (9 testes) e tipo da saída (8 testes); verificadores das ferramentas (27 testes). Todos passam. O executável do `sensor` foi bloqueado uma vez pela política de Controle de Aplicativo do Windows depois de um relink, mas recompilado rodou e passou.
 - **Hardware verificado em 02/11/2026:** a imagem do OloggerMulti executa no STM32L412 real, com FreeRTOS e a tarefa de vida. A aquisição analógica mede a entrada 4 com 8 mA injetados e mostra 8,007 mA.
 - **Nada da entrada digital, do contador de pulsos, do totalizador e da gerência de energia foi testado em hardware.** Só compilam e têm testes de lógica no PC. O roteiro de bancada está em `documentacao/roteiro_bancada_entrada_digital.md`.
 - **Saídas digitais (FW-022, FW-024 e FW-025, 04/11/2026):** ligar, desligar, retardo de acionamento (relé de tempo, o "acionamento por tempo") e modo manual e automático por saída em código, com 36 e 82 verificações no PC. O comando manual prevalece; em automático valem a regra do sensor, se cadastrada, ou, sem ela, a agenda (offline) e o CCO (online); a falha do sensor desliga e a saída só volta a operar pelo sensor depois de 5 minutos estáveis. O que falta: o cadastro e o avaliador da regra do sensor (FW-063, com campos por MQTT ou Modbus), a saída em frequência (FW-023), o alerta ao CCO e a ligação com comandos. Sem teste em hardware.
@@ -48,9 +48,9 @@ Documento vivo. Diz o que existe no código, o que está em teste e o que falta.
 | Estado da saída digital | `lib/io/` (`saida`) | Implementado; desligada, aguardando o retardo ou ligada | FW-022, FW-024 | 36 verificações no PC |
 | Driver dos pinos das saídas | `lib/io/` (`io_saida`) | Código pronto; pino em nível alto liga a saída (NPN em coletor aberto) | FW-022 | Sem teste em hardware |
 | Controle das quatro saídas | `lib/io/` (`io_saidas`) | Código pronto; tarefa de 100 ms liga as saídas ao fim do retardo | FW-022 | Sem teste em hardware |
-| Saída em frequência (a "pulsada") | `lib/io/` (`freq_saida`) | Parcial: cálculo proporcional da frequência (4–20 mA, 0 Hz na falha) pronto e testado no PC; falta gerar o sinal; PB12 não tem canal de timer; só habilita com o sleep desligado | FW-023 | 04/11/2026 |
+| Saída em frequência (a "pulsada") | `lib/io/` (`freq_saida`, `tipo_saida`) | Parcial: cálculo proporcional da frequência (4–20 mA, 0 Hz na falha) e tipo por saída com a exclusão do sleep prontos e testados no PC; falta gerar o sinal. Decidido: 0 Hz em nível baixo, duty de 50%, só as saídas 2 a 4 (PB13 a PB15) | FW-023 | 04/11/2026 |
 | Retardo de acionamento (relé de tempo) | `lib/io/` (`saida`, `io_saidas`) | Código pronto; bancada pendente | FW-024 | 36 verificações no PC |
-| Ligar e desligar o sleep | `lib/energia/` | Lado do sleep pronto (`energia_define_habilitada` pode recusar); falta o lado das saídas e o comando | FW-061 | Sem teste em hardware |
+| Ligar e desligar o sleep | `lib/energia/`, `lib/io/` (`tipo_saida`, `io_frequencia`) | Os dois lados prontos: `energia_define_habilitada` pode recusar e `io_frequencia_sleep_permitido` impede o sleep com saída em frequência; falta o comando do Modbus | FW-061 | Sem teste em hardware |
 | Modo manual e automático por saída | `lib/io/` (`controle_saida`, `io_saidas`) | Lógica implementada e ligada às quatro saídas, com regra do sensor, agenda offline, CCO online e espera de 5 minutos depois da falha; sem alerta ao CCO | FW-025 | 82 verificações no PC; sem teste em hardware |
 | Regra do sensor entrada analógica para saída digital | `lib/io/` (`regra_sensor`) | Parcial: cadastro validado, sentidos 0 e 1 e histerese prontos e testados no PC (9 testes); falta o cadastro pelos endereços Modbus e por MQTT e a ligação à entrada analógica | FW-063 | 04/11/2026 |
 | Modo de frequência em Hz | `lib/io/` | Não iniciado; faixa de 0 a 20 kHz, ajuste fica para depois | FW-054 | — |
@@ -92,12 +92,13 @@ Legenda de estado: **Não iniciado**, **Em desenvolvimento**, **Em teste**, **Im
 - **SPRINT_00** foi concluída em 04/11/2026 (versão 0.2.0 do changelog); o FW-007 foi para a SPRINT_07.
 - **SPRINT_01B** (entrada digital) e **SPRINT_04** (saídas) seguem em andamento, em código pronto. A validação em bancada depende do device e do roteiro `documentacao/roteiro_bancada_entrada_digital.md`.
 - **SPRINT_01** (aquisição analógica) depende de soldar a ferrite L2 (HW-007).
-- Próximos itens de código: o restante do FW-023 (gerar o sinal da saída em frequência, só com o sleep desligado, e o lado das saídas do FW-061).
+- Próximos itens de código: o restante do FW-023 (gerar o sinal da saída em frequência pelo timer, só com o sleep desligado).
 
 ## Histórico
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.16 | FW-061 pronto nos dois lados; decisões da saída em frequência |
 | 04/11/2026 | 0.2.15 | Saída em frequência: cálculo da frequência pronto (FW-023 parcial) |
 | 04/11/2026 | 0.2.14 | Regra do sensor: avaliador pronto (FW-063 parcial) |
 | 04/11/2026 | 0.2.13 | Agenda semanal: formato e validação prontos em `lib/agenda` |

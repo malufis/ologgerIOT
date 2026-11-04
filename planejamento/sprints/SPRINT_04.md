@@ -1,6 +1,6 @@
 # SPRINT_04 — Saídas e controle
 
-> **Criado em:** 03/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.11
+> **Criado em:** 03/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.12
 > **Período:** 30/11/2026 a 04/12/2026
 
 Em andamento desde 03/11/2026: o FW-022 e o FW-024 estão em código pronto; os demais itens estão pendentes. As datas são a sequência de semanas a partir de 02/11/2026 e mudam se a SPRINT_00, a SPRINT_01 ou a SPRINT_01B atrasarem.
@@ -14,10 +14,10 @@ Saídas discretas (ligar e desligar, com retardo de acionamento), saída em freq
 | ID | Tarefa | Situação |
 |---|---|---|
 | FW-022 | Saídas discretas: ligar e desligar, com as saídas desligadas na partida | Código pronto em 03/11/2026: ligar e desligar (`saida`, `io_saida`, `io_saidas`), com as saídas desligadas na partida. Bancada pendente |
-| FW-023 | Saída em frequência (a "pulsada") proporcional a 4–20 mA, com 4 mA e 20 mA configuráveis; só pode ser habilitada com o sleep desligado | Parcial em 04/11/2026: `lib/io/freq_saida` pronto (cálculo proporcional da frequência a partir de 4–20 mA, 0 Hz na falha, 9 testes no PC); falta gerar o sinal (timer), a escolha do canal (PB12 não tem canal de timer) e o lado das saídas da exclusão com o sleep (FW-061) |
+| FW-023 | Saída em frequência (a "pulsada") proporcional a 4–20 mA, com 4 mA e 20 mA configuráveis; só pode ser habilitada com o sleep desligado | Parcial em 04/11/2026: `lib/io/freq_saida` pronto (cálculo proporcional da frequência a partir de 4–20 mA, 0 Hz na falha, 9 testes no PC). Decidido em 04/11/2026: em 0 Hz a saída fica em nível baixo (transistor desligado), o duty cycle é de 50%, e só as saídas 2, 3 e 4 (PB13, PB14 e PB15, com canal de timer) têm modo frequência; a saída 1 (PB12) fica só discreta. Falta gerar o sinal pelo timer |
 | FW-024 | Retardo de acionamento (relé de tempo, o "acionamento por tempo") por saída discreta, com cancelamento por comando de desligar | Código pronto em 03/11/2026 (`saida_define_atraso`, `io_saidas_define_atraso`): 36 verificações no PC com o retardo, o comando descartado, o cancelamento por desligar e a volta do contador. Regras confirmadas em 03/11/2026. Bancada pendente |
 | FW-025 | Modo manual e automático por saída, com prioridade do sensor | Código pronto em 04/11/2026 (`controle_saida`, `io_saidas`): 82 verificações no PC com manual, automático, regra do sensor, agenda local offline, comando do CCO online, falha do sensor com espera de 5 minutos e retardo. Falta o alerta ao CCO na chegada do comando manual. Bancada pendente |
-| FW-061 | Ligar e desligar o modo sleep (modo de operação, registro 40412), com exclusão mútua: o sleep só liga se nenhuma saída estiver em frequência, e a saída em frequência só habilita com o sleep desligado | Lado do sleep pronto em 03/11/2026 (`energia_define_habilitada` devolve erro se um módulo impede). Falta o lado das saídas (FW-023) e o comando do Modbus |
+| FW-061 | Ligar e desligar o modo sleep (modo de operação, registro 40412), com exclusão mútua: o sleep só liga se nenhuma saída estiver em frequência, e a saída em frequência só habilita com o sleep desligado | Lado do sleep pronto em 03/11/2026 (`energia_define_habilitada` devolve erro se um módulo impede). Lado das saídas pronto em 04/11/2026: `lib/io/tipo_saida` guarda o tipo de cada saída, recusa frequência com o sleep ligado e na saída 1, e `io_frequencia_sleep_permitido` é o gancho que impede ligar o sleep com saída em frequência (8 testes no PC). Falta o comando do Modbus (40166 e 40412) |
 | FW-063 | Regra do sensor entrada analógica para saída digital (comando automático local): cadastro por MQTT ou Modbus (entrada associada, limiares máximo e mínimo e sentido, mais a frequência em 4 mA e 20 mA, todos com endereço Modbus) e o avaliador com histerese que gera os pedidos da fonte do sensor. Sentido 0: liga no mínimo e desliga no máximo; sentido 1: liga no máximo e desliga no mínimo. Sem regra cadastrada valem a agenda (offline) e o CCO (online) | Parcial em 04/11/2026: `lib/io/regra_sensor` pronto (cadastro validado, sentidos 0 e 1 e histerese, 9 testes no PC); falta ler e gravar o cadastro pelos endereços Modbus e por MQTT e ligar a regra à leitura da entrada analógica |
 
 ## Estado das saídas digitais (03/11/2026)
@@ -69,6 +69,7 @@ Implementado conforme o B4 e as definições de 04/11/2026 (`documentacao/config
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.12 | FW-061 com o lado das saídas pronto; FW-023 com as decisões de 0 Hz, duty cycle e canais |
 | 04/11/2026 | 0.1.11 | FW-023 parcial: módulo `freq_saida` pronto e testado |
 | 04/11/2026 | 0.1.10 | FW-063 parcial: módulo `regra_sensor` pronto e testado |
 | 04/11/2026 | 0.1.9 | FW-063 com o sentido da comparação confirmado |
