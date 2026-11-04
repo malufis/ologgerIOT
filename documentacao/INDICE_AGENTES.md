@@ -1,6 +1,6 @@
 # Índice para agentes — oLoggerIOT
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.2.2
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.4
 
 Use este índice para achar o documento de cada assunto. Comece sempre por `INICIAR.md`. Para o índice completo, use `documentacao/README.md`.
 
@@ -38,9 +38,10 @@ Use este índice para achar o documento de cada assunto. Comece sempre por `INIC
 | Saídas digitais (circuito, estado, comandos, frequência) | `planejamento/sprints/SPRINT_04.md`, `documentacao/configuracao_do_dispositivo.md`, `lib/io/` (`saida`, `io_saida`, `io_saidas`) |
 | Bloqueios de bancada (L2, D1, limite de 12 V) | `documentacao/analise_hardware_ologgeriot.md` (HW-007 e HW-008) |
 | Melhorias de hardware para a próxima revisão das placas | `documentacao/melhorias_hardware.md` |
+| Decisões de arquitetura pendentes (versão do FreeRTOS, ferramenta MISRA, atualização, espaço de flash, secure boot) | `documentacao/adr/` |
 | Módulos existentes em `lib/` | `lib/README.md` |
 | Testes e critérios de aceite | `planejamento/PLANO_IMPLANTACAO_FIRMWARE.md`, `planejamento/BACKLOG.md` |
-| Desvio do MISRA | `documentacao/desvios_misra.md` (criado quando houver desvio) |
+| Desvio do MISRA | `documentacao/desvios_misra.md` (primeiro desvio registrado em 04/11/2026) |
 
 ## Skill → quando usar
 
@@ -66,6 +67,8 @@ Use este índice para achar o documento de cada assunto. Comece sempre por `INIC
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.4 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |
+| 04/11/2026 | 0.2.3 | Adicionada a entrada das decisões de arquitetura (ADR) |
 | 03/11/2026 | 0.2.2 | Adicionada a entrada de melhorias de hardware |
 | 03/11/2026 | 0.2.1 | Adicionada a entrada de saídas digitais |
 | 03/11/2026 | 0.2.0 | Adicionadas as entradas de entrada digital, sleep, roteiro de bancada, bloqueios de bancada e módulos de lib |

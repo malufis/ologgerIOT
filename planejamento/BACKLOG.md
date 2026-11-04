@@ -1,6 +1,6 @@
 # Backlog do firmware — oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.2.4
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.5
 
 ## Regras
 
@@ -21,7 +21,7 @@ Prazo de referência do protótipo de bancada: 29/11/2026. São quatro semanas a
 
 - **Entrou escopo novo:** a fase 1B (entrada digital, contador de pulsos, totalizador e Stop 2, FW-052 a FW-060) não estava no plano original. A maior parte está em código pronto, mas falta validar em bancada.
 - **A bancada é o gargalo:** a SPRINT_01 está bloqueada pela ferrite L2 (HW-007), e a validação da fase 1B e do FW-012 depende do device. Nada do que foi implementado desde 02/11/2026 passou por hardware, exceto a aquisição analógica parcial e o FreeRTOS.
-- **ESP32 para depois da validação do STM32:** o FW-007 e a parte ESP32 do FW-046 foram para a SPRINT_07 e só começa depois de finalizados os testes do STM32 e de o STM32 estar validado (decisão de 03/11/2026). A fase 7 (MQTT) depende disso, e o atraso na validação do STM32 empurra o ESP32 e o protótipo completo.
+- **ESP32 para depois da validação do STM32:** o FW-007 e a parte ESP32 do FW-046 foram para a SPRINT_07 e só começam depois de finalizados os testes do STM32 e de o STM32 estar validado (decisão de 03/11/2026). A fase 7 (MQTT) depende disso, e o atraso na validação do STM32 empurra o ESP32 e o protótipo completo.
 - **Sem decisão de escopo ainda:** o que sai ou entra no protótipo continua com o responsável técnico.
 
 ## Itens
@@ -36,7 +36,7 @@ Prazo de referência do protótipo de bancada: 29/11/2026. São quatro semanas a
 | FW-004 | Configurar Doxygen em português e gerar XML para o dicionário | `doxygen` gera saída sem erro | Concluído em 02/11/2026 |
 | FW-005 | Criar modelo de cabeçalho de arquivo (data, versão, descrição) | Modelo usado em todo arquivo novo | Concluído em 02/11/2026 |
 | FW-006 | Build vazio do STM32 (CMake com toolchain ARM e HAL) | Compila para o alvo STM32 | Concluído em 02/11/2026 |
-| FW-007 | Build vazio do ESP32 (ESP-IDF) | Compila para o alvo ESP32 | Movido para a SPRINT_07 (decisão de 03/11/2026): só começa depois de finalizados os testes do STM32 e de o STM32 estar validado (decisão de 03/11/2026) |
+| FW-007 | Build vazio do ESP32 (ESP-IDF) | Compila para o alvo ESP32 | Movido para a SPRINT_07 (decisão de 03/11/2026): só começa depois de finalizados os testes do STM32 e de o STM32 estar validado |
 | FW-008 | Criar script de verificação do padrão C (tamanho de função e cabeçalho) | Script falha com função acima do limite | Concluído em 02/11/2026 |
 | FW-046 | Base FreeRTOS no STM32 e no ESP-IDF: configuração com alocação estática, tabela de prioridades e uma task de teste em cada alvo (`padrao_codigo_c.md`, seção FreeRTOS) | Task de teste roda nos dois alvos, mede pilha e não usa alocação dinâmica | Concluído no STM32 em 02/11/2026; a parte ESP32 fica com o FW-007, na SPRINT_07, depois da validação do STM32 |
 
@@ -153,6 +153,7 @@ Entrada digital ativa com tensão no campo (de 12 a 24 V; na bancada, até 12 V)
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.5 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |
 | 03/11/2026 | 0.2.4 | O "acionamento por tempo" é o retardo de acionamento; ligar com a saída ligada ou aguardando é descartado; mapa Modbus das saídas ajustado (P-037) |
 | 03/11/2026 | 0.2.3 | Decisões de 03/11/2026: "pulsada" é a saída em frequência (FW-023), o retardo de acionamento vale para a saída discreta (FW-024) e o sleep liga e desliga com exclusão mútua com a frequência (novo FW-061) |
 | 03/11/2026 | 0.2.2 | FW-022: código pronto (saídas discretas e acionamento por tempo); a SPRINT_04 começou |

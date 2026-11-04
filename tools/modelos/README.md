@@ -1,6 +1,6 @@
 # tools/modelos/ — modelos de arquivo
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 02/11/2026 · **Versão:** 0.1.0
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.1
 
 Modelos para todo arquivo C novo do firmware (FW-005):
 
@@ -16,3 +16,10 @@ Modelos para todo arquivo C novo do firmware (FW-005):
 O cabeçalho de arquivo é verificado por `tools/verifica_padrao.py`: `@file`, `@brief`, `@date criacao`, `@date modificacao` e `@version`.
 
 Regras: `documentacao/padrao_codigo_c.md`.
+
+## Histórico
+
+| Data | Versão | Alteração |
+|---|---|---|
+| 04/11/2026 | 0.1.1 | Adicionada a tabela de histórico, que faltava. As alterações anteriores não foram registradas aqui; ver o histórico do git |
+| 02/11/2026 | 0.1.0 | Criado |

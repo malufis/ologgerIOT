@@ -1,6 +1,6 @@
 # devices/ — pinagem e memória por placa
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 02/11/2026 · **Versão:** 0.3.0
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.1
 
 Um subdiretório por build, escolhido pelo CMake pelo `-DDEVICE`:
 
@@ -12,3 +12,10 @@ O `pinos.h` tem um par de macros por função, `PINO_<FUNCAO>_PORTA` e `PINO_<FU
 A composição de funcionalidades de cada build não fica aqui. Ela fica em `builds/composicao.cmake`.
 
 Regras: `documentacao/composicao_builds.md` e `documentacao/padrao_codigo_c.md`.
+
+## Histórico
+
+| Data | Versão | Alteração |
+|---|---|---|
+| 04/11/2026 | 0.3.1 | Adicionada a tabela de histórico, que faltava. As alterações anteriores não foram registradas aqui; ver o histórico do git |
+| 02/11/2026 | 0.1.0 | Criado |

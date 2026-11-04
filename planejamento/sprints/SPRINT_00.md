@@ -1,6 +1,6 @@
 # SPRINT_00 — Base do projeto
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.1.9
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.10
 > **Período:** 02/11/2026 a 06/11/2026
 
 ## Meta
@@ -17,7 +17,7 @@ Base do projeto pronta para as sprints seguintes: estrutura de pastas, CMake com
 | FW-046 | Base FreeRTOS nos dois alvos, com alocação estática | Concluído no STM32 em 02/11/2026: OloggerMulti executa no chip real (9,9 ciclos/s medidos para 10 esperados, 101 de 128 palavras de pilha livres); y7080 compila sem avisos, sem teste em hardware. Parte ESP32 fica para depois do STM32 |
 | FW-004 | Doxygen em português | Concluído em 02/11/2026: `Doxyfile` falha em item sem documentação; `tools/gera_dicionario.py` gera o dicionário a partir do XML (8 testes) |
 | FW-005 | Modelo de cabeçalho | Concluído em 02/11/2026: `tools/modelos/modelo.h` e `modelo.c`, compilados sem avisos para M4 e M0+ |
-| FW-006 | Build vazio do STM32 | Concluído em 02/11/2026: imagens do OloggerMulti (L412, 1432 bytes de código) e do y7080 (L071, 1348 bytes de código) compilam e linkam sem avisos. A do OloggerMulti executa no STM32L412 real (BOOT0 contornado por bits de opção) |
+| FW-006 | Build vazio do STM32 | Concluído em 02/11/2026: imagens vazias de 02/11/2026 do OloggerMulti (L412, 1432 bytes de código) e do y7080 (L071, 1348 bytes de código) compilam e linkam sem avisos. A do OloggerMulti executa no STM32L412 real (BOOT0 contornado por bits de opção) |
 | FW-007 | Build vazio do ESP32 | Movido para a SPRINT_07 em 03/11/2026: só começa depois de finalizados os testes do STM32 e de o STM32 estar validado. Não conta mais como pendente desta sprint |
 | FW-008 | Script de verificação do padrão C | Concluído em 02/11/2026: `tools/verifica_padrao.py` (função de 40 linhas, arquivo de 400, cabeçalho e alocação dinâmica; 12 testes). Ferramenta MISRA e ADR seguem pendentes |
 
@@ -31,6 +31,7 @@ Base do projeto pronta para as sprints seguintes: estrutura de pastas, CMake com
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.10 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |
 | 03/11/2026 | 0.1.9 | FW-007 movido para a SPRINT_07 (decisão de 03/11/2026). Todos os itens restantes estão concluídos; sprint pronta para o `sprint-close`, que ainda não foi executado |
 | 03/11/2026 | 0.1.8 | Conferido o estado: 8 dos 9 itens concluídos; FW-007 adiado e sem sprint definida. Cabeçalho duplicado corrigido. Os dois builds STM32 seguem compilando sem avisos com o código das sprints 01 e 01B (24 952 e 4 944 bytes de código) |
 | 02/11/2026 | 0.1.7 | FW-046 concluído no STM32 (FreeRTOS com alocação estática, tarefa de vida medida no hardware); FW-007 e a parte ESP32 do FW-046 ficam para depois |

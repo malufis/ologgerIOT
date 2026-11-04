@@ -1,6 +1,6 @@
 # SPRINT_04 — Saídas e controle
 
-> **Criado em:** 03/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.1.4
+> **Criado em:** 03/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.5
 > **Período:** 30/11/2026 a 04/12/2026
 
 Em andamento desde 03/11/2026: o FW-022 e o FW-024 estão em código pronto; os demais itens estão pendentes. As datas são a sequência de semanas a partir de 02/11/2026 e mudam se a SPRINT_00, a SPRINT_01 ou a SPRINT_01B atrasarem.
@@ -28,7 +28,7 @@ Saídas discretas (ligar e desligar, com retardo de acionamento), saída em freq
 
 ### Decisões de 03/11/2026
 
-- **"Pulsada" é a saída em frequência.** Não é um acionamento por tempo. O mapa Modbus foi ajustado: modo da saída 0 = discreto, 1 = frequência (pulsada), 2 reservado (P-037 resolvida).
+- **"Pulsada" é a saída em frequência.** Não é um acionamento por tempo. O mapa Modbus foi ajustado: tipo da saída 0 = discreto, 1 = frequência (pulsada), 2 reservado (P-037 resolvida).
 - **O "acionamento por tempo" é o retardo de acionamento (relé de tempo).** Não existe um acionamento que liga e desliga sozinho depois de um tempo. A saída discreta só tem ligar, desligar e o retardo. O registrador de tempo de acionamento (40271 a 40285) fica reservado, porque o parâmetro é o retardo (40256 a 40270).
 - **Retardo em todo comando que liga.** A saída discreta pode ter um retardo, por saída, em segundos. Todo comando de ligar espera o retardo; retardo zero liga na hora. Um comando de desligar durante a espera cancela a partida.
 - **Contagem em curso.** Com um retardo em andamento, outro comando de ligar é descartado e a contagem em curso continua.
@@ -52,6 +52,7 @@ Saídas discretas (ligar e desligar, com retardo de acionamento), saída em freq
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.5 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |
 | 03/11/2026 | 0.1.4 | O "acionamento por tempo" é o retardo de acionamento; ligar com a saída ligada ou aguardando é descartado; mapa Modbus das saídas ajustado (P-037) |
 | 03/11/2026 | 0.1.3 | Meta ajustada: "pulsada" é a saída em frequência |
 | 03/11/2026 | 0.1.2 | Decisões de 03/11/2026 registradas (pulsada é frequência, retardo de acionamento, sleep e frequência não coexistem); FW-024 em código pronto; novo FW-061 |

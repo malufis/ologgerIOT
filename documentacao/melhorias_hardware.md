@@ -1,6 +1,6 @@
 # Melhorias de hardware — próxima revisão das placas
 
-> **Criado em:** 03/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.1.0
+> **Criado em:** 03/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.2
 
 Lista das mudanças de hardware que apareceram durante o desenvolvimento do firmware e que o responsável técnico quer tratar na **próxima revisão das placas**. Cada item aponta o achado de origem em `analise_hardware_ologgeriot.md`. Este documento só registra; a decisão de entrar no layout e a priorização são do responsável técnico. As placas de bancada atuais seguem com os contornos descritos em cada item.
 
@@ -15,13 +15,14 @@ Lista das mudanças de hardware que apareceram durante o desenvolvimento do firm
 | 5 | Proteção contra inversão de polaridade nas entradas digitais (por exemplo, diodo em série com o LED) | HW-008 | O LED do optoacoplador suporta cerca de 5 V reversos e não tem diodo em série | A decidir |
 | 6 | Confirmar a bateria no pino VBAT | Pendência P-030 | Os registradores de backup do totalizador de pulsos só sobrevivem à falta de energia com bateria no VBAT | A confirmar na placa; pode virar mudança de layout |
 | 7 | Avaliar remapear a saída 1 (PB12) para um pino com canal de timer, se a saída em frequência precisar de PWM de hardware nas quatro saídas | Pendência do FW-023 | Só PB13, PB14 e PB15 têm canal de timer; PB12 só tem `TIM1_BKIN`. Pela decisão atual a frequência será gerada por temporizador com tratador, o que dispensa a mudança | Opcional, a decidir |
+| 8 | Avaliar o STM32L412**CB** (128 KB de flash) no lugar do L412**C8** (64 KB), mantendo o encapsulamento UFQFPN48 | ADR-0003, P-038 | O C8 tem 64 KB e a imagem já usa 25,8 KB; a atualização com recuperação e os módulos que faltam pressionam o espaço. A base do CubeMX lista os dois no mesmo encapsulamento; conferir no datasheet e na lista de materiais | A decidir; depende da opção escolhida no ADR-0003 |
 
 ## Montagem e processo (não é mudança de layout)
 
 | # | Ponto | Origem | Estado |
 |---|---|---|---|
-| 8 | Conferir a montagem da ferrite L2 (BLM18HE152SN1D) em toda placa nova: sem ela o VDDA cai para ~2,37 V e o ADC lê errado | HW-007 | Na placa de bancada, soldar a L2 |
-| 9 | Gravar os bits de opção `nSWBOOT0=0` e `nBOOT0=1` em toda unidade do OloggerMulti enquanto o item 2 não for corrigido | HW-006, FW-051 | Procedimento e script pendentes |
+| 9 | Conferir a montagem da ferrite L2 (BLM18HE152SN1D) em toda placa nova: sem ela o VDDA cai para ~2,37 V e o ADC lê errado | HW-007 | Na placa de bancada, soldar a L2 |
+| 10 | Gravar os bits de opção `nSWBOOT0=0` e `nBOOT0=1` em toda unidade do OloggerMulti enquanto o item 2 não for corrigido | HW-006, FW-051 | Procedimento e script pendentes |
 
 ## Regras da instalação, fora do hardware da placa
 
@@ -32,4 +33,6 @@ Lista das mudanças de hardware que apareceram durante o desenvolvimento do firm
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.2 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |
+| 04/11/2026 | 0.1.1 | Adicionado o item 10: avaliar o STM32L412CB de 128 KB |
 | 03/11/2026 | 0.1.0 | Criado a pedido do responsável técnico, com os pontos de HW-006 a HW-009, a bateria do VBAT e o remapeamento opcional da saída 1 |

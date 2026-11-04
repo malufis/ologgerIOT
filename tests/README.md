@@ -1,6 +1,6 @@
 # tests/ — testes
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.2.4
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.5
 
 Testes de unidade da lógica, compilados e executados no PC, sem hardware. Cada módulo tem seu teste em `tests/<modulo>/`. Testes que dependem de placa ficam no roteiro de bancada, e não aqui.
 
@@ -22,6 +22,7 @@ Referência de testes: `planejamento/PLANO_IMPLANTACAO_FIRMWARE.md`, seção "Te
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.5 | O teste de `saida` passou de 54 para 36 verificações: saíram os casos do acionamento que desligava sozinho, removido por decisão de 03/11/2026 |
 | 03/11/2026 | 0.2.4 | O "acionamento por tempo" é o retardo de acionamento; ligar com a saída ligada ou aguardando é descartado; mapa Modbus das saídas ajustado (P-037) |
 | 03/11/2026 | 0.2.3 | Testes de `saida` com o retardo de acionamento: 54 verificações |
 | 03/11/2026 | 0.2.2 | Adicionado o módulo `saida` aos testes |

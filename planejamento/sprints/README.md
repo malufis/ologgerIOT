@@ -1,6 +1,6 @@
 # Sprints do firmware — índice
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.2.3
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.4
 
 Sprints de uma semana. Cada sprint tem um arquivo com meta, itens do backlog, estado e critério de encerramento. Itens concluídos são marcados no arquivo da sprint e no `BACKLOG.md`.
 
@@ -20,12 +20,13 @@ Sprints de uma semana. Cada sprint tem um arquivo com meta, itens do backlog, es
 
 As datas são a sequência de semanas a partir de 02/11/2026. O protótipo de bancada tem referência em 29/11/2026, que é a véspera do início da SPRINT_04. **Risco de prazo:** ver `planejamento/BACKLOG.md`, seção "Prazo e risco", que traz a reavaliação de 03/11/2026. A reavaliação do escopo com o responsável técnico acontece antes da SPRINT_03.
 
-**ESP32 (03/11/2026).** O FW-007 (build do ESP32) e a parte ESP32 do FW-046 estão na SPRINT_07 e só começa depois de finalizados os testes do STM32 e de o STM32 estar validado (decisão de 03/11/2026). A SPRINT_00 só fecha com a skill `sprint-close`, que ainda não foi executada.
+**ESP32 (03/11/2026).** O FW-007 (build do ESP32) e a parte ESP32 do FW-046 estão na SPRINT_07 e só começam depois de finalizados os testes do STM32 e de o STM32 estar validado (decisão de 03/11/2026). A SPRINT_00 só fecha com a skill `sprint-close`, que ainda não foi executada.
 
 ## Histórico
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.4 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |
 | 03/11/2026 | 0.2.3 | SPRINT_04 inclui o FW-061 (sleep liga e desliga); FW-022 e FW-024 em código pronto |
 | 03/11/2026 | 0.2.2 | SPRINT_04 em andamento: FW-022 em código pronto |
 | 03/11/2026 | 0.2.1 | FW-007 movido para a SPRINT_07; SPRINT_00 pronta para o `sprint-close` |

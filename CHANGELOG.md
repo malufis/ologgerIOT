@@ -1,18 +1,20 @@
 # Changelog — oLoggerIOT firmware
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.2.4
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.6
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versões seguem a numeração do projeto (ver `sistema-init/STATUS_PROJETO.md`). Cada entrada cita o item do backlog (`FW-###`) quando houver.
 
 ## Não lançado
 
 ### Adicionado
+- `documentacao/desvios_misra.md`: registro do desvio DEV-001 (`MISRA-DEV` em `lib/adc/src/adc.c`), que estava marcado no código sem registro.
+- `documentacao/adr/`: três decisões de arquitetura em estado de proposta (versão do FreeRTOS, ferramenta MISRA, atualização e proteção). Registrado o risco de espaço de flash do STM32L412C8 (64 KB, imagem atual de 25,8 KB).
 - FW-024: retardo de acionamento (relé de tempo, o "acionamento por tempo") por saída discreta: `saida_define_atraso`, `io_saidas_define_atraso` e `io_saidas_aguardando`. Todo comando que liga a saída espera o retardo; desligar durante a espera cancela a partida; ligar com a saída ligada ou com o retardo em andamento é descartado. 36 verificações no PC. Removido o acionamento que desligava sozinho (`saida_aciona_por` e `io_saidas_aciona`), por decisão de 03/11/2026.
 - FW-061: o sleep passa a ligar e desligar por `energia_define_habilitada`, que devolve `ENERGIA_ERRO_BLOQUEADO` se um módulo impede (gancho `sleep_permitido`). Serve à exclusão mútua com a saída em frequência (FW-023). `energia_ganchos_t` ganhou o campo `sleep_permitido`.
 - `documentacao/melhorias_hardware.md`: lista das mudanças de hardware para a próxima revisão das placas (pull-down das saídas, resistor e proteção das entradas, VBAT).
 - FW-022: saídas digitais discretas no OloggerMulti. `saida` (estado: desligada, aguardando o retardo ou ligada, lógica pura), `io_saida` (pinos PB12 a PB15, com o nível desligado escrito antes de virar saída) e `io_saidas` (quatro saídas e tarefa de 100 ms que liga as saídas ao fim do retardo). As saídas partem desligadas. Compila no `ologgermulti` (25 792 bytes); o `y7080` não muda. Sem teste em hardware.
 - HW-009: as saídas digitais não têm pull-down na base do transistor, e só PB13 a PB15 têm canal de timer.
-- Decisão de 03/11/2026: o FW-007 (build do ESP32) e a parte ESP32 do FW-046 vão para a SPRINT_07 e só começa depois de finalizados os testes do STM32 e de o STM32 estar validado (decisão de 03/11/2026).
+- Decisão de 03/11/2026: o FW-007 (build do ESP32) e a parte ESP32 do FW-046 vão para a SPRINT_07 e só começam depois de finalizados os testes do STM32 e de o STM32 estar validado.
 - Documentação sincronizada em 03/11/2026 (skill `doc-sync`): coluna de situação em todos os itens do backlog, arquivos das sprints 01 e 02 a 09, reescrita de `ESTADO_IMPLEMENTACAO.md` e `SPRINT_01B.md`, novas pendências P-028 a P-033 em `STATUS_PROJETO.md`, seções novas no manual de operação, na telemetria e no padrão de código, e atualização do README, do índice de agentes, de `lib/README.md` e de `tests/README.md`.
 - HW-008 (03/11/2026): D1 retirada das entradas digitais da placa de bancada; limite de 12 V com o resistor de 4K7 em 0402.
 - FW-058/FW-056: `adc_para`, `adc_retoma`, `aquisicao_para` e `aquisicao_retoma` param e retomam a aquisição analógica ao dormir. Roteiro de bancada da entrada digital em `documentacao/roteiro_bancada_entrada_digital.md` (12 testes, ainda não executados).

@@ -1,6 +1,6 @@
 # tools/ — ferramentas de apoio
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 02/11/2026 · **Versão:** 0.2.0
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.1
 
 Scripts de apoio ao desenvolvimento, sem código embarcado:
 
@@ -18,3 +18,10 @@ python -m unittest discover -s tools -p "test_*.py"
 ```
 
 Os scripts usam só a biblioteca padrão do Python. Não incluir artefatos de build aqui.
+
+## Histórico
+
+| Data | Versão | Alteração |
+|---|---|---|
+| 04/11/2026 | 0.2.1 | Adicionada a tabela de histórico, que faltava. As alterações anteriores não foram registradas aqui; ver o histórico do git |
+| 02/11/2026 | 0.1.0 | Criado |

@@ -1,6 +1,6 @@
 # oLoggerIOT — firmware
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.2.0
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.1
 
 Firmware da família oLoggerIOT, para os modelos **OloggerMulti** e **y7080**. Coleta de sensores 4–20 mA e digitais, controle de saídas, telemetria offline, comunicação por MQTT ou serial e Modbus RTU.
 
@@ -20,7 +20,7 @@ Firmware da família oLoggerIOT, para os modelos **OloggerMulti** e **y7080**. C
 | `builds/` | Composição de cada build (`composicao.cmake`) |
 | `devices/` | Pinagem de cada placa |
 | `tests/` | Testes de unidade no PC |
-| `tools/` | Verificação de padrão, geração do dicionário e simulador |
+| `tools/` | Verificação de padrão, geração do dicionário e verificação de pinos (o simulador ainda não existe) |
 | `esp32/` | Projeto ESP-IDF (a criar na FW-007) |
 | `documentacao/` | Regras, padrões, integração, dicionário e estado |
 | `planejamento/` | Plano, backlog e sprints |
@@ -75,5 +75,6 @@ Os dois builds STM32 compilam sem avisos com `-Werror` (verificado em 03/11/2026
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.1 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |
 | 03/11/2026 | 0.2.0 | Comandos de compilação e de teste atualizados: os dois builds STM32 compilam e há testes no PC |
 | 02/11/2026 | 0.1.0 | Criado |

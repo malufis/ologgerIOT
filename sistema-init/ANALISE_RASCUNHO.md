@@ -1,6 +1,8 @@
 # Análise do Rascunho Original (chatInicial.txt)
 
-> **Criado em:** 15/10/2026 · **Última modificação:** 15/10/2026 · **Versão:** 1.2.0
+> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 1.2.1
+
+> **Nota de 04/11/2026:** os documentos de sistema citados abaixo (`documentacao/01_visao_do_projeto.md`, `02_requisitos.md`, `03_glossario.md`, `04_riscos_e_pendencias.md`, `05_arquitetura.md`, `apps_moveis.md`, `lgpd.md`, `seguranca_e_dados.md`, `adr/ADR-0001-backend.md`, `adr/ADR-0002-frontend.md` e `planejamento/ROADMAP.md`) pertencem ao kit genérico de inicialização do **sistema** e **não existem neste repositório do firmware**. As decisões do device estão em `sistema-init/STATUS_PROJETO.md` e em `documentacao/`. A pasta `documentacao/adr/` deste repositório trata das decisões de arquitetura do firmware, com outros assuntos.
 
 ## 1. Onde cada tema do rascunho foi tratado
 
@@ -61,3 +63,10 @@ Estão no `estado/STATUS_PROJETO.md` e são feitas nos blocos indicados. As mais
 
 - **Versão 1.3 do kit:** bloco de **telemetria e tipos de sensor** (faixas de 4-20 mA, contadores de pulso, conversão de escala, qualidade do sinal) e bloco de **calendário de eventos** (falhas, alterações de configuração, acesso remoto).
 - **Skills específicas:** `padroes_iot_sensores`, `padroes_mqtt` e `seguranca_lgpd`, quando o projeto entrar na fase de arquitetura.
+
+## Histórico
+
+| Data | Versão | Alteração |
+|---|---|---|
+| 04/11/2026 | 1.2.1 | Adicionada a nota sobre os documentos de sistema que não existem neste repositório e a tabela de histórico |
+| 15/10/2026 | 1.2.0 | Versão anterior à tabela de histórico |

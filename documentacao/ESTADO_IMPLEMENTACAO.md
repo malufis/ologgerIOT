@@ -1,6 +1,6 @@
 # Estado da implementação — oLoggerIOT
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.2.5
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.7
 
 Documento vivo. Diz o que existe no código, o que está em teste e o que falta. Agentes e desenvolvedores leem aqui antes de começar um item. Atualizado pela skill `doc-sync` a cada item fechado e revisado pela skill `sprint-close`.
 
@@ -8,7 +8,7 @@ Documento vivo. Diz o que existe no código, o que está em teste e o que falta.
 
 - **Sprints em andamento:** SPRINT_00 (todos os itens concluídos ou movidos; pronta para o `sprint-close`) e SPRINT_01B (entrada digital e contador de pulsos). A SPRINT_01 (aquisição analógica) está bloqueada pela ferrite L2.
 - **Dois builds compilam sem avisos com `-Werror`** (03/11/2026): `ologgermulti` com 25 792 bytes de código e `y7080` com 4 944. O `y7080` não leva `ENTRADA_DIGITAL`, nem a gerência de energia.
-- **Testes no PC (03/11/2026):** sensor (57 verificações), filtro de ruído (135), contador de pulsos (25) e totalizador (36); verificadores das ferramentas (27 testes). Todos passam. O executável do `sensor` foi bloqueado uma vez pela política de Controle de Aplicativo do Windows depois de um relink, mas recompilado rodou e passou.
+- **Testes no PC (03/11/2026):** sensor (57 verificações), filtro de ruído (135), contador de pulsos (25), totalizador (36) e estado da saída digital (36); verificadores das ferramentas (27 testes). Todos passam. O executável do `sensor` foi bloqueado uma vez pela política de Controle de Aplicativo do Windows depois de um relink, mas recompilado rodou e passou.
 - **Hardware verificado em 02/11/2026:** a imagem do OloggerMulti executa no STM32L412 real, com FreeRTOS e a tarefa de vida. A aquisição analógica mede a entrada 4 com 8 mA injetados e mostra 8,007 mA.
 - **Nada da entrada digital, do contador de pulsos, do totalizador e da gerência de energia foi testado em hardware.** Só compilam e têm testes de lógica no PC. O roteiro de bancada está em `documentacao/roteiro_bancada_entrada_digital.md`.
 - **Saídas digitais (FW-022 e FW-024, 03/11/2026):** ligar, desligar e retardo de acionamento (relé de tempo, o "acionamento por tempo") em código, com 36 verificações no PC. O que falta: quem manda na saída (manual, automático, sensor), saída em frequência (a "pulsada") e a ligação com comandos. Sem teste em hardware. A saída em frequência só habilita com o sleep desligado, e o sleep só liga sem saída em frequência (FW-061).
@@ -16,7 +16,7 @@ Documento vivo. Diz o que existe no código, o que está em teste e o que falta.
 - **Bloqueio da fase 1 (HW-007):** a ferrite L2 não foi soldada na placa de bancada. Sem ela, o VDDA cai para ~2,37 V e o ADC satura em ~15,8 mA. Soldar a L2, conferir a resistência (quase 0 Ω) e o VDDA (3,25 V), voltar a referência do firmware para 3,25 V e refazer a calibração em 4, 8, 12, 16 e 20 mA.
 - **Risco no FreeRTOS:** entre a criação da primeira tarefa e `vTaskStartScheduler` o SysTick fica mascarado. Chamada do HAL com *timeout* nessa janela nunca expira. Inicializar hardware antes de criar tarefas, ou dentro delas.
 - **Risco no sleep:** o tick do FreeRTOS para em Stop 2, e os tempos medidos por ele (como o de inatividade) não contam o tempo dormido. A hora certa virá do RTC (fase 6).
-- **Próximo:** executar o roteiro de bancada da entrada digital quando o device estiver disponível; resolver o HW-007 e fechar o FW-012. O build do ESP32 (FW-007) e a parte ESP32 do FW-046 foram para a SPRINT_07 e só começa depois de finalizados os testes do STM32 e de o STM32 estar validado (decisão de 03/11/2026). O despertar do módulo para transmitir (RTC, 1, 2 ou 5 vezes ao dia, ou por entrada analógica) é de outra sprint.
+- **Próximo:** executar o roteiro de bancada da entrada digital quando o device estiver disponível; resolver o HW-007 e fechar o FW-012. O build do ESP32 (FW-007) e a parte ESP32 do FW-046 foram para a SPRINT_07 e só começam depois de finalizados os testes do STM32 e de o STM32 estar validado (decisão de 03/11/2026). O despertar do módulo para transmitir (RTC, 1, 2 ou 5 vezes ao dia, ou por entrada analógica) é de outra sprint.
 
 ## Módulos
 
@@ -31,9 +31,9 @@ Documento vivo. Diz o que existe no código, o que está em teste e o que falta.
 | Imagem STM32 do OloggerMulti (L412) | `src/`, `cmake/hal-stm32l4.cmake`, `include/stm32l4xx_hal_conf.h`, `devices/ologgermulti/` | Compila e linka sem avisos (25 792 bytes de código em 03/11/2026). Executa no STM32L412 real com a versão de 02/11/2026 | FW-006 | Build com `-Werror`; em hardware, PC em `0x0800....` e SysTick contando |
 | Imagem STM32 do y7080 (L071) | `cmake/hal-stm32l0.cmake`, `include/stm32l0xx_hal_conf.h`, `devices/y7080/` | Compila e linka sem avisos (4 944 bytes de código em 03/11/2026). Sem teste em hardware | FW-006 | Build com `-Werror` |
 | Build ESP32 | `esp32/` | Não iniciado; depois da validação do STM32 (SPRINT_07) | FW-007 | — |
-| Doxygen e dicionário de funções | `Doxyfile`, `tools/gera_dicionario.py` | Implementado; 56 funções no dicionário | FW-004 | 8 testes do gerador; Doxygen barra função e parâmetro sem documentação |
+| Doxygen e dicionário de funções | `Doxyfile`, `tools/gera_dicionario.py` | Implementado; 73 funções no dicionário | FW-004 | 8 testes do gerador; Doxygen barra função e parâmetro sem documentação |
 | Modelo de arquivo C | `tools/modelos/` | Implementado | FW-005 | Compila sem avisos para Cortex-M4 e M0+ |
-| Verificação de padrão | `tools/verifica_padrao.py` | Implementado; 32 arquivos sem violação | FW-008 | 12 testes: tamanho de função e arquivo, cabeçalho e alocação dinâmica |
+| Verificação de padrão | `tools/verifica_padrao.py` | Implementado; 38 arquivos sem violação | FW-008 | 12 testes: tamanho de função e arquivo, cabeçalho e alocação dinâmica |
 | ADC (TIM6, ADC1 e DMA) | `lib/adc/` | Implementado para o L412; medido em bancada com referência provisória de 2,367 V. Parada e retomada (`adc_para`, `adc_retoma`) só compilam | FW-009 | Entrada 4 com 8 mA: 8,007 mA. Refazer depois de soldar a L2 |
 | Sensor (média por segundo) | `lib/sensor/` | Implementado | FW-010 | 57 verificações em `tests/sensor` passam (03/11/2026) |
 | Conversão 4–20 mA | `lib/sensor/` | Implementado | FW-011 | Calibração de dois pontos em bancada; refazer em 5 pontos depois da L2 |
@@ -68,27 +68,37 @@ Legenda de estado: **Não iniciado**, **Em desenvolvimento**, **Em teste**, **Im
 - **Entrada digital de 12 a 24 V (HW-008):** a proteção D1 (ESDA6V1SC5, ruptura de 6,1 V) foi retirada na bancada em 03/11/2026. O resistor de 4K7 em 0402 limita a entrada a 12 V; passará a 0603 no próximo layout, e para 24 V ainda precisa de potência maior. Sem a D1 a entrada não tem supressor de surto e ESD, nem diodo contra inversão de polaridade. Se for para campo industrial, avaliar um supressor de ~30 V no próximo layout.
 - **Saídas digitais sem pull-down na base (HW-009):** durante o reset e o bootloader o pino flutua e o estado da saída não é garantido. Anotado em `documentacao/melhorias_hardware.md` para a próxima revisão (pull-down de ~10 kΩ). O firmware leva o pino a desligado logo depois do `HAL_Init`.
 - **Saída em frequência (FW-023):** só PB13, PB14 e PB15 têm canal de timer; a saída 1 (PB12) não. Frequências independentes pedem temporizador com tratador, que não roda em Stop 2: por isso a frequência só habilita com o sleep desligado e o sleep só liga sem saída em frequência (decidido em 03/11/2026).
-- **Mapa Modbus das saídas (P-037, resolvida em 03/11/2026):** modo da saída 0 = discreto, 1 = frequência (pulsada) e 2 reservado; o tempo de acionamento (40271–40285) ficou reservado, porque é o mesmo retardo de acionamento (40256–40270).
+- **Mapa Modbus das saídas (P-037, resolvida em 03/11/2026):** tipo da saída 0 = discreto, 1 = frequência (pulsada) e 2 reservado; o tempo de acionamento (40271–40285) ficou reservado, porque é o mesmo retardo de acionamento (40256–40270).
 - **Bateria no pino VBAT:** os registradores de backup do totalizador só sobrevivem à falta de energia se o VBAT tiver bateria. Confirmar na placa.
 - **Largura mínima do pulso:** o filtro de 20 ms exige que o medidor gere pulsos mais largos que isso. Confirmar com os leitores.
 - **Frequência em Hz (FW-054):** faixa de projeto de 0 a 20 kHz, mas o limite real é o optoacoplador TLP291 com o 10k; confirmar o limite do pino no datasheet e medir em bancada. Ajuste fica para depois.
 - **Contagem em hardware na D4 (FW-059):** só a D4 (PB5) tem `LPTIM1_IN1`, pela base do STM32CubeMX; confirmar no RM0394.
 - **Modo do despertar e debug:** em Stop 2 a conexão SWD cai. Habilitar o sleep na bancada exige o clock de depuração do Stop ou uso por pulso.
 - **Mapa Modbus:** o modo da entrada digital (40151–40165) hoje é "discreto ou pulsado". Falta definir os modos (discreto, contador de pulsos e frequência) e o endereço do totalizador.
-- Versão do FreeRTOS: os pacotes da ST trazem V10.3.1 (L4) e V10.2.0 (L0), então os dois builds usam kernels diferentes. Decidir se fixa uma só versão para os dois, copiada para o repositório.
-- Ferramenta de verificação estática MISRA e o ADR de escolha, previstos no padrão de código (FW-008 entregou só o verificador do projeto).
+- **Espaço de flash do STM32L412C8: 64 KB (verificado na base do CubeMX em 04/11/2026), com 40 KB de RAM.** A imagem do OloggerMulti já usa 25,8 KB de flash e 8,6 KB de RAM, e ainda faltam Modbus, fila, agenda, sessão e o protocolo com o ESP32. A atualização com recuperação da versão anterior (FW-040 a FW-042) não cabe em dois espaços internos quando a imagem passar de ~28 KB. O L412CB tem 128 KB. Decidir cedo: `documentacao/adr/ADR-0003-atualizacao-e-protecao.md` e `documentacao/melhorias_hardware.md`.
+- Versão do FreeRTOS: os pacotes da ST trazem V10.3.1 (L4) e V10.2.0 (L0), então os dois builds usam kernels diferentes. Decidir se fixa uma só versão para os dois, copiada para o repositório (proposta em `documentacao/adr/ADR-0001-versao-freertos.md`).
+- Ferramenta de verificação estática MISRA e o ADR de escolha, previstos no padrão de código (FW-008 entregou só o verificador do projeto). Proposta em `documentacao/adr/ADR-0002-analise-estatica-misra.md`.
 - Protocolo do rádio externo na UART do OloggerMulti (`RADIO_UART_EXTERNO`).
 - Armazenamento de credencial no ESP32: NVS criptografada ou criptografia de flash (P-004 e P-006).
-- Secure boot: pendente, a registrar em ADR antes da fase 7.
+- Secure boot e proteção de credenciais: pendente de decisão (proposta em `documentacao/adr/ADR-0003-atualizacao-e-protecao.md`), antes da fase 7.
 - Forma de referenciar `lib/` a partir do projeto ESP-IDF (FW-007).
 - Validação de TLS 1.3 na versão do mbedTLS do ESP-IDF (fase 7).
 - Validação NB-IoT em bancada (P-026, FW-044).
 - Gerência de energia do y7080 (STM32L0): o módulo `lib/energia` só existe para o L4.
 
+## Próxima sprint
+
+- **SPRINT_00** fica pronta para o fechamento (`sprint-close`): todos os itens estão concluídos, exceto o FW-007, que foi para a SPRINT_07.
+- **SPRINT_01B** (entrada digital) e **SPRINT_04** (saídas) seguem em andamento, em código pronto. A validação em bancada depende do device e do roteiro `documentacao/roteiro_bancada_entrada_digital.md`.
+- **SPRINT_01** (aquisição analógica) depende de soldar a ferrite L2 (HW-007).
+- Próximos itens de código: FW-025 (modo manual e automático por saída) e FW-023 (saída em frequência, só com o sleep desligado).
+
 ## Histórico
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.7 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |
+| 04/11/2026 | 0.2.6 | Adicionados o risco do espaço de flash do STM32L412C8, as referências aos ADRs e a seção "Próxima sprint" |
 | 03/11/2026 | 0.2.5 | O "acionamento por tempo" é o retardo de acionamento; ligar com a saída ligada ou aguardando é descartado; mapa Modbus das saídas ajustado (P-037) |
 | 03/11/2026 | 0.2.4 | Retardo de acionamento (FW-024) em código pronto; saída em frequência e sleep com exclusão mútua; melhorias de hardware anotadas |
 | 03/11/2026 | 0.2.3 | Saídas digitais: FW-022 em código pronto; HW-009 e as decisões da saída em frequência |

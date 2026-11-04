@@ -1,6 +1,6 @@
 ﻿# Configuração do dispositivo — oLoggerIOT
 
-> **Criado em:** 29/10/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.1.50
+> **Criado em:** 29/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.51
 
 ## Origem e estado
 
@@ -46,7 +46,7 @@ O usuário confirmou: **span é a faixa de medição do sensor**, com exemplo de
 Em 30/10/2026, Rodrigo Maluf definiu que as saídas deverão permitir:
 
 - **Ligar e desligar** por comando.
-- **Acionar por um tempo**, desligando automaticamente ao final do intervalo. *(Esclarecido em 03/11/2026: o "acionamento por tempo" é o retardo de acionamento descrito abaixo; não há desligamento automático.)*
+- **Acionar por um tempo:** é o **retardo de acionamento** da saída (esclarecido em 03/11/2026). Não há desligamento automático ao final de um intervalo; ver "Saídas digitais — implementação" abaixo.
 - **Relé de partida com atraso configurável:** depois da falta de energia, o sistema volta e informa que está normal. Um novo comando de ligar inicia a contagem; ao terminar o tempo configurado, a porta digital é ligada.
 
 O requisito descreve o comportamento funcional esperado; não decide se o relé temporizado será implementado em firmware ou por componente externo. O tempo de partida será **configurável por saída**, conforme definição do usuário; valores, limites e padrão ainda serão esclarecidos.
@@ -132,7 +132,7 @@ A frequência de atualização e a relação entre quantidade de entradas e saí
 - **Comandos implementados:** ligar e desligar. O "acionamento por tempo" é o retardo de acionamento (próximo item).
 - **Retardo de acionamento (relé de tempo, confirmado em 03/11/2026):** a saída discreta pode ter um retardo configurável por saída, em segundos. **Todo comando que liga a saída espera o retardo**; retardo zero liga na hora. Um comando de desligar durante a espera cancela a partida. Com o retardo em andamento, outro comando de ligar é descartado e a contagem continua. Com a saída já ligada, outro comando de ligar é descartado (o retardo não é reaplicado).
 - **Ainda não implementado:** modo manual e automático e prioridade do sensor (FW-025) e saída em frequência (FW-023).
-- **"Pulsada" é a saída em frequência (decidido em 03/11/2026):** não é acionamento por tempo. A saída discreta é só ligada ou desligada, com o retardo de acionamento. O modo da saída no mapa Modbus ficou 0 = discreto e 1 = frequência.
+- **"Pulsada" é a saída em frequência (decidido em 03/11/2026):** não é acionamento por tempo. A saída discreta é só ligada ou desligada, com o retardo de acionamento. O tipo da saída no mapa Modbus ficou 0 = discreto e 1 = frequência.
 - **Sleep e frequência (decidido em 03/11/2026):** a saída em frequência só pode ser habilitada se o modo sleep não estiver ativo, e o sleep só liga se nenhuma saída estiver em frequência. O sleep tem uma função de ligar e desligar (modo de operação 40412).
 - **Carga indutiva:** o diodo de roda livre fica no relé externo, instalado pelo responsável técnico.
 - **Stop 2:** o pino mantém o estado, mas o retardo não corre durante o sleep.
@@ -193,6 +193,7 @@ Depois de estabelecida a conectividade do dispositivo, a configuração continua
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.51 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |
 | 03/11/2026 | 0.1.50 | O "acionamento por tempo" é o retardo de acionamento; ligar com a saída ligada ou aguardando é descartado; mapa Modbus das saídas ajustado (P-037) |
 | 03/11/2026 | 0.1.49 | Saídas digitais: "pulsada" é a saída em frequência, retardo de acionamento (relé de tempo), exclusão mútua entre frequência e sleep e diodo no relé externo |
 | 03/11/2026 | 0.1.48 | Registrada a implementação das saídas digitais: circuito, estado na partida, comandos e o que falta |

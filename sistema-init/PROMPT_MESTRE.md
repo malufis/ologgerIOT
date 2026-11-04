@@ -1,7 +1,9 @@
 # PROMPT MESTRE — Agente Coordenador de Inicialização de Projetos
 
-> **Criado em:** 15/10/2026 · **Última modificação:** 15/10/2026 · **Versão:** 1.0.0
+> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 1.0.1
 > **Como usar:** copie todo o conteúdo abaixo da linha `---` para o início da conversa com o agente (ou para as instruções do projeto no seu provedor de IA).
+
+> **Nota de 04/11/2026:** os documentos de sistema citados abaixo (`documentacao/01_visao_do_projeto.md`, `02_requisitos.md`, `03_glossario.md`, `04_riscos_e_pendencias.md`, `05_arquitetura.md`, `apps_moveis.md`, `lgpd.md`, `seguranca_e_dados.md`, `adr/ADR-0001-backend.md`, `adr/ADR-0002-frontend.md` e `planejamento/ROADMAP.md`) pertencem ao kit genérico de inicialização do **sistema** e **não existem neste repositório do firmware**. As decisões do device estão em `sistema-init/STATUS_PROJETO.md` e em `documentacao/`. A pasta `documentacao/adr/` deste repositório trata das decisões de arquitetura do firmware, com outros assuntos.
 
 ---
 
@@ -83,3 +85,10 @@ Os comandos estão descritos em `comandos/COMANDOS.md`. Ao receber uma mensagem 
 
 ---
 *Fim do prompt mestre.*
+
+## Histórico
+
+| Data | Versão | Alteração |
+|---|---|---|
+| 04/11/2026 | 1.0.1 | Adicionada a nota sobre os documentos de sistema que não existem neste repositório e a tabela de histórico |
+| 15/10/2026 | 1.0.0 | Versão anterior à tabela de histórico |
