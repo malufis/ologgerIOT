@@ -51,6 +51,24 @@ add_executable(test_saida
 target_include_directories(test_saida PRIVATE ../lib/io/include .)
 add_test(NAME saida COMMAND test_saida)
 
+# Módulo agenda: formato da configuração persistente (fuso e agendas).
+add_executable(test_agenda_config
+  agenda/test_agenda_config.c
+  ../lib/agenda/src/agenda_config.c
+  ../lib/agenda/src/agenda_aplicador.c
+  ../lib/agenda/src/agenda.c
+)
+target_include_directories(test_agenda_config PRIVATE ../lib/agenda/include .)
+add_test(NAME agenda_config COMMAND test_agenda_config)
+
+# Módulo armazem: configuração persistente em dois espaços de flash, com flash simulada.
+add_executable(test_armazem
+  armazem/test_armazem.c
+  ../lib/armazem/src/armazem.c
+)
+target_include_directories(test_armazem PRIVATE ../lib/armazem/include .)
+add_test(NAME armazem COMMAND test_armazem)
+
 # Módulo tempo: conversão do tempo UTC em data e hora locais com o fuso da instalação.
 add_executable(test_tempo
   tempo/test_tempo.c

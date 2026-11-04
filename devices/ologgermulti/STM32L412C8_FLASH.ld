@@ -50,7 +50,9 @@ MEMORY
   RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 40K
   SRAM1    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 32K
   SRAM2    (xrw)    : ORIGIN = 0x20008000,   LENGTH = 8K
-  ROM    (rx)    : ORIGIN = 0x08000000,   LENGTH = 64K
+  /* As duas últimas páginas de 2 KB (0x0800F000 a 0x0800FFFF) são do armazém de configuração
+     (lib/armazem, flash_interna.h) e ficam fora da área do programa. */
+  ROM    (rx)    : ORIGIN = 0x08000000,   LENGTH = 60K
 }
 
 /* Sections */

@@ -34,7 +34,7 @@ endif()
 # Agenda semanal das saídas (lógica pura, testada no PC em tests/agenda). Só serve a quem tem
 # saída digital discreta.
 if(SAIDA_DISCRETA IN_LIST OLOG_FEATURES)
-  add_library(agenda STATIC agenda/src/agenda.c agenda/src/agenda_aplicador.c)
+  add_library(agenda STATIC agenda/src/agenda.c agenda/src/agenda_aplicador.c agenda/src/agenda_config.c)
   target_include_directories(agenda PUBLIC agenda/include)
 endif()
 
@@ -54,9 +54,12 @@ endif()
 
 # Tarefa que aplica as agendas pelo horário do RTC: precisa das saídas digitais e do relógio.
 if((SAIDA_DISCRETA IN_LIST OLOG_FEATURES) AND (RELOGIO IN_LIST OLOG_FEATURES))
+  add_library(armazem STATIC armazem/src/armazem.c armazem/src/flash_interna.c)
+  target_include_directories(armazem PUBLIC armazem/include)
+  target_link_libraries(armazem PUBLIC ${OLOG_HAL_TARGET})
   add_library(agenda_tarefa STATIC agenda/src/agenda_tarefa.c)
   target_include_directories(agenda_tarefa PUBLIC agenda/include)
-  target_link_libraries(agenda_tarefa PUBLIC agenda io rtc tempo rtos freertos)
+  target_link_libraries(agenda_tarefa PUBLIC agenda armazem io rtc tempo energia rtos freertos)
 endif()
 
 # Gerência de energia com Stop 2. Existe só para o STM32L4; o do STM32L0 (y7080) é a fazer.

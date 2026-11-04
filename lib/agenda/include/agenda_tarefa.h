@@ -9,13 +9,16 @@
  * minutos e depois de carregar a agenda ou de mudar o fuso. A saída só aplica o pedido da agenda
  * com o device offline, em modo automático e sem regra do sensor (controle_saida.h).
  *
- * **Sem hora válida ou sem fuso configurado, nada é pedido** e as saídas mantêm o estado. O fuso
- * é configuração enviada pelo CCO (40403, proposta): enquanto não chegar, a agenda não é aplicada
- * (proposta a confirmar; sem o fuso, a hora local seria um palpite).
+ * **A agenda só funciona com o modo sleep desabilitado** (decidido em 04/11/2026): com o sleep
+ * habilitado nada é pedido. Assim a tarefa não precisa acordar o STM32 no limite do intervalo.
+ * **Sem hora válida, nada é pedido** e as saídas mantêm o estado. O fuso é configuração enviada
+ * pelo CCO (40403, proposta); até chegar, vale o de Brasília (UTC−3), que é o padrão da partida.
  *
- * Limites desta versão: a tarefa depende do tick do FreeRTOS, que para em Stop 2, então o
- * despertar no limite do intervalo, com o alarme do RTC, é um passo futuro. A agenda e o fuso
- * ainda não são guardados em memória persistente e se perdem no reinício. Sem teste em hardware.
+ * **Persistência (decidido em 04/11/2026): a agenda e o fuso gravados persistem ao reinício.** A
+ * tarefa os grava no armazém (armazem.h), nas duas últimas páginas da flash interna, 5 segundos
+ * depois da última mudança, e os carrega na partida. Uma queda de energia nesses 5 segundos perde a
+ * mudança mais recente; o registro anterior continua válido. Sem registro, valem a agenda vazia e o
+ * fuso de Brasília. Sem teste em hardware.
  *
  * @date criacao 04/11/2026
  * @date modificacao 04/11/2026
@@ -32,6 +35,12 @@
 #define AGENDA_TAREFA_PERIODO_MS     1000U
 /** Tamanho da pilha da tarefa, em palavras de 32 bits. */
 #define AGENDA_TAREFA_PILHA_PALAVRAS 192U
+
+/** Segundos sem novas mudanças antes de gravar a agenda e o fuso na flash. */
+#define AGENDA_TAREFA_ESPERA_GRAVAR_S 5U
+
+/** Fuso horário inicial, em minutos em relação ao UTC: Brasília (decidido em 04/11/2026). */
+#define AGENDA_TAREFA_FUSO_PADRAO_MIN (-180)
 
 /** Código de retorno: sucesso. */
 #define AGENDA_TAREFA_OK             0
