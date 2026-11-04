@@ -1,6 +1,6 @@
 # Backlog do firmware — oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.23
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.24
 
 ## Regras
 
@@ -141,6 +141,7 @@ Entrada digital ativa com tensão no campo (de 12 a 24 V; na bancada, até 12 V)
 | FW-041 | Recuperação da versão anterior em falha ou queda de energia | Teste de queda durante gravação | Pendente |
 | FW-042 | Saídas desligadas durante atualização e retomada com tempo de partida | Teste de retomada | Pendente |
 | FW-062 | Layout da flash interna do STM32 com bootloader (ADR-0003): reservar o espaço do bootloader, mover o início da aplicação no linker, e medir e registrar a folga de flash e de RAM por fase | Imagem compila e executa no novo endereço; tabela de folga por fase registrada em `documentacao/ESTADO_IMPLEMENTACAO.md` | Pendente; criado em 04/11/2026 pela decisão do ADR-0003 |
+| FW-064 | Configuração persistente: tabela de parâmetros com os endereços do mapa Modbus (`lib/config`), armazém em dois espaços de flash com CRC (`lib/armazem`), gravação nas duas últimas páginas da flash interna, aplicação na partida e a tarefa que liga as entradas analógicas às regras das saídas e à saída em frequência | Testes no PC: leitura e escrita por endereço, floats ABCD, limites, atomicidade, exclusões, ida e volta da gravação, queda de energia em vários pontos | Código pronto em 04/11/2026 (101 + 139 verificações no PC; compila nos dois builds); **sem teste em hardware**. Falta a camada Modbus e MQTT que chama `config_tarefa_le` e `config_tarefa_escreve` |
 
 ### Fase 10 — Bancada e protótipo (SPRINT_09)
 
@@ -155,6 +156,7 @@ Entrada digital ativa com tensão no campo (de 12 a 24 V; na bancada, até 12 V)
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.24 | FW-064: configuração persistente |
 | 04/11/2026 | 0.2.23 | FW-032: agenda só com o sleep desabilitado; persistência da agenda e do fuso; fuso padrão de Brasília |
 | 04/11/2026 | 0.2.22 | FW-032: tarefa que aplica a agenda pelo RTC escrita, sem teste em hardware |
 | 04/11/2026 | 0.2.21 | FW-030: driver do RTC escrito, sem teste em hardware |

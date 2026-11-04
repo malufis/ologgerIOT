@@ -1,6 +1,6 @@
 # Status do Projeto — oLoggerIOT
 
-> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.167
+> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.168
 > **Repositório:** https://github.com/malufis/ologgerIOT
 
 ## Fase atual
@@ -64,6 +64,7 @@
 | P-044 | Identificador do comando MQTT | Fase 7 | RESOLVIDO em 04/11/2026 — aceito: campo `id` de até 36 caracteres, devolvido sem alteração em cada resposta, descarte de repetição com os últimos 8; nomes `etapa` e `motivo` e endereço 40403 do fuso seguem como proposta |
 | P-045 | Agenda sem fuso configurado | Fase 6 | RESOLVIDO em 04/11/2026 — o fuso começa em Brasília (−180), e a agenda e o fuso gravados persistem ao reinício; a agenda só funciona com o sleep desabilitado |
 | P-046 | Onde guardar a agenda e o fuso: proposta de usar as duas últimas páginas de 2 KB da flash interna (0x0800F000 a 0x0800FFFF), fora da área do programa de 60 KB. Confirmar com o layout do bootloader (FW-062, ADR-0003) e com o responsável técnico; a alternativa é a flash externa, que depende do driver FW-018 | Fase 6 | PENDENTE — confirmar |
+| P-047 | Propostas desta configuração: endereços 40382–40396 (estabilidade do sensor) e 40413 (inatividade da entrada digital); padrões de fábrica (RS-485 em escravo a 9600 bps e endereço 1, intervalos de 60 s); falha do sensor abaixo de 3,6 mA ou acima de 21 mA (NAMUR NE43). Confirmar | Fase 6 | PENDENTE — confirmar |
 
 ## Decisões tomadas
 B0 — Identificação: respostas e resumo confirmados pelo usuário em 29/10/2026.
@@ -321,7 +322,7 @@ Regra de processo: a entrevista do firmware só pergunta o que é do device. O q
 ## Processo de desenvolvimento (01/11/2026)
 - **Git:** repositório local iniciado em `firmware/`, com remoto `origin` para `https://github.com/malufis/ologgerIOT.git`. Em 03/11/2026 o branch `feat/fw-002-cmake-raiz` tem commits enviados ao remoto e o PR #1 está aberto para `main`; commit e push seguem dependendo de ordem explícita do usuário.
 - **Documentação:** índice em `documentacao/README.md`. Dicionário de funções, padrão de código C (base MISRA C:2012), contrato de integração e manual de operação criados como esqueletos.
-- **Backlog:** `planejamento/BACKLOG.md`, com 63 itens (FW-001 a FW-063) em 12 fases, incluindo a fase 1B. Sprints de uma semana, de SPRINT_00 a SPRINT_09, em `planejamento/sprints/`.
+- **Backlog:** `planejamento/BACKLOG.md`, com 64 itens (FW-001 a FW-064) em 12 fases, incluindo a fase 1B. Sprints de uma semana, de SPRINT_00 a SPRINT_09, em `planejamento/sprints/`.
 - **Skills:** `c-firmware-standards`, `doc-sync`, `device-profile-build` e `sprint-task` em `firmware/.claude/skills/`.
 - **Agentes:** `firmware-dev` e `doc-keeper` em `firmware/.claude/agents/`.
 - **Scripts prontos (02/11/2026):** `tools/verifica_padrao.py` e `tools/gera_dicionario.py` (FW-004 e FW-008), citados pelas skills.
@@ -363,6 +364,7 @@ A entrevista está encerrada e o firmware está em desenvolvimento. Os dois buil
 ## Histórico de atualizações
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.168 | FW-064: configuração persistente; P-047 aberta (propostas da configuração) |
 | 04/11/2026 | 0.3.167 | P-045 resolvida; P-046 aberta (local da persistência); persistência da agenda escrita |
 | 04/11/2026 | 0.3.166 | FW-032: tarefa da agenda pelo RTC escrita; P-045 aberta (agenda sem fuso) |
 | 04/11/2026 | 0.3.165 | FW-030: driver do RTC escrito, sem teste em hardware |

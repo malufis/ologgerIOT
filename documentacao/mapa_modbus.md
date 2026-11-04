@@ -1,6 +1,6 @@
 # Mapa Modbus do device oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.11
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.12
 
 ## Origem e estado
 
@@ -61,6 +61,7 @@ Mapa definido pelo usuário em 01/11/2026: seguir a norma Modbus, com float ocup
 | 40307–40336 | holding float | Limiar máximo da regra do sensor da saída n, na unidade de engenharia da entrada associada (**proposta de 04/11/2026**) |
 | 40337–40366 | holding float | Limiar mínimo da regra do sensor da saída n, na unidade de engenharia da entrada associada (**proposta de 04/11/2026**) |
 | 40367–40381 | holding uint16 | Sentido da regra do sensor da saída n: 0 = liga no mínimo e desliga no máximo, 1 = liga no máximo e desliga no mínimo (**confirmado em 04/11/2026**; endereços ainda a confirmar) |
+| 40382–40396 | holding uint16 | Tempo de estabilidade do sensor da saída n depois de uma falha, em segundos; padrão 300 (5 minutos) (**proposta de 04/11/2026**) |
 
 ## Sistema trifásico (reservado, sem hardware identificado)
 
@@ -156,6 +157,15 @@ Mesmo layout do Wi-Fi, a partir de 30400: MAC 30400–30408, fabricante 30409–
 | 40410 | uint16 | Intervalo de coleta em segundos |
 | 40411 | uint16 | Intervalo de envio em segundos |
 | 40412 | uint16 | Modo de operação: 0 = contínuo, 1 = sleep |
+| 40413 | uint16 | Tempo sem pulso para o STM32 dormir, em segundos, de 1 a 65535; padrão 60 (**proposta de 04/11/2026**) |
+
+## Persistência dos registradores de configuração (decidido em 04/11/2026)
+
+**Todos os registradores de retenção (holding, 4xxxx) deste mapa são configuração e setup, e ficam na memória flash do device:** o que o CCO ou o Modbus gravam sobrevive ao reinício e à falta de energia, sem depender de bateria. A gravação ocorre 5 segundos depois da última escrita. Valem os padrões de fábrica quando não há registro válido, e um valor gravado inválido volta ao padrão.
+
+- **Escrita atômica:** o pedido só vale se todos os valores estiverem nos limites; um float escrito pela metade, um endereço fora da configuração ou uma combinação proibida (frequência na saída 1, ou frequência com o sleep ligado) recusa o pedido inteiro.
+- **Não persistem** (são estado, e não configuração): o comando e o estado das saídas (coils), o modo manual ou automático (40286–40300, volta a automático e desligada depois de um reinício), o totalizador de pulsos e a hora. A agenda semanal é gravada junto, mas não tem endereço Modbus (vem por MQTT).
+- **Implementação:** `lib/config` (tabela de parâmetros, com os endereços, limites e padrões) e `lib/armazem` (dois espaços de flash com CRC-32, seguro contra queda de energia).
 
 ## Exemplo de JSON
 
@@ -202,6 +212,7 @@ Os nomes dos grupos (analogico, digital, falhas, sistema, rede) são uma propost
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.12 | Persistência dos registradores de configuração; propostos 40382–40396 (estabilidade do sensor) e 40413 (inatividade da entrada digital) |
 | 04/11/2026 | 0.1.11 | Tipo da saída: só as saídas 2 a 4 aceitam frequência e a gravação é recusada com o sleep ligado |
 | 04/11/2026 | 0.1.10 | Proposto o endereço 40403 para o fuso horário da instalação, configurado pelo CCO |
 | 04/11/2026 | 0.1.9 | Sentido da regra do sensor confirmado (0 liga no mínimo, 1 liga no máximo); registrado que a agenda não tem registradores Modbus |

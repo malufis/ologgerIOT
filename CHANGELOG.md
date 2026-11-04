@@ -1,6 +1,6 @@
 # Changelog — oLoggerIOT firmware
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.25
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.26
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versões seguem a numeração do projeto (ver `sistema-init/STATUS_PROJETO.md`). Cada entrada cita o item do backlog (`FW-###`) quando houver.
 
@@ -10,6 +10,7 @@ Trabalho das sprints 01 (aquisição analógica), 01B (entrada digital) e 04 (sa
 
 ### Adicionado
 - FW-032 (parcial): `lib/agenda`, agenda semanal de 336 intervalos de 30 minutos por saída. `agenda_carrega_hex` valida por inteiro a cadeia de 84 caracteres hexadecimais recebida do CCO por MQTT (sem alterar a agenda anterior em caso de erro) e `agenda_estado` devolve ligada, desligada ou sem agenda para um instante. 57 verificações no PC. Falta o recebimento por MQTT. Formato em `documentacao/agenda_operacional_offline.md` (P-042).
+- FW-064: configuração persistente. `lib/config` tem a tabela de todos os parâmetros de configuração com o endereço do mapa Modbus, tipo, limites e padrão; `config_le_registradores` e `config_escreve_registradores` (floats ABCD, escrita atômica, regras de exclusão) são o ponto de entrada comum do Modbus e do MQTT; 101 verificações no PC. Toda a configuração e a agenda são gravadas num só registro do armazém, nas duas últimas páginas da flash interna, 5 s depois da última mudança, e aplicadas na partida (`config_tarefa`). `regras_tarefa` liga as entradas 4–20 mA às regras do sensor e à saída em frequência a cada 200 ms (falha provisória abaixo de 3,6 mA ou acima de 21 mA). Novos endereços propostos: 40382–40396 (estabilidade do sensor) e 40413 (inatividade da entrada digital). **Sem teste em hardware.**
 - FW-032 (parcial): persistência da agenda e do fuso. `lib/armazem` guarda uma carga em um de dois espaços de flash (sequência e CRC-32; escolhe o espaço sem o registro mais recente, apaga, grava e confere), então uma queda de energia deixa o registro anterior intacto (14 testes com flash simulada e corte em vários pontos). `agenda_config` define a carga de 176 bytes (7 testes). `flash_interna` usa as duas últimas páginas da flash interna, fora da área do programa (linker com 60 KB). A `agenda_tarefa` carrega na partida e grava 5 s depois da última mudança. **Sem teste em hardware.**
 - FW-032 (parcial): `agenda_tarefa`, a tarefa que aplica as agendas pelo RTC. A cada segundo lê o RTC, aplica o fuso e entrega às saídas, por `io_saidas_pedido`, o pedido da fonte agenda do intervalo atual (partida, virada de intervalo, agenda carregada ou fuso mudado). Sem hora válida nada é pedido, e com o sleep habilitado a agenda não funciona. O fuso começa em Brasília. `agenda_tarefa_define_fuso` e `agenda_tarefa_carrega` recebem o fuso e a agenda. Compila no OloggerMulti (30 252 bytes); **sem teste em hardware**.
 - FW-030 (parcial): `lib/rtc`, driver do RTC do STM32L412 com o cristal de 32,768 kHz (funcionalidade nova `RELOGIO`, só no OloggerMulti). `rtc_inicia` liga o LSE e o RTC sem reiniciar o domínio de backup (preserva o totalizador), `rtc_define` acerta a hora em UTC (2000 a 2099), `rtc_le` lê a hora e `rtc_hora_valida` diz se há hora. Sem cristal, o firmware segue com hora inválida. `tempo_de_utc` faz a conversão inversa e foi testado em todo o intervalo de 32 bits. **Sem teste em hardware.**
@@ -45,6 +46,7 @@ Trabalho das sprints 01 (aquisição analógica), 01B (entrada digital) e 04 (sa
 - Aquisição analógica (fase 1, em bancada): driver do ADC com TIM6, ADC1 e DMA, tarefa de aquisição e módulo `sensor` (média por segundo e conversão 4-20 mA). Entrada 4 medida com 8 mA: 8,007 mA. Calibração de bancada por dois pontos, referência efetiva de 2,367 V; causa do fator ~1,37 em aberto.
 
 ### Alterado
+- Persistência (04/11/2026): todos os registradores de retenção do mapa Modbus passam a ficar na flash; a agenda e o fuso deixam de ter gravação própria e entram no mesmo registro da configuração. O gerador de frequência passou a calcular o passo em ponto flutuante de 32 bits (menos 1,6 KB de flash, mesmo resultado).
 - Agenda (04/11/2026): só funciona com o modo sleep desabilitado (o despertar no limite do intervalo deixa de ser necessário); o fuso horário começa em Brasília (−180) e vale até o CCO enviar outro; a agenda e o fuso gravados persistem ao reinício. A área do programa do OloggerMulti passa de 64 KB para 60 KB.
 - `tempo` passa a usar só divisão de 32 bits, o que tira cerca de 2 KB de flash da imagem sem mudar o resultado (64 460 verificações).
 - Hardware do relógio (P-030, 04/11/2026): a bateria no VBAT é opcional, conforme a implantação; o OloggerMulti tem os dois cristais e o y7080 não tem cristal.

@@ -1,6 +1,6 @@
 # Dicionário de funções — firmware oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.16
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.17
 
 ## Como manter
 
@@ -39,8 +39,11 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `agenda_aplicador_reavalia` | agenda_aplicador | `lib/agenda/include/agenda_aplicador.h` | Marca todas as saídas para serem avaliadas de novo na próxima atualização. | AGENDA_OK, ou AGENDA_ERRO_PARAMETRO se ap for nulo. | ativa |
 | `agenda_config_desempacota` | agenda_config | `lib/agenda/include/agenda_config.h` | Desempacota uma carga nas agendas e no fuso, só se ela for válida por inteiro. | AGENDA_CONFIG_OK, AGENDA_CONFIG_ERRO_PARAMETRO, AGENDA_CONFIG_ERRO_FORMATO ou AGENDA_CONFIG_ERRO_CAMPO. | ativa |
 | `agenda_config_empacota` | agenda_config | `lib/agenda/include/agenda_config.h` | Empacota o fuso e as agendas numa carga. | AGENDA_CONFIG_OK ou AGENDA_CONFIG_ERRO_PARAMETRO. | ativa |
+| `agenda_tarefa_alteracoes` | agenda_tarefa | `lib/agenda/include/agenda_tarefa.h` | Quantas vezes uma agenda foi alterada desde a partida. | Contador de alterações; o módulo de configuração o compara para saber quando gravar. | ativa |
 | `agenda_tarefa_carrega` | agenda_tarefa | `lib/agenda/include/agenda_tarefa.h` | Carrega a agenda de uma saída, recebida do CCO. | Os códigos de agenda.h: AGENDA_OK ou o erro de parâmetro, tamanho ou caractere. | ativa |
 | `agenda_tarefa_define_fuso` | agenda_tarefa | `lib/agenda/include/agenda_tarefa.h` | Define o fuso horário da instalação, enviado pelo CCO. | AGENDA_TAREFA_OK ou AGENDA_TAREFA_ERRO_FUSO. | ativa |
+| `agenda_tarefa_exporta` | agenda_tarefa | `lib/agenda/include/agenda_tarefa.h` | Empacota as agendas para a gravação (formato de agenda_config.h). | AGENDA_CONFIG_OK ou AGENDA_CONFIG_ERRO_PARAMETRO. | ativa |
+| `agenda_tarefa_importa` | agenda_tarefa | `lib/agenda/include/agenda_tarefa.h` | Restaura as agendas gravadas, só se a carga for válida por inteiro. | AGENDA_CONFIG_OK ou o erro de agenda_config.h (as agendas ficam como estavam). | ativa |
 | `agenda_tarefa_inicia` | agenda_tarefa | `lib/agenda/include/agenda_tarefa.h` | Cria a tarefa que aplica as agendas, com memória estática. | AGENDA_TAREFA_OK ou AGENDA_TAREFA_ERRO_TAREFA. | ativa |
 | `aquisicao_contagens` | aquisicao | `lib/aquisicao/include/aquisicao.h` | Lê a média de contagens do ADC do último segundo de uma entrada. | AQUISICAO_OK, AQUISICAO_ERRO_PARAMETRO ou AQUISICAO_ERRO_SEM_DADO. | ativa |
 | `aquisicao_inicia` | aquisicao | `lib/aquisicao/include/aquisicao.h` | Cria a tarefa de aquisição e inicia o ADC. | AQUISICAO_OK, AQUISICAO_ERRO_PARAMETRO ou AQUISICAO_ERRO_INICIO. | ativa |
@@ -51,6 +54,22 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `armazem_grava` | armazem | `lib/armazem/include/armazem.h` | Grava uma carga nova, sem apagar a anterior até a nova estar conferida. | ARMAZEM_OK, ARMAZEM_ERRO_PARAMETRO, ARMAZEM_ERRO_TAMANHO ou ARMAZEM_ERRO_FLASH (a carga anterior continua valendo). | ativa |
 | `armazem_inicia` | armazem | `lib/armazem/include/armazem.h` | Inicia o armazém e procura o registro válido mais recente. | ARMAZEM_OK, ou ARMAZEM_ERRO_PARAMETRO se algum ponteiro for nulo ou o espaço for pequeno. | ativa |
 | `armazem_le` | armazem | `lib/armazem/include/armazem.h` | Lê a carga do registro válido mais recente. | ARMAZEM_OK, ARMAZEM_ERRO_PARAMETRO, ARMAZEM_ERRO_VAZIO ou ARMAZEM_ERRO_TAMANHO. | ativa |
+| `config_bits_validos` | config | `lib/config/include/config.h` | Diz se os 32 bits guardados são um valor aceito pelo parâmetro. | true se estiver nos limites. | ativa |
+| `config_conflito` | config | `lib/config/include/config.h` | Diz se a configuração viola uma regra de exclusão. | true se há conflito. | ativa |
+| `config_desempacota` | config | `lib/config/include/config.h` | Carrega a configuração de uma carga gravada. | CONFIG_OK, CONFIG_ERRO_PARAMETRO, CONFIG_ERRO_TAMANHO ou CONFIG_ERRO_VERSAO. | ativa |
+| `config_empacota` | config | `lib/config/include/config.h` | Empacota a configuração numa carga para o armazém. | CONFIG_OK, CONFIG_ERRO_PARAMETRO ou CONFIG_ERRO_TAMANHO. | ativa |
+| `config_escreve_registradores` | config | `lib/config/include/config.h` | Grava registradores de retenção, só se o pedido inteiro for válido. | CONFIG_OK, CONFIG_ERRO_PARAMETRO, CONFIG_ERRO_ENDERECO ou CONFIG_ERRO_VALOR (nada muda). | ativa |
+| `config_float` | config | `lib/config/include/config.h` | Lê o valor de uma instância de ponto flutuante. | O valor, ou 0 se os argumentos forem inválidos. | ativa |
+| `config_indice` | config | `lib/config/include/config.h` | Posição de uma instância no vetor de valores. | A posição, ou CONFIG_VALORES se os argumentos forem inválidos. | ativa |
+| `config_instancias` | config | `lib/config/include/config.h` | Quantas entradas ou saídas tem um parâmetro. | Quantidade de instâncias, ou 0 se id for inválido. | ativa |
+| `config_inteiro` | config | `lib/config/include/config.h` | Lê o valor inteiro de uma instância (para parâmetros uint16 e int16). | O valor, ou 0 se os argumentos forem inválidos. | ativa |
+| `config_le_registradores` | config | `lib/config/include/config.h` | Lê registradores de retenção (holding), a partir de um endereço do mapa Modbus. | CONFIG_OK, CONFIG_ERRO_PARAMETRO ou CONFIG_ERRO_ENDERECO. | ativa |
+| `config_mudou` | config | `lib/config/include/config.h` | Diz se uma instância tem valor diferente nas duas configurações. | true se o valor mudou. Falso se os argumentos forem inválidos. | ativa |
+| `config_padroes` | config | `lib/config/include/config.h` | Põe todos os parâmetros nos valores de fábrica. | CONFIG_OK, ou CONFIG_ERRO_PARAMETRO se cfg for nulo. | ativa |
+| `config_tarefa_copia` | config_tarefa | `lib/config/include/config_tarefa.h` | Copia a configuração atual (para os módulos que a leem em laço, como as regras do sensor). | void | ativa |
+| `config_tarefa_escreve` | config_tarefa | `lib/config/include/config_tarefa.h` | Grava registradores de retenção da configuração e aplica o que mudou. | Os códigos de config.h; com erro, nada é alterado nem aplicado. | ativa |
+| `config_tarefa_inicia` | config_tarefa | `lib/config/include/config_tarefa.h` | Lê a configuração gravada, a aplica aos módulos e cria a tarefa de gravação. | CONFIG_TAREFA_OK ou CONFIG_TAREFA_ERRO_TAREFA. | ativa |
+| `config_tarefa_le` | config_tarefa | `lib/config/include/config_tarefa.h` | Lê registradores de retenção da configuração. | Os códigos de config.h (CONFIG_OK, CONFIG_ERRO_ENDERECO, ...). | ativa |
 | `controle_saida_aguardando` | controle_saida | `lib/io/include/controle_saida.h` | Lê se a saída espera o retardo de acionamento. | true se há um retardo em curso. | ativa |
 | `controle_saida_atualiza` | controle_saida | `lib/io/include/controle_saida.h` | Atualiza o estado com o instante atual e devolve se a saída está ligada. | true se a saída está ligada depois da atualização. | ativa |
 | `controle_saida_comando_manual` | controle_saida | `lib/io/include/controle_saida.h` | Comando manual direto: passa a saída ao modo manual e liga ou desliga. | true se a saída estava em modo automático e passou a manual. A chegada de todo comando manual gera um alerta ao CCO; o valor devolvido diz se houve a mudança de modo. | ativa |
@@ -138,6 +157,7 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `regra_sensor_avalia` | regra_sensor | `lib/io/include/regra_sensor.h` | Avalia um valor da entrada e devolve o pedido da regra. | O pedido atual: LIGA, DESLIGA, ou NENHUM se a regra não está definida ou ainda não alcançou nenhum limiar. Um valor não numérico mantém o pedido anterior. | ativa |
 | `regra_sensor_cadastra` | regra_sensor | `lib/io/include/regra_sensor.h` | Cadastra a regra. Só troca a regra se todos os campos forem válidos. | REGRA_SENSOR_OK, ou o código de erro (a regra anterior fica como estava). | ativa |
 | `regra_sensor_limpa` | regra_sensor | `lib/io/include/regra_sensor.h` | Deixa a regra sem cadastro e sem pedido. | REGRA_SENSOR_OK, ou REGRA_SENSOR_ERRO_PARAMETRO se regra for nula. | ativa |
+| `regras_tarefa_inicia` | regras_tarefa | `lib/config/include/regras_tarefa.h` | Cria a tarefa das regras, com memória estática. | REGRAS_TAREFA_OK ou REGRAS_TAREFA_ERRO_TAREFA. | ativa |
 | `rtc_define` | rtc | `lib/rtc/include/rtc.h` | Acerta o RTC com a hora UTC dada (por exemplo, a do servidor NTP). | RTC_OK, RTC_ERRO_LSE (cristal parado), RTC_ERRO_DATA ou RTC_ERRO_TEMPO. | ativa |
 | `rtc_hora_valida` | rtc | `lib/rtc/include/rtc.h` | Informa se o RTC tem uma hora válida. | true se o LSE subiu e o RTC já recebeu data e hora. | ativa |
 | `rtc_inicia` | rtc | `lib/rtc/include/rtc.h` | Liga o cristal LSE e o RTC, sem alterar a hora que o RTC já tem. | RTC_OK, RTC_ERRO_LSE ou RTC_ERRO_CONFIG. | ativa |
@@ -170,6 +190,7 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.17 | Tabela regenerada com 159 funções públicas: entram as de `config`, `config_tarefa`, `regras_tarefa` e as novas de `agenda_tarefa` |
 | 04/11/2026 | 0.3.16 | Tabela regenerada com 139 funções públicas: entram as de `armazem`, `flash_interna` e `agenda_config` |
 | 04/11/2026 | 0.3.15 | Tabela regenerada com 133 funções públicas: entram as de `agenda_tarefa` e `agenda_aplicador_reavalia` |
 | 04/11/2026 | 0.3.14 | Tabela regenerada com 129 funções públicas: entram as de `rtc` e `tempo_de_utc` |

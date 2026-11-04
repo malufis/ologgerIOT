@@ -1,6 +1,6 @@
 # Agenda operacional offline — oLoggerIOT
 
-> **Criado em:** 31/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.27
+> **Criado em:** 31/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.28
 
 ## Objetivo informado
 
@@ -80,7 +80,7 @@ A agenda chega ao device **por MQTT, vinda do CCO, como configuração**. O form
 - **Versão e responsabilidade (decidido em 04/11/2026):** o **CCO é responsável pela agenda**. O device **guarda só a última agenda que o CCO enviar**: não guarda versões antigas, não compara versões e não recusa uma agenda por ser mais antiga. O campo `versao` é opcional, é guardado junto com a agenda e informado ao sistema, mas nunca é comparado.
 - **Aprovação:** a aprovação pelo CCO ou integrador acontece no sistema, antes do envio. O device não a verifica.
 - **Armazenamento:** a agenda precisa sobreviver a reinício. Ficará na memória não volátil, com CRC e gravação atômica, no mesmo estilo da configuração do mapeamento Modbus (FW-048). São 42 bytes por saída, 168 bytes no OloggerMulti, mais a versão.
-- **Quando atua:** só com o device **offline**, em modo automático, **sem regra do sensor** na saída e com a **hora válida**. A agenda é aplicada **pelo horário atual**: a cada limite de 30 minutos o device pede à saída o estado do intervalo, e ao ficar offline pede o do intervalo atual. **Depois de um reinício, a agenda assume na hora o estado do intervalo do horário atual** (se reiniciou às 9h30, vale o que está agendado para as 9h30), sem esperar as tentativas de reconexão; se depois o device conecta, a saída mantém o estado e espera um novo comando do CCO. A agenda só funciona com o modo sleep desabilitado. **Implementado** (lógica) em `agenda_aplicador`: pede o estado na primeira avaliação, a cada virada de intervalo e depois de carregar ou apagar a agenda; sem hora válida não pede nada e as saídas mantêm o estado. A tarefa `agenda_tarefa` lê o RTC, aplica o fuso enviado pelo CCO e entrega o pedido às saídas; o fuso começa em **Brasília (UTC−3)** e vale até o CCO enviar outro (decidido em 04/11/2026). **A agenda e o fuso gravados persistem ao reinício**: ficam nas duas últimas páginas da flash interna e são carregados na partida.
+- **Quando atua:** só com o device **offline**, em modo automático, **sem regra do sensor** na saída e com a **hora válida**. A agenda é aplicada **pelo horário atual**: a cada limite de 30 minutos o device pede à saída o estado do intervalo, e ao ficar offline pede o do intervalo atual. **Depois de um reinício, a agenda assume na hora o estado do intervalo do horário atual** (se reiniciou às 9h30, vale o que está agendado para as 9h30), sem esperar as tentativas de reconexão; se depois o device conecta, a saída mantém o estado e espera um novo comando do CCO. A agenda só funciona com o modo sleep desabilitado. **Implementado** (lógica) em `agenda_aplicador`: pede o estado na primeira avaliação, a cada virada de intervalo e depois de carregar ou apagar a agenda; sem hora válida não pede nada e as saídas mantêm o estado. A tarefa `agenda_tarefa` lê o RTC, aplica o fuso enviado pelo CCO e entrega o pedido às saídas; o fuso começa em **Brasília (UTC−3)** e vale até o CCO enviar outro (decidido em 04/11/2026). **A agenda e o fuso gravados persistem ao reinício**: ficam, com toda a configuração, nas duas últimas páginas da flash interna e são carregados na partida (`documentacao/configuracao_do_dispositivo.md`).
 - **Hora de referência (decidido em 04/11/2026):** o horário da instalação, o mesmo do `timestamp` do JSON. O **fuso horário é um parâmetro de configuração, enviado pelo CCO**, em minutos em relação ao UTC (endereço Modbus 40403 proposto, `documentacao/mapa_modbus.md`). O device não muda o fuso sozinho: se houver horário de verão, o CCO envia o novo valor.
 - **No código:** `agenda_carrega_hex` valida e carrega; `agenda_estado(dia, hora, minuto)` devolve ligada, desligada ou sem agenda; a tarefa que lê o relógio e entrega o pedido a `controle_saida_pedido` com a fonte `CONTROLE_FONTE_AGENDA` é parte do FW-032.
 
@@ -88,6 +88,7 @@ A agenda chega ao device **por MQTT, vinda do CCO, como configuração**. O form
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.28 | A agenda é gravada junto com toda a configuração |
 | 04/11/2026 | 0.1.27 | Agenda só com o sleep desabilitado; fuso padrão de Brasília; persistência da agenda e do fuso |
 | 04/11/2026 | 0.1.26 | Tarefa da agenda pelo RTC; agenda só com o fuso configurado (proposta) |
 | 04/11/2026 | 0.1.25 | Bateria de backup opcional; cristais do OloggerMulti |

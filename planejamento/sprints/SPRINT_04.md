@@ -1,6 +1,6 @@
 # SPRINT_04 — Saídas e controle
 
-> **Criado em:** 03/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.15
+> **Criado em:** 03/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.16
 > **Período:** 30/11/2026 a 04/12/2026
 
 Em andamento desde 03/11/2026: o FW-022 e o FW-024 estão em código pronto; os demais itens estão pendentes. As datas são a sequência de semanas a partir de 02/11/2026 e mudam se a SPRINT_00, a SPRINT_01 ou a SPRINT_01B atrasarem.
@@ -19,6 +19,7 @@ Saídas discretas (ligar e desligar, com retardo de acionamento), saída em freq
 | FW-025 | Modo manual e automático por saída, com prioridade do sensor | Código pronto em 04/11/2026 (`controle_saida`, `io_saidas`): 82 verificações no PC com manual, automático, regra do sensor, agenda local offline, comando do CCO online, falha do sensor com espera de 5 minutos e retardo. Falta o alerta ao CCO na chegada do comando manual. Bancada pendente |
 | FW-061 | Ligar e desligar o modo sleep (modo de operação, registro 40412), com exclusão mútua: o sleep só liga se nenhuma saída estiver em frequência, e a saída em frequência só habilita com o sleep desligado | Lado do sleep pronto em 03/11/2026 (`energia_define_habilitada` devolve erro se um módulo impede). Lado das saídas pronto em 04/11/2026: `lib/io/tipo_saida` guarda o tipo de cada saída, recusa frequência com o sleep ligado e na saída 1, e `io_frequencia_sleep_permitido` é o gancho que impede ligar o sleep com saída em frequência (8 testes no PC). Falta o comando do Modbus (40166 e 40412) |
 | FW-063 | Regra do sensor entrada analógica para saída digital (comando automático local): cadastro por MQTT ou Modbus (entrada associada, limiares máximo e mínimo e sentido, mais a frequência em 4 mA e 20 mA, todos com endereço Modbus) e o avaliador com histerese que gera os pedidos da fonte do sensor. Sentido 0: liga no mínimo e desliga no máximo; sentido 1: liga no máximo e desliga no mínimo. Sem regra cadastrada valem a agenda (offline) e o CCO (online) | Parcial em 04/11/2026: `lib/io/regra_sensor` pronto (cadastro validado, sentidos 0 e 1 e histerese, 9 testes no PC); falta ler e gravar o cadastro pelos endereços Modbus e por MQTT e ligar a regra à leitura da entrada analógica |
+| FW-064 | Configuração persistente e regras do sensor ligadas à aquisição (`lib/config`, `lib/armazem`) | Código pronto em 04/11/2026; sem teste em hardware |
 
 ## Estado das saídas digitais (03/11/2026)
 
@@ -69,6 +70,7 @@ Implementado conforme o B4 e as definições de 04/11/2026 (`documentacao/config
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.16 | FW-064 incluído: configuração persistente |
 | 04/11/2026 | 0.1.15 | Saída em frequência: o sensor manda; funções de cadastro e atualização |
 | 04/11/2026 | 0.1.14 | FW-023: gerador ligado ao TIM6 e aos pinos (compila, sem teste em hardware) |
 | 04/11/2026 | 0.1.13 | FW-023: gerador de frequência por acumulador de fase pronto e testado |

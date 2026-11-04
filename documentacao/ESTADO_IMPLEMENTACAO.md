@@ -1,14 +1,14 @@
 # Estado da implementação — oLoggerIOT
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.25
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.26
 
 Documento vivo. Diz o que existe no código, o que está em teste e o que falta. Agentes e desenvolvedores leem aqui antes de começar um item. Atualizado pela skill `doc-sync` a cada item fechado e revisado pela skill `sprint-close`.
 
 ## Situação atual
 
 - **Sprints em andamento:** SPRINT_01B (entrada digital e contador de pulsos) e SPRINT_04 (saídas), em código pronto. A SPRINT_01 (aquisição analógica) está bloqueada pela ferrite L2. A SPRINT_00 foi concluída em 04/11/2026.
-- **Dois builds compilam sem avisos com `-Werror`** (03/11/2026): `ologgermulti` com 34 240 bytes de código em 60 KB de área do programa (04/11/2026, com o RTC, a agenda e a persistência) e `y7080` com 4 944. O `y7080` não leva `ENTRADA_DIGITAL`, nem a gerência de energia.
-- **Testes no PC (03/11/2026):** sensor (57 verificações), conversão de tempo (64 460 verificações, com ida e volta em todo o intervalo de 32 bits), filtro de ruído (135), contador de pulsos (25), totalizador (36) estado da saída digital (36), controle manual e automático (82), agenda (57), aplicação da agenda (47), formato da configuração da agenda (42), armazém persistente (139) e regra do sensor (9 testes) frequência da saída (9 testes) gerador de frequência (10 testes) e tipo da saída (8 testes); verificadores das ferramentas (27 testes). Todos passam. O executável do `sensor` foi bloqueado uma vez pela política de Controle de Aplicativo do Windows depois de um relink, mas recompilado rodou e passou.
+- **Dois builds compilam sem avisos com `-Werror`** (03/11/2026): `ologgermulti` com 41 620 bytes de código em 60 KB de área do programa (04/11/2026, com o RTC, a agenda e a configuração persistente) e `y7080` com 4 944. O `y7080` não leva `ENTRADA_DIGITAL`, nem a gerência de energia.
+- **Testes no PC (03/11/2026):** sensor (57 verificações), conversão de tempo (64 460 verificações, com ida e volta em todo o intervalo de 32 bits), filtro de ruído (135), contador de pulsos (25), totalizador (36) estado da saída digital (36), controle manual e automático (82), agenda (57), aplicação da agenda (47), formato da configuração da agenda (42), armazém persistente (139) e configuração (101) e regra do sensor (9 testes) frequência da saída (9 testes) gerador de frequência (10 testes) e tipo da saída (8 testes); verificadores das ferramentas (27 testes). Todos passam. O executável do `sensor` foi bloqueado uma vez pela política de Controle de Aplicativo do Windows depois de um relink, mas recompilado rodou e passou.
 - **Hardware verificado em 02/11/2026:** a imagem do OloggerMulti executa no STM32L412 real, com FreeRTOS e a tarefa de vida. A aquisição analógica mede a entrada 4 com 8 mA injetados e mostra 8,007 mA.
 - **Nada da entrada digital, do contador de pulsos, do totalizador e da gerência de energia foi testado em hardware.** Só compilam e têm testes de lógica no PC. O roteiro de bancada está em `documentacao/roteiro_bancada_entrada_digital.md`.
 - **Saídas digitais (FW-022, FW-024 e FW-025, 04/11/2026):** ligar, desligar, retardo de acionamento (relé de tempo, o "acionamento por tempo") e modo manual e automático por saída em código, com 36 e 82 verificações no PC. O comando manual prevalece; em automático valem a regra do sensor, se cadastrada, ou, sem ela, a agenda (offline) e o CCO (online); a falha do sensor desliga e a saída só volta a operar pelo sensor depois de 5 minutos estáveis. O que falta: o cadastro e o avaliador da regra do sensor (FW-063, com campos por MQTT ou Modbus), a saída em frequência (FW-023), o alerta ao CCO e a ligação com comandos. Sem teste em hardware.
@@ -59,7 +59,8 @@ Documento vivo. Diz o que existe no código, o que está em teste e o que falta.
 | Modbus RTU | `lib/modbus/` | Não iniciado | FW-026 a FW-029 | — |
 | Conversão do tempo em data e hora locais | `lib/tempo/` | Pronta e testada no PC (fuso, bissexto, virada de dia e de ano, e a conversão inversa em UTC) | FW-030 | 04/11/2026 |
 | RTC com o cristal de 32,768 kHz | `lib/rtc/` | Driver escrito para o OloggerMulti, compila nos dois builds (só o OloggerMulti o inclui); **sem teste em hardware**; falta a conferência NTP | FW-030 | 04/11/2026 |
-| Agenda offline | `lib/agenda/` | Parcial: formato, validação e consulta de intervalo prontos; aplicação pelo horário atual (`agenda_aplicador`) pronta e testada no PC; a tarefa `agenda_tarefa` liga o RTC e o fuso às saídas (compila, **sem teste em hardware**); a agenda só funciona com o sleep desabilitado; o fuso começa em Brasília; a agenda e o fuso gravados persistem ao reinício (`lib/armazem` com flash simulada e corte de energia testados no PC; gravação nas duas últimas páginas da flash interna, sem teste em hardware); falta o recebimento por MQTT | FW-032 | 57 verificações no PC |
+| Configuração persistente (todo o mapa Modbus de retenção) | `lib/config/`, `lib/armazem/` | Tabela de parâmetros, armazém com CRC e queda de energia, aplicação na partida e regras do sensor ligadas à aquisição, prontos e testados no PC (101 e 139 verificações); gravação na flash interna e as tarefas compilam, **sem teste em hardware**; falta a camada Modbus e MQTT | FW-064 | 04/11/2026 |
+| Agenda offline | `lib/agenda/` | Parcial: formato, validação e consulta de intervalo prontos; aplicação pelo horário atual (`agenda_aplicador`) pronta e testada no PC; a tarefa `agenda_tarefa` liga o RTC e o fuso às saídas (compila, **sem teste em hardware**); a agenda só funciona com o sleep desabilitado; o fuso começa em Brasília; a agenda e o fuso persistem ao reinício, junto com toda a configuração (ver a linha da configuração persistente); falta o recebimento por MQTT | FW-032 | 57 verificações no PC |
 | Sessão de configuração | `lib/sessao/` | Não iniciado | FW-037 | — |
 | MQTT no ESP32 | `esp32/components/` | Não iniciado | FW-034 | — |
 
@@ -100,6 +101,7 @@ Legenda de estado: **Não iniciado**, **Em desenvolvimento**, **Em teste**, **Im
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.26 | Configuração persistente (FW-064) |
 | 04/11/2026 | 0.2.25 | Persistência da agenda e do fuso; agenda só com o sleep desabilitado |
 | 04/11/2026 | 0.2.24 | Tarefa da agenda pelo RTC escrita (FW-032), sem teste em hardware |
 | 04/11/2026 | 0.2.23 | Driver do RTC escrito (FW-030), sem teste em hardware |
