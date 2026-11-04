@@ -78,10 +78,11 @@ int32_t io_saidas_comando_manual(uint8_t canal, bool liga, bool *mudou_de_modo);
 int32_t io_saidas_modo_automatico(uint8_t canal);
 
 /**
- * @brief Registra o pedido de uma fonte automática (sensor local, ou agenda e plataforma).
+ * @brief Registra o pedido de uma fonte automática: local (regra cadastrada) ou remota (CCO).
  *
- * Em modo automático é aplicado na hora; em manual fica guardado para a volta ao automático. O
- * pedido do sensor local prevalece sobre o da fonte externa.
+ * Em modo automático é aplicado na hora; em manual fica guardado para a volta ao automático. Com
+ * regra local definida (io_saidas_define_regra_local), vale só o pedido local e o remoto fica
+ * guardado, sem efeito. Sem regra local, vale o pedido remoto do CCO.
  *
  * @param canal Saída de 1 a IO_SAIDAS_QTD.
  * @param fonte Fonte do pedido.
@@ -100,6 +101,30 @@ int32_t io_saidas_pedido(uint8_t canal, controle_fonte_t fonte, controle_pedido_
  * @return IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO.
  */
 int32_t io_saidas_sensor_falha(uint8_t canal, bool falha);
+
+/**
+ * @brief Informa se a saída tem uma regra local cadastrada (entrada analógica para a saída).
+ *
+ * Com regra local, a saída segue só o pedido dela (fonte local) e ignora os comandos remotos
+ * do CCO. Sem regra local, vale o comando automático remoto.
+ *
+ * @param canal Saída de 1 a IO_SAIDAS_QTD.
+ * @param definida true se há regra local cadastrada para a saída.
+ * @return IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO.
+ */
+int32_t io_saidas_define_regra_local(uint8_t canal, bool definida);
+
+/**
+ * @brief Define o tempo de estabilidade do sensor depois de uma falha.
+ *
+ * Depois que a falha termina, a saída só volta a operar pelo sensor depois deste tempo sem nova
+ * falha. O padrão é de 5 minutos.
+ *
+ * @param canal Saída de 1 a IO_SAIDAS_QTD.
+ * @param segundos Tempo em segundos, de 0 a 4 294 967.
+ * @return IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO.
+ */
+int32_t io_saidas_define_estabilidade(uint8_t canal, uint32_t segundos);
 
 /**
  * @brief Define o retardo de acionamento (relé de tempo) de uma saída.

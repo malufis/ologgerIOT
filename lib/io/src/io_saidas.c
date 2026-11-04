@@ -161,6 +161,33 @@ int32_t io_saidas_sensor_falha(uint8_t canal, bool falha)
   return IO_SAIDAS_OK;
 }
 
+int32_t io_saidas_define_regra_local(uint8_t canal, bool definida)
+{
+  if (!canal_valido(canal))
+  {
+    return IO_SAIDAS_ERRO_PARAMETRO;
+  }
+
+  taskENTER_CRITICAL();
+  controle_saida_define_regra_local(&saidas[canal - 1U], definida, agora_ms());
+  aplica_no_pino((uint8_t)(canal - 1U));
+  taskEXIT_CRITICAL();
+  return IO_SAIDAS_OK;
+}
+
+int32_t io_saidas_define_estabilidade(uint8_t canal, uint32_t segundos)
+{
+  if (!canal_valido(canal) || (segundos > DURACAO_MAX_S))
+  {
+    return IO_SAIDAS_ERRO_PARAMETRO;
+  }
+
+  taskENTER_CRITICAL();
+  controle_saida_define_estabilidade(&saidas[canal - 1U], segundos * 1000U);
+  taskEXIT_CRITICAL();
+  return IO_SAIDAS_OK;
+}
+
 int32_t io_saidas_define_atraso(uint8_t canal, uint32_t segundos)
 {
   if (!canal_valido(canal) || (segundos > DURACAO_MAX_S))

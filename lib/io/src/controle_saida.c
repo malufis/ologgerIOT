@@ -4,7 +4,7 @@
  *
  * @date criacao 04/11/2026
  * @date modificacao 04/11/2026
- * @version 0.1.0
+ * @version 0.2.0
  */
 
 #include "controle_saida.h"
@@ -12,30 +12,25 @@
 #include <stddef.h>
 
 /**
- * @brief Pedido vencedor entre as fontes automáticas, na ordem de prioridade.
+ * @brief Pedido vencedor, na ordem de prioridade.
  *
- * A falha do sensor vence tudo e pede para desligar. Sem falha, vale o pedido do sensor local
- * e, se ele não pedir nada, o da fonte externa.
+ * O sensor indisponível (em falha ou esperando a estabilidade) vence tudo e pede para desligar.
+ * Com regra local definida, vale só o pedido dela. Sem regra local, vale o pedido remoto do CCO.
  *
  * @param controle Controle iniciado com controle_saida_inicia().
  * @return O pedido a aplicar, ou CONTROLE_PEDIDO_NENHUM se ninguém pede nada.
  */
 static controle_pedido_t pedido_vencedor(const controle_saida_t *controle)
 {
-  uint32_t fonte;
-
-  if (controle->sensor_falha)
+  if (controle_saida_sensor_indisponivel(controle))
   {
     return CONTROLE_PEDIDO_DESLIGA;
   }
-  for (fonte = 0U; fonte < CONTROLE_FONTES; fonte++)
+  if (controle->regra_local)
   {
-    if (controle->pedido[fonte] != CONTROLE_PEDIDO_NENHUM)
-    {
-      return controle->pedido[fonte];
-    }
+    return controle->pedido[CONTROLE_FONTE_LOCAL];
   }
-  return CONTROLE_PEDIDO_NENHUM;
+  return controle->pedido[CONTROLE_FONTE_REMOTA];
 }
 
 /**
@@ -64,7 +59,7 @@ static void reavalia(controle_saida_t *controle, uint32_t agora_ms)
   }
   else
   {
-    /* Nenhum pedido: a saída mantém o estado em que está. */
+    /* Nenhum pedido válido: a saída mantém o último estado válido do comando. */
   }
 }
 
@@ -79,7 +74,11 @@ int32_t controle_saida_inicia(controle_saida_t *controle)
 
   (void)saida_inicia(&controle->saida);
   controle->modo = CONTROLE_MODO_AUTOMATICO;
+  controle->regra_local = false;
   controle->sensor_falha = false;
+  controle->recuperando = false;
+  controle->fim_falha_ms = 0U;
+  controle->estabilidade_ms = CONTROLE_ESTABILIDADE_PADRAO_MS;
   for (fonte = 0U; fonte < CONTROLE_FONTES; fonte++)
   {
     controle->pedido[fonte] = CONTROLE_PEDIDO_NENHUM;
@@ -90,6 +89,17 @@ int32_t controle_saida_inicia(controle_saida_t *controle)
 void controle_saida_define_atraso(controle_saida_t *controle, uint32_t atraso_ms)
 {
   saida_define_atraso(&controle->saida, atraso_ms);
+}
+
+void controle_saida_define_estabilidade(controle_saida_t *controle, uint32_t estabilidade_ms)
+{
+  controle->estabilidade_ms = estabilidade_ms;
+}
+
+void controle_saida_define_regra_local(controle_saida_t *controle, bool definida, uint32_t agora_ms)
+{
+  controle->regra_local = definida;
+  reavalia(controle, agora_ms);
 }
 
 bool controle_saida_comando_manual(controle_saida_t *controle, bool liga, uint32_t agora_ms)
@@ -128,12 +138,33 @@ void controle_saida_pedido(controle_saida_t *controle, controle_fonte_t fonte,
 
 void controle_saida_sensor_falha(controle_saida_t *controle, bool falha, uint32_t agora_ms)
 {
+  if (falha)
+  {
+    controle->recuperando = false; /* Nova falha: a contagem de estabilidade recomeça depois. */
+  }
+  else if (controle->sensor_falha)
+  {
+    controle->recuperando = true; /* A falha terminou agora: começa a espera de estabilidade. */
+    controle->fim_falha_ms = agora_ms;
+  }
+  else
+  {
+    /* Sem falha antes e sem falha agora: nada muda. */
+  }
+
   controle->sensor_falha = falha;
   reavalia(controle, agora_ms);
 }
 
 bool controle_saida_atualiza(controle_saida_t *controle, uint32_t agora_ms)
 {
+  /* A subtração sem sinal resolve a volta do contador de milissegundos. */
+  if (controle->recuperando &&
+      ((uint32_t)(agora_ms - controle->fim_falha_ms) >= controle->estabilidade_ms))
+  {
+    controle->recuperando = false;
+    reavalia(controle, agora_ms);
+  }
   return saida_atualiza(&controle->saida, agora_ms);
 }
 
@@ -150,4 +181,9 @@ bool controle_saida_ligada(const controle_saida_t *controle)
 bool controle_saida_aguardando(const controle_saida_t *controle)
 {
   return saida_aguardando(&controle->saida);
+}
+
+bool controle_saida_sensor_indisponivel(const controle_saida_t *controle)
+{
+  return controle->sensor_falha || controle->recuperando;
 }

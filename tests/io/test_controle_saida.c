@@ -4,24 +4,29 @@
  *
  * @date criacao 04/11/2026
  * @date modificacao 04/11/2026
- * @version 0.1.0
+ * @version 0.2.0
  */
 
 #include "controle_saida.h"
 #include "teste.h"
+
+/** Cinco minutos em milissegundos. */
+#define CINCO_MIN 300000U
 
 static void inicia_rejeita_nulo(void)
 {
   VERIFICA(controle_saida_inicia(NULL) == CONTROLE_SAIDA_ERRO_PARAMETRO);
 }
 
-static void comeca_automatica_e_desligada(void)
+static void comeca_automatica_desligada_e_sem_regra_local(void)
 {
   controle_saida_t c;
 
   VERIFICA(controle_saida_inicia(&c) == CONTROLE_SAIDA_OK);
   VERIFICA(controle_saida_modo(&c) == CONTROLE_MODO_AUTOMATICO);
   VERIFICA(controle_saida_ligada(&c) == false);
+  VERIFICA(c.regra_local == false);
+  VERIFICA(controle_saida_sensor_indisponivel(&c) == false);
   VERIFICA(controle_saida_atualiza(&c, 1000U) == false);
 }
 
@@ -76,9 +81,10 @@ static void manual_prevalece_sobre_pedidos_automaticos(void)
   controle_saida_t c;
 
   (void)controle_saida_inicia(&c);
+  controle_saida_define_regra_local(&c, true, 0U);
   (void)controle_saida_comando_manual(&c, false, 0U);
-  controle_saida_pedido(&c, CONTROLE_FONTE_SENSOR, CONTROLE_PEDIDO_LIGA, 10U);
-  controle_saida_pedido(&c, CONTROLE_FONTE_EXTERNA, CONTROLE_PEDIDO_LIGA, 20U);
+  controle_saida_pedido(&c, CONTROLE_FONTE_LOCAL, CONTROLE_PEDIDO_LIGA, 10U);
+  controle_saida_pedido(&c, CONTROLE_FONTE_REMOTA, CONTROLE_PEDIDO_LIGA, 20U);
   VERIFICA(controle_saida_ligada(&c) == false); /* Os pedidos ficam guardados, sem efeito. */
   VERIFICA(controle_saida_modo(&c) == CONTROLE_MODO_MANUAL);
 }
@@ -90,15 +96,16 @@ static void volta_ao_automatico_executa_a_regra_valida_na_hora(void)
   controle_saida_t c;
 
   (void)controle_saida_inicia(&c);
+  controle_saida_define_regra_local(&c, true, 0U);
   (void)controle_saida_comando_manual(&c, false, 0U);
-  controle_saida_pedido(&c, CONTROLE_FONTE_SENSOR, CONTROLE_PEDIDO_LIGA, 10U);
+  controle_saida_pedido(&c, CONTROLE_FONTE_LOCAL, CONTROLE_PEDIDO_LIGA, 10U);
   VERIFICA(controle_saida_ligada(&c) == false);
   controle_saida_modo_automatico(&c, 20U);
   VERIFICA(controle_saida_modo(&c) == CONTROLE_MODO_AUTOMATICO);
   VERIFICA(controle_saida_ligada(&c) == true); /* Sem esperar nova leitura ou novo pedido. */
 }
 
-static void volta_ao_automatico_sem_pedido_mantem_o_estado(void)
+static void volta_ao_automatico_sem_pedido_mantem_o_ultimo_estado_valido(void)
 {
   controle_saida_t c;
 
@@ -107,6 +114,10 @@ static void volta_ao_automatico_sem_pedido_mantem_o_estado(void)
   controle_saida_modo_automatico(&c, 10U);
   VERIFICA(controle_saida_modo(&c) == CONTROLE_MODO_AUTOMATICO);
   VERIFICA(controle_saida_ligada(&c) == true);
+  /* Idem com a saída desligada pelo comando manual. */
+  (void)controle_saida_comando_manual(&c, false, 20U);
+  controle_saida_modo_automatico(&c, 30U);
+  VERIFICA(controle_saida_ligada(&c) == false);
 }
 
 static void volta_ao_automatico_com_pedido_de_desligar_desliga(void)
@@ -114,53 +125,71 @@ static void volta_ao_automatico_com_pedido_de_desligar_desliga(void)
   controle_saida_t c;
 
   (void)controle_saida_inicia(&c);
-  controle_saida_pedido(&c, CONTROLE_FONTE_EXTERNA, CONTROLE_PEDIDO_DESLIGA, 0U);
+  controle_saida_pedido(&c, CONTROLE_FONTE_REMOTA, CONTROLE_PEDIDO_DESLIGA, 0U);
   (void)controle_saida_comando_manual(&c, true, 10U);
   controle_saida_modo_automatico(&c, 20U);
   VERIFICA(controle_saida_ligada(&c) == false);
 }
 
-/* ------------------------------------------------------------ prioridade das fontes */
+/* --------------------------------------------- comando local e comando remoto (CCO) */
 
-static void pedido_automatico_liga_e_desliga_a_saida(void)
+static void sem_regra_local_vale_o_comando_remoto_do_cco(void)
 {
   controle_saida_t c;
 
   (void)controle_saida_inicia(&c);
-  controle_saida_pedido(&c, CONTROLE_FONTE_EXTERNA, CONTROLE_PEDIDO_LIGA, 0U);
+  controle_saida_pedido(&c, CONTROLE_FONTE_REMOTA, CONTROLE_PEDIDO_LIGA, 0U);
   VERIFICA(controle_saida_ligada(&c) == true);
-  controle_saida_pedido(&c, CONTROLE_FONTE_EXTERNA, CONTROLE_PEDIDO_DESLIGA, 10U);
+  controle_saida_pedido(&c, CONTROLE_FONTE_REMOTA, CONTROLE_PEDIDO_DESLIGA, 10U);
   VERIFICA(controle_saida_ligada(&c) == false);
 }
 
-static void sensor_prevalece_sobre_a_fonte_externa(void)
+static void com_regra_local_o_comando_remoto_e_ignorado(void)
 {
   controle_saida_t c;
 
   (void)controle_saida_inicia(&c);
-  controle_saida_pedido(&c, CONTROLE_FONTE_SENSOR, CONTROLE_PEDIDO_DESLIGA, 0U);
-  controle_saida_pedido(&c, CONTROLE_FONTE_EXTERNA, CONTROLE_PEDIDO_LIGA, 10U);
-  VERIFICA(controle_saida_ligada(&c) == false); /* A agenda ou a plataforma não vence o sensor. */
-}
-
-static void externa_vale_quando_o_sensor_nao_pede_nada(void)
-{
-  controle_saida_t c;
-
-  (void)controle_saida_inicia(&c);
-  controle_saida_pedido(&c, CONTROLE_FONTE_SENSOR, CONTROLE_PEDIDO_NENHUM, 0U);
-  controle_saida_pedido(&c, CONTROLE_FONTE_EXTERNA, CONTROLE_PEDIDO_LIGA, 10U);
+  controle_saida_define_regra_local(&c, true, 0U);
+  controle_saida_pedido(&c, CONTROLE_FONTE_REMOTA, CONTROLE_PEDIDO_LIGA, 10U);
+  VERIFICA(controle_saida_ligada(&c) == false); /* Há regra local: o CCO não manda. */
+  controle_saida_pedido(&c, CONTROLE_FONTE_LOCAL, CONTROLE_PEDIDO_LIGA, 20U);
   VERIFICA(controle_saida_ligada(&c) == true);
 }
 
-static void sensor_que_pede_ligar_vence_externa_que_pede_desligar(void)
+static void regra_local_que_pede_desligar_vence_o_remoto_que_pede_ligar(void)
 {
   controle_saida_t c;
 
   (void)controle_saida_inicia(&c);
-  controle_saida_pedido(&c, CONTROLE_FONTE_EXTERNA, CONTROLE_PEDIDO_DESLIGA, 0U);
-  controle_saida_pedido(&c, CONTROLE_FONTE_SENSOR, CONTROLE_PEDIDO_LIGA, 10U);
+  controle_saida_define_regra_local(&c, true, 0U);
+  controle_saida_pedido(&c, CONTROLE_FONTE_LOCAL, CONTROLE_PEDIDO_DESLIGA, 0U);
+  controle_saida_pedido(&c, CONTROLE_FONTE_REMOTA, CONTROLE_PEDIDO_LIGA, 10U);
+  VERIFICA(controle_saida_ligada(&c) == false);
+}
+
+static void regra_local_sem_pedido_mantem_o_estado_e_nao_libera_o_remoto(void)
+{
+  controle_saida_t c;
+
+  (void)controle_saida_inicia(&c);
+  controle_saida_pedido(&c, CONTROLE_FONTE_REMOTA, CONTROLE_PEDIDO_LIGA, 0U);
   VERIFICA(controle_saida_ligada(&c) == true);
+  controle_saida_define_regra_local(&c, true, 10U); /* O remoto deixa de valer; o local ainda não pede. */
+  VERIFICA(controle_saida_ligada(&c) == true);
+  controle_saida_pedido(&c, CONTROLE_FONTE_REMOTA, CONTROLE_PEDIDO_DESLIGA, 20U);
+  VERIFICA(controle_saida_ligada(&c) == true);
+}
+
+static void apagar_a_regra_local_devolve_o_comando_ao_cco(void)
+{
+  controle_saida_t c;
+
+  (void)controle_saida_inicia(&c);
+  controle_saida_define_regra_local(&c, true, 0U);
+  controle_saida_pedido(&c, CONTROLE_FONTE_REMOTA, CONTROLE_PEDIDO_LIGA, 10U);
+  VERIFICA(controle_saida_ligada(&c) == false);
+  controle_saida_define_regra_local(&c, false, 20U);
+  VERIFICA(controle_saida_ligada(&c) == true); /* O pedido do CCO, guardado, passa a valer. */
 }
 
 static void fonte_invalida_e_ignorada(void)
@@ -179,10 +208,12 @@ static void falha_do_sensor_em_automatico_desliga(void)
   controle_saida_t c;
 
   (void)controle_saida_inicia(&c);
-  controle_saida_pedido(&c, CONTROLE_FONTE_SENSOR, CONTROLE_PEDIDO_LIGA, 0U);
+  controle_saida_define_regra_local(&c, true, 0U);
+  controle_saida_pedido(&c, CONTROLE_FONTE_LOCAL, CONTROLE_PEDIDO_LIGA, 0U);
   VERIFICA(controle_saida_ligada(&c) == true);
   controle_saida_sensor_falha(&c, true, 10U);
   VERIFICA(controle_saida_ligada(&c) == false);
+  VERIFICA(controle_saida_sensor_indisponivel(&c) == true);
 }
 
 static void falha_mantem_a_saida_desligada_apesar_de_novo_pedido(void)
@@ -190,20 +221,68 @@ static void falha_mantem_a_saida_desligada_apesar_de_novo_pedido(void)
   controle_saida_t c;
 
   (void)controle_saida_inicia(&c);
+  controle_saida_define_regra_local(&c, true, 0U);
   controle_saida_sensor_falha(&c, true, 0U);
-  controle_saida_pedido(&c, CONTROLE_FONTE_EXTERNA, CONTROLE_PEDIDO_LIGA, 10U);
+  controle_saida_pedido(&c, CONTROLE_FONTE_LOCAL, CONTROLE_PEDIDO_LIGA, 10U);
   VERIFICA(controle_saida_ligada(&c) == false);
 }
 
-static void fim_da_falha_volta_a_aplicar_o_pedido_valido(void)
+static void depois_da_falha_so_volta_a_operar_apos_5_minutos_estaveis(void)
 {
   controle_saida_t c;
 
   (void)controle_saida_inicia(&c);
-  controle_saida_pedido(&c, CONTROLE_FONTE_SENSOR, CONTROLE_PEDIDO_LIGA, 0U);
+  controle_saida_define_regra_local(&c, true, 0U);
+  controle_saida_pedido(&c, CONTROLE_FONTE_LOCAL, CONTROLE_PEDIDO_LIGA, 0U);
   controle_saida_sensor_falha(&c, true, 10U);
-  controle_saida_sensor_falha(&c, false, 20U);
+  controle_saida_sensor_falha(&c, false, 1000U); /* A falha terminou. */
+  VERIFICA(controle_saida_ligada(&c) == false);
+  VERIFICA(controle_saida_sensor_indisponivel(&c) == true);
+  VERIFICA(controle_saida_atualiza(&c, 1000U + CINCO_MIN - 1U) == false);
+  VERIFICA(controle_saida_atualiza(&c, 1000U + CINCO_MIN) == true); /* 5 minutos estáveis. */
+  VERIFICA(controle_saida_sensor_indisponivel(&c) == false);
+}
+
+static void nova_falha_dentro_dos_5_minutos_reinicia_a_contagem(void)
+{
+  controle_saida_t c;
+
+  (void)controle_saida_inicia(&c);
+  controle_saida_define_regra_local(&c, true, 0U);
+  controle_saida_pedido(&c, CONTROLE_FONTE_LOCAL, CONTROLE_PEDIDO_LIGA, 0U);
+  controle_saida_sensor_falha(&c, true, 0U);
+  controle_saida_sensor_falha(&c, false, 1000U);
+  controle_saida_sensor_falha(&c, true, 100000U);  /* Nova falha aos 100 s. */
+  controle_saida_sensor_falha(&c, false, 200000U); /* Termina aos 200 s: a contagem recomeça. */
+  VERIFICA(controle_saida_atualiza(&c, 1000U + CINCO_MIN) == false); /* A contagem antiga não vale. */
+  VERIFICA(controle_saida_atualiza(&c, 200000U + CINCO_MIN - 1U) == false);
+  VERIFICA(controle_saida_atualiza(&c, 200000U + CINCO_MIN) == true);
+}
+
+static void estabilidade_configuravel(void)
+{
+  controle_saida_t c;
+
+  (void)controle_saida_inicia(&c);
+  controle_saida_define_estabilidade(&c, 60000U);
+  controle_saida_define_regra_local(&c, true, 0U);
+  controle_saida_pedido(&c, CONTROLE_FONTE_LOCAL, CONTROLE_PEDIDO_LIGA, 0U);
+  controle_saida_sensor_falha(&c, true, 0U);
+  controle_saida_sensor_falha(&c, false, 1000U);
+  VERIFICA(controle_saida_atualiza(&c, 60999U) == false);
+  VERIFICA(controle_saida_atualiza(&c, 61000U) == true);
+}
+
+static void sem_falha_anterior_nao_ha_espera(void)
+{
+  controle_saida_t c;
+
+  (void)controle_saida_inicia(&c);
+  controle_saida_define_regra_local(&c, true, 0U);
+  controle_saida_sensor_falha(&c, false, 0U); /* Nunca houve falha. */
+  controle_saida_pedido(&c, CONTROLE_FONTE_LOCAL, CONTROLE_PEDIDO_LIGA, 10U);
   VERIFICA(controle_saida_ligada(&c) == true);
+  VERIFICA(controle_saida_sensor_indisponivel(&c) == false);
 }
 
 static void falha_do_sensor_em_manual_mantem_o_comando_manual(void)
@@ -215,6 +294,8 @@ static void falha_do_sensor_em_manual_mantem_o_comando_manual(void)
   controle_saida_sensor_falha(&c, true, 10U);
   VERIFICA(controle_saida_ligada(&c) == true);
   VERIFICA(controle_saida_modo(&c) == CONTROLE_MODO_MANUAL);
+  controle_saida_sensor_falha(&c, false, 20U);
+  VERIFICA(controle_saida_atualiza(&c, 20U + CINCO_MIN) == true); /* O fim da espera não mexe no manual. */
 }
 
 static void voltar_ao_automatico_com_falha_desliga_na_hora(void)
@@ -228,6 +309,21 @@ static void voltar_ao_automatico_com_falha_desliga_na_hora(void)
   VERIFICA(controle_saida_ligada(&c) == false);
 }
 
+static void voltar_ao_automatico_durante_a_espera_de_estabilidade_desliga(void)
+{
+  controle_saida_t c;
+
+  (void)controle_saida_inicia(&c);
+  controle_saida_define_regra_local(&c, true, 0U);
+  controle_saida_pedido(&c, CONTROLE_FONTE_LOCAL, CONTROLE_PEDIDO_LIGA, 0U);
+  (void)controle_saida_comando_manual(&c, true, 10U);
+  controle_saida_sensor_falha(&c, true, 20U);
+  controle_saida_sensor_falha(&c, false, 30U);
+  controle_saida_modo_automatico(&c, 40U); /* Ainda esperando os 5 minutos. */
+  VERIFICA(controle_saida_ligada(&c) == false);
+  VERIFICA(controle_saida_atualiza(&c, 30U + CINCO_MIN) == true);
+}
+
 /* ------------------------------------------------------------- retardo nos pedidos */
 
 static void pedido_automatico_de_ligar_respeita_o_retardo(void)
@@ -236,7 +332,7 @@ static void pedido_automatico_de_ligar_respeita_o_retardo(void)
 
   (void)controle_saida_inicia(&c);
   controle_saida_define_atraso(&c, 2000U);
-  controle_saida_pedido(&c, CONTROLE_FONTE_SENSOR, CONTROLE_PEDIDO_LIGA, 1000U);
+  controle_saida_pedido(&c, CONTROLE_FONTE_REMOTA, CONTROLE_PEDIDO_LIGA, 1000U);
   VERIFICA(controle_saida_aguardando(&c) == true);
   VERIFICA(controle_saida_atualiza(&c, 2999U) == false);
   VERIFICA(controle_saida_atualiza(&c, 3000U) == true);
@@ -248,7 +344,8 @@ static void falha_durante_o_retardo_cancela_a_partida(void)
 
   (void)controle_saida_inicia(&c);
   controle_saida_define_atraso(&c, 2000U);
-  controle_saida_pedido(&c, CONTROLE_FONTE_SENSOR, CONTROLE_PEDIDO_LIGA, 0U);
+  controle_saida_define_regra_local(&c, true, 0U);
+  controle_saida_pedido(&c, CONTROLE_FONTE_LOCAL, CONTROLE_PEDIDO_LIGA, 0U);
   controle_saida_sensor_falha(&c, true, 500U);
   VERIFICA(controle_saida_aguardando(&c) == false);
   VERIFICA(controle_saida_atualiza(&c, 2000U) == false);
@@ -260,33 +357,38 @@ static void pedido_repetido_de_ligar_nao_reinicia_o_retardo(void)
 
   (void)controle_saida_inicia(&c);
   controle_saida_define_atraso(&c, 2000U);
-  controle_saida_pedido(&c, CONTROLE_FONTE_SENSOR, CONTROLE_PEDIDO_LIGA, 0U);
-  controle_saida_pedido(&c, CONTROLE_FONTE_SENSOR, CONTROLE_PEDIDO_LIGA, 1500U);
+  controle_saida_pedido(&c, CONTROLE_FONTE_REMOTA, CONTROLE_PEDIDO_LIGA, 0U);
+  controle_saida_pedido(&c, CONTROLE_FONTE_REMOTA, CONTROLE_PEDIDO_LIGA, 1500U);
   VERIFICA(controle_saida_atualiza(&c, 2000U) == true);
 }
 
 int main(void)
 {
   EXECUTA(inicia_rejeita_nulo);
-  EXECUTA(comeca_automatica_e_desligada);
+  EXECUTA(comeca_automatica_desligada_e_sem_regra_local);
   EXECUTA(comando_manual_passa_a_manual_e_liga);
   EXECUTA(novo_comando_manual_nao_muda_de_modo_de_novo);
   EXECUTA(manual_respeita_o_retardo_de_acionamento);
   EXECUTA(manual_desligar_cancela_a_partida);
   EXECUTA(manual_prevalece_sobre_pedidos_automaticos);
   EXECUTA(volta_ao_automatico_executa_a_regra_valida_na_hora);
-  EXECUTA(volta_ao_automatico_sem_pedido_mantem_o_estado);
+  EXECUTA(volta_ao_automatico_sem_pedido_mantem_o_ultimo_estado_valido);
   EXECUTA(volta_ao_automatico_com_pedido_de_desligar_desliga);
-  EXECUTA(pedido_automatico_liga_e_desliga_a_saida);
-  EXECUTA(sensor_prevalece_sobre_a_fonte_externa);
-  EXECUTA(externa_vale_quando_o_sensor_nao_pede_nada);
-  EXECUTA(sensor_que_pede_ligar_vence_externa_que_pede_desligar);
+  EXECUTA(sem_regra_local_vale_o_comando_remoto_do_cco);
+  EXECUTA(com_regra_local_o_comando_remoto_e_ignorado);
+  EXECUTA(regra_local_que_pede_desligar_vence_o_remoto_que_pede_ligar);
+  EXECUTA(regra_local_sem_pedido_mantem_o_estado_e_nao_libera_o_remoto);
+  EXECUTA(apagar_a_regra_local_devolve_o_comando_ao_cco);
   EXECUTA(fonte_invalida_e_ignorada);
   EXECUTA(falha_do_sensor_em_automatico_desliga);
   EXECUTA(falha_mantem_a_saida_desligada_apesar_de_novo_pedido);
-  EXECUTA(fim_da_falha_volta_a_aplicar_o_pedido_valido);
+  EXECUTA(depois_da_falha_so_volta_a_operar_apos_5_minutos_estaveis);
+  EXECUTA(nova_falha_dentro_dos_5_minutos_reinicia_a_contagem);
+  EXECUTA(estabilidade_configuravel);
+  EXECUTA(sem_falha_anterior_nao_ha_espera);
   EXECUTA(falha_do_sensor_em_manual_mantem_o_comando_manual);
   EXECUTA(voltar_ao_automatico_com_falha_desliga_na_hora);
+  EXECUTA(voltar_ao_automatico_durante_a_espera_de_estabilidade_desliga);
   EXECUTA(pedido_automatico_de_ligar_respeita_o_retardo);
   EXECUTA(falha_durante_o_retardo_cancela_a_partida);
   EXECUTA(pedido_repetido_de_ligar_nao_reinicia_o_retardo);
