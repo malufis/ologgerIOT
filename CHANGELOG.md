@@ -1,6 +1,6 @@
 # Changelog — oLoggerIOT firmware
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.27
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.28
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versões seguem a numeração do projeto (ver `sistema-init/STATUS_PROJETO.md`). Cada entrada cita o item do backlog (`FW-###`) quando houver.
 
@@ -47,6 +47,8 @@ Trabalho das sprints 01 (aquisição analógica), 01B (entrada digital) e 04 (sa
 - Aquisição analógica (fase 1, em bancada): driver do ADC com TIM6, ADC1 e DMA, tarefa de aquisição e módulo `sensor` (média por segundo e conversão 4-20 mA). Entrada 4 medida com 8 mA: 8,007 mA. Calibração de bancada por dois pontos, referência efetiva de 2,367 V; causa do fator ~1,37 em aberto.
 
 ### Alterado
+- Otimização (04/11/2026): o firmware passa a ser compilado com `-Os` por padrão (opção `OLOG_OTIMIZACAO`: `s`, `g`, `0`, `1` ou `2`), e as informações de depuração (`-g`) ficam sempre ligadas. O `ologgermulti` cai de 50 748 para 27 776 bytes de código, e o `y7080` de 4 944 para 3 224. Os dois builds compilam sem avisos.
+- Confirmados em 04/11/2026: formato serial 8N1 da RS-485 (P-048), gravação da configuração nas duas últimas páginas da flash interna (P-046), endereços 40382–40396 e 40413, padrões de fábrica e falha do sensor abaixo de 3,6 mA ou acima de 21 mA (P-047).
 - Persistência (04/11/2026): todos os registradores de retenção do mapa Modbus passam a ficar na flash; a agenda e o fuso deixam de ter gravação própria e entram no mesmo registro da configuração. O gerador de frequência passou a calcular o passo em ponto flutuante de 32 bits (menos 1,6 KB de flash, mesmo resultado).
 - Agenda (04/11/2026): só funciona com o modo sleep desabilitado (o despertar no limite do intervalo deixa de ser necessário); o fuso horário começa em Brasília (−180) e vale até o CCO enviar outro; a agenda e o fuso gravados persistem ao reinício. A área do programa do OloggerMulti passa de 64 KB para 60 KB.
 - `tempo` passa a usar só divisão de 32 bits, o que tira cerca de 2 KB de flash da imagem sem mudar o resultado (64 460 verificações).

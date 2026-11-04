@@ -1,6 +1,6 @@
 # Composição dos builds — oLoggerIOT
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.15
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.16
 > **Status:** composição confirmada pelo responsável técnico em 02/11/2026. A lista vigente está em `builds/composicao.cmake`.
 
 ## Princípio
@@ -22,6 +22,7 @@ Configuração (FW-002, validada em 02/11/2026):
 
 ```
 cmake -S . -B build/ologgermulti -G Ninja -DDEVICE=ologgermulti -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-arm-none-eabi.cmake
+# Otimização: -Os por padrão. Para depurar passo a passo, acrescente -DOLOG_OTIMIZACAO=g (-Og) ou 0.
 cmake -S . -B build/y7080        -G Ninja -DDEVICE=y7080        -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-arm-none-eabi.cmake
 ```
 
@@ -92,13 +93,14 @@ A pinagem de cada placa está em `devices/<build>/pinos.h` (FW-003), com um par 
 - Validar no manual AT do SIM7080G os comandos do cliente MQTT, que roda no modem (decidido em 02/11/2026).
 - Rádio externo do OloggerMulti na UART1 do STM32 (PA9/PA10), decidido em 02/11/2026: o STM32 é o cérebro e recebe todos os dados externos. O conector ligado à UART0 do ESP32 fica fora do uso do firmware até confirmação do seu uso.
 - Integrador por tipo de rádio externo: fase futura. `lib/radio_externo` só repassa bytes, sem interpretar (decidido em 02/11/2026).
-- Medir flash e RAM de cada build (FW-006). Em 03/11/2026: `ologgermulti` com 50 748 bytes de código (04/11/2026, com o Modbus; sem otimização, e com `-Og` seriam 32,3 KB e com `-Os` 27,8 KB; área do programa de 60 KB) e `y7080` com 4 944.
+- Medir flash e RAM de cada build (FW-006). Em 03/11/2026: `ologgermulti` com 27 776 bytes de código (04/11/2026, com o Modbus, compilado com `-Os`; área do programa de 60 KB) e `y7080` com 3 224.
 - Gerência de energia do y7080 (STM32L0): o módulo `lib/energia` só existe para o L4.
 
 ## Histórico
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.16 | Otimização -Os por padrão (OLOG_OTIMIZACAO); tamanhos atualizados |
 | 04/11/2026 | 0.2.15 | Tamanho do build do OloggerMulti atualizado para 50 748 bytes, com a medida por otimização |
 | 04/11/2026 | 0.2.14 | Tamanho do build do OloggerMulti atualizado para 41 620 bytes de código |
 | 04/11/2026 | 0.2.13 | Tamanho do build do OloggerMulti atualizado para 34 240 bytes de código |

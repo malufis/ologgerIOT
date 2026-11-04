@@ -15,7 +15,7 @@ Quadro RTU e CRC, mestre com timeout e tentativas, escravo, recuperação e a ta
 |---|---|---|
 | FW-026 | Biblioteca `lib/modbus`: quadro RTU e CRC | Código pronto em 04/11/2026: `lib/modbus/modbus_rtu` (quadro, CRC-16, funções 01 a 06, 15 e 16, exceções, difusão), 39 verificações no PC; **sem teste em hardware** |
 | FW-027 | Mestre com timeout de 30 s e dez tentativas a cada 30 s | Pendente |
-| FW-028 | Escravo com mapa de `documentacao/mapa_modbus.md` | Código pronto em 04/11/2026: `modbus_mapa` liga as bobinas, as entradas discretas, os registradores de entrada e toda a configuração (retenção) ao firmware; `rs485` (USART2, 8N1) e `modbus_tarefa` atendem o escravo com endereço, velocidade e modo da configuração; compila; **sem teste em hardware** (teste de bancada com o conversor USB-RS485 CH340 na COM6). Falta o registro de status por variável (FW-050) e a paridade (P-048) |
+| FW-028 | Escravo com mapa de `documentacao/mapa_modbus.md` | Código pronto em 04/11/2026: `modbus_mapa` liga as bobinas, as entradas discretas, os registradores de entrada e toda a configuração (retenção) ao firmware; `rs485` (USART2, 8N1) e `modbus_tarefa` atendem o escravo com endereço, velocidade e modo da configuração; compila; **sem teste em hardware** (teste de bancada com o conversor USB-RS485 CH340 na COM6). Falta o registro de status por variável (FW-050) |
 | FW-029 | Recuperação com cinco leituras válidas e defeito após uma hora | Pendente |
 | FW-047 | `lib/tabela_variaveis`: 64 variáveis na RAM, com estado, marca de tempo e mutex estático | Pendente |
 | FW-048 | `lib/mapeamento`: configuração de até 8 equipamentos, validação completa e gravação atômica em flash com CRC | Pendente |

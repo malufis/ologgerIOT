@@ -1,6 +1,6 @@
 # Status do Projeto — oLoggerIOT
 
-> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.169
+> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.170
 > **Repositório:** https://github.com/malufis/ologgerIOT
 
 ## Fase atual
@@ -63,9 +63,9 @@
 | P-043 | Agenda: fuso, versão, momento depois de reinício, identificador do comando e tratamento de saída ausente e de cadeia vazia | Fase 6 | RESOLVIDO em 04/11/2026 — fuso horário configurado pelo CCO (40403, proposta); o device guarda só a última agenda, sem ordem de versão; depois de reinício a agenda assume o intervalo do horário atual; saída ausente mantém e cadeia vazia apaga (proposta mantida); identificador do comando em proposta (P-044) |
 | P-044 | Identificador do comando MQTT | Fase 7 | RESOLVIDO em 04/11/2026 — aceito: campo `id` de até 36 caracteres, devolvido sem alteração em cada resposta, descarte de repetição com os últimos 8; nomes `etapa` e `motivo` e endereço 40403 do fuso seguem como proposta |
 | P-045 | Agenda sem fuso configurado | Fase 6 | RESOLVIDO em 04/11/2026 — o fuso começa em Brasília (−180), e a agenda e o fuso gravados persistem ao reinício; a agenda só funciona com o sleep desabilitado |
-| P-046 | Onde guardar a agenda e o fuso: proposta de usar as duas últimas páginas de 2 KB da flash interna (0x0800F000 a 0x0800FFFF), fora da área do programa de 60 KB. Confirmar com o layout do bootloader (FW-062, ADR-0003) e com o responsável técnico; a alternativa é a flash externa, que depende do driver FW-018 | Fase 6 | PENDENTE — confirmar |
-| P-047 | Propostas desta configuração: endereços 40382–40396 (estabilidade do sensor) e 40413 (inatividade da entrada digital); padrões de fábrica (RS-485 em escravo a 9600 bps e endereço 1, intervalos de 60 s); falha do sensor abaixo de 3,6 mA ou acima de 21 mA (NAMUR NE43). Confirmar | Fase 6 | PENDENTE — confirmar |
-| P-048 | Formato serial da RS-485: o escravo usa 8N1 (sem paridade, 1 stop bit); a norma Modbus pede 8E1 por padrão e muitos equipamentos usam 8N1 ou 8N2. Confirmar, ou acrescentar um registrador de paridade | Fase 5 | PENDENTE — confirmar |
+| P-046 | Onde guardar a agenda e o fuso | Fase 6 | RESOLVIDO em 04/11/2026 — nas duas últimas páginas de 2 KB da flash interna (0x0800F000 a 0x0800FFFF), com a área do programa em 60 KB; a posição final será conferida com o layout do bootloader (FW-062) |
+| P-047 | Propostas da configuração persistente | Fase 6 | RESOLVIDO em 04/11/2026 — confirmados os endereços 40382–40396 (estabilidade do sensor) e 40413 (inatividade da entrada digital), os padrões de fábrica e a falha do sensor abaixo de 3,6 mA ou acima de 21 mA (NAMUR NE43) |
+| P-048 | Formato serial da RS-485 | Fase 5 | RESOLVIDO em 04/11/2026 — fica 8N1 (8 bits, sem paridade, 1 stop bit) |
 
 ## Decisões tomadas
 B0 — Identificação: respostas e resumo confirmados pelo usuário em 29/10/2026.
@@ -365,6 +365,7 @@ A entrevista está encerrada e o firmware está em desenvolvimento. Os dois buil
 ## Histórico de atualizações
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.170 | P-046, P-047 e P-048 resolvidas; firmware passa a ser compilado com -Os |
 | 04/11/2026 | 0.3.169 | FW-026 e FW-028: escravo Modbus RTU pronto; P-048 aberta (paridade) |
 | 04/11/2026 | 0.3.168 | FW-064: configuração persistente; P-047 aberta (propostas da configuração) |
 | 04/11/2026 | 0.3.167 | P-045 resolvida; P-046 aberta (local da persistência); persistência da agenda escrita |

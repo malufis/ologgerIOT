@@ -27,9 +27,17 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(cmake/mcu.cmake)
 
+# Otimização (decidido em 04/11/2026): padrão -Os, o menor código, que cabe com folga nos 60 KB do
+# STM32L412. Para depurar passo a passo use -DOLOG_OTIMIZACAO=g (-Og) ou 0 (sem otimização). As
+# informações de depuração (-g) não ocupam flash.
+set(OLOG_OTIMIZACAO "s" CACHE STRING "Nível de otimização: s (padrão), g, 0, 1 ou 2")
+set_property(CACHE OLOG_OTIMIZACAO PROPERTY STRINGS s g 0 1 2)
+
 # Avisos como erro, e seções separadas para o linker remover o que não é usado.
 add_compile_options(
   ${OLOG_MCU_CPU_FLAGS}
+  -O${OLOG_OTIMIZACAO}
+  -g
   -Wall
   -Wextra
   -Werror

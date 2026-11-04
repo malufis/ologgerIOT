@@ -3,8 +3,8 @@
  * @brief Driver da RS-485 (USART2) do OloggerMulti: recepção de quadros e envio.
  *
  * A RS-485 usa o transceptor SP3485 na USART2 (PA2 TX e PA3 RX), com DE e /RE ligados ao PB9
- * (nível alto transmite). O formato é **8 bits, sem paridade, 1 stop bit (8N1)**; é uma proposta, já
- * que o mapa Modbus ainda não define a paridade (P-048).
+ * (nível alto transmite). O formato é **8 bits, sem paridade, 1 stop bit (8N1)**; confirmado em
+ * 04/11/2026 (P-048); o mapa Modbus não tem registrador de paridade.
  *
  * - **Fim do quadro:** o silêncio de 3,5 caracteres (40 bits) é medido pelo próprio USART (receiver
  *   timeout, RTOR), que interrompe quando a linha fica quieta. A interrupção entrega o quadro à tarefa.

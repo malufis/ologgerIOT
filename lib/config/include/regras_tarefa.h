@@ -14,7 +14,7 @@
  *   definida, a saída ignora a agenda e o CCO.
  *
  * **Falha do sensor:** corrente abaixo de 3,6 mA ou acima de 21 mA (faixa de falha da norma NAMUR
- * NE43, **proposta** a confirmar no FW-013). Em falha, a saída discreta desliga e a de frequência
+ * NE43, **confirmada em 04/11/2026**; o dente de serra continua no FW-013). Em falha, a saída discreta desliga e a de frequência
  * vai a 0 Hz; a volta ao sensor só depois de 5 minutos estáveis (controle_saida.h). Sem leitura
  * ainda (primeiro segundo depois da partida), a passada é pulada sem declarar falha.
  *
@@ -40,9 +40,9 @@
 /** Tamanho da pilha da tarefa, em palavras de 32 bits. */
 #define REGRAS_TAREFA_PILHA_PALAVRAS 384U
 
-/** Corrente abaixo da qual o sensor está em falha, em mA (proposta, NAMUR NE43). */
+/** Corrente abaixo da qual o sensor está em falha, em mA (NAMUR NE43, confirmada). */
 #define REGRAS_FALHA_ABAIXO_MA       3.6F
-/** Corrente acima da qual o sensor está em falha, em mA (proposta, NAMUR NE43). */
+/** Corrente acima da qual o sensor está em falha, em mA (NAMUR NE43, confirmada). */
 #define REGRAS_FALHA_ACIMA_MA        21.0F
 
 /** Código de retorno: sucesso. */

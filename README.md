@@ -43,6 +43,7 @@ Os dois builds STM32 compilam sem avisos com `-Werror` (verificado em 03/11/2026
 
   ```
   cmake -S . -B build/ologgermulti -G Ninja -DDEVICE=ologgermulti -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-arm-none-eabi.cmake
+  # -Os por padrão; para depurar passo a passo: -DOLOG_OTIMIZACAO=g (-Og) ou 0
   ```
 
   Troque `ologgermulti` por `y7080` para o outro build. Precisa também da pasta do pacote STM32CubeL4, passada com `-DOLOG_STM32CUBE_L4=<pasta>`, por exemplo `C:/Users/<usuario>/STM32Cube/Repository/STM32Cube_FW_L4_V1.18.2`.

@@ -1,13 +1,13 @@
 # Estado da implementação — oLoggerIOT
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.27
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.28
 
 Documento vivo. Diz o que existe no código, o que está em teste e o que falta. Agentes e desenvolvedores leem aqui antes de começar um item. Atualizado pela skill `doc-sync` a cada item fechado e revisado pela skill `sprint-close`.
 
 ## Situação atual
 
 - **Sprints em andamento:** SPRINT_01B (entrada digital e contador de pulsos) e SPRINT_04 (saídas), em código pronto. A SPRINT_01 (aquisição analógica) está bloqueada pela ferrite L2. A SPRINT_00 foi concluída em 04/11/2026.
-- **Dois builds compilam sem avisos com `-Werror`** (03/11/2026): `ologgermulti` com 50 748 bytes de código em 60 KB de área do programa (04/11/2026, com o Modbus; **a imagem está sem otimização**: com `-Og` seriam 32,3 KB e com `-Os` 27,8 KB) e `y7080` com 4 944. O `y7080` não leva `ENTRADA_DIGITAL`, nem a gerência de energia.
+- **Dois builds compilam sem avisos com `-Werror`** (03/11/2026): `ologgermulti` com 27 776 bytes de código em 60 KB de área do programa (04/11/2026, com o Modbus, compilado com `-Os`, que passou a ser o padrão; sem otimização eram 50,7 KB) e `y7080` com 3 224. O `y7080` não leva `ENTRADA_DIGITAL`, nem a gerência de energia.
 - **Testes no PC (03/11/2026):** sensor (57 verificações), conversão de tempo (64 460 verificações, com ida e volta em todo o intervalo de 32 bits), filtro de ruído (135), contador de pulsos (25), totalizador (36) estado da saída digital (36), controle manual e automático (82), agenda (57), aplicação da agenda (47), formato da configuração da agenda (42), armazém persistente (139) configuração (101) e Modbus RTU (39) e regra do sensor (9 testes) frequência da saída (9 testes) gerador de frequência (10 testes) e tipo da saída (8 testes); verificadores das ferramentas (27 testes). Todos passam. O executável do `sensor` foi bloqueado uma vez pela política de Controle de Aplicativo do Windows depois de um relink, mas recompilado rodou e passou.
 - **Hardware verificado em 02/11/2026:** a imagem do OloggerMulti executa no STM32L412 real, com FreeRTOS e a tarefa de vida. A aquisição analógica mede a entrada 4 com 8 mA injetados e mostra 8,007 mA.
 - **Nada da entrada digital, do contador de pulsos, do totalizador e da gerência de energia foi testado em hardware.** Só compilam e têm testes de lógica no PC. O roteiro de bancada está em `documentacao/roteiro_bancada_entrada_digital.md`.
@@ -28,7 +28,7 @@ Documento vivo. Diz o que existe no código, o que está em teste e o que falta.
 | Tarefa de vida | `lib/vida/` | Implementada; executa no L412 real | FW-046 | Contador subindo no chip; 101 de 128 palavras de pilha livres |
 | Pinagem por placa | `devices/ologgermulti/pinos.h`, `devices/y7080/pinos.h`, `tools/verifica_pinos.py` | Implementada | FW-003 | Conferida contra as netlists (31 e 26 funções); compila com o HAL real; 7 testes do verificador |
 | Configuração CMake (raiz, toolchain, CPU por MCU) | `CMakeLists.txt`, `cmake/` | Implementada | FW-002 | Configura os dois builds e recusa device inválido |
-| Imagem STM32 do OloggerMulti (L412) | `src/`, `cmake/hal-stm32l4.cmake`, `include/stm32l4xx_hal_conf.h`, `devices/ologgermulti/` | Compila e linka sem avisos (26 280 bytes de código em 03/11/2026). Executa no STM32L412 real com a versão de 02/11/2026 | FW-006 | Build com `-Werror`; em hardware, PC em `0x0800....` e SysTick contando |
+| Imagem STM32 do OloggerMulti (L412) | `src/`, `cmake/hal-stm32l4.cmake`, `include/stm32l4xx_hal_conf.h`, `devices/ologgermulti/` | Compila e linka sem avisos (27 776 bytes de código com `-Os` em 04/11/2026). Executa no STM32L412 real com a versão de 02/11/2026 | FW-006 | Build com `-Werror`; em hardware, PC em `0x0800....` e SysTick contando |
 | Imagem STM32 do y7080 (L071) | `cmake/hal-stm32l0.cmake`, `include/stm32l0xx_hal_conf.h`, `devices/y7080/` | Compila e linka sem avisos (4 944 bytes de código em 03/11/2026). Sem teste em hardware | FW-006 | Build com `-Werror` |
 | Build ESP32 | `esp32/` | Não iniciado; depois da validação do STM32 (SPRINT_07) | FW-007 | — |
 | Doxygen e dicionário de funções | `Doxyfile`, `tools/gera_dicionario.py` | Implementado; 73 funções no dicionário | FW-004 | 8 testes do gerador; Doxygen barra função e parâmetro sem documentação |
@@ -101,6 +101,7 @@ Legenda de estado: **Não iniciado**, **Em desenvolvimento**, **Em teste**, **Im
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.28 | Firmware compilado com -Os (27 776 bytes); P-046 a P-048 resolvidas |
 | 04/11/2026 | 0.2.27 | Escravo Modbus RTU pronto (FW-026 e FW-028), sem teste em hardware |
 | 04/11/2026 | 0.2.26 | Configuração persistente (FW-064) |
 | 04/11/2026 | 0.2.25 | Persistência da agenda e do fuso; agenda só com o sleep desabilitado |
