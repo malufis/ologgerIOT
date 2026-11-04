@@ -1,6 +1,6 @@
 # Changelog — oLoggerIOT firmware
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.16
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.17
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versões seguem a numeração do projeto (ver `sistema-init/STATUS_PROJETO.md`). Cada entrada cita o item do backlog (`FW-###`) quando houver.
 
@@ -10,6 +10,7 @@ Trabalho das sprints 01 (aquisição analógica), 01B (entrada digital) e 04 (sa
 
 ### Adicionado
 - FW-032 (parcial): `lib/agenda`, agenda semanal de 336 intervalos de 30 minutos por saída. `agenda_carrega_hex` valida por inteiro a cadeia de 84 caracteres hexadecimais recebida do CCO por MQTT (sem alterar a agenda anterior em caso de erro) e `agenda_estado` devolve ligada, desligada ou sem agenda para um instante. 57 verificações no PC. Falta o RTC, o armazenamento persistente, a aplicação por intervalo e o recebimento por MQTT. Formato em `documentacao/agenda_operacional_offline.md` (P-042).
+- FW-023 (parcial): `lib/io/gerador_freq`, onda quadrada de 50% por acumulador de fase, uma frequência independente por saída (de 0 a 20 kHz, resolução de 0,001 Hz), 0 Hz em nível baixo, pensada para a interrupção de um timer a 100 kHz. 10 testes no PC. A 20 kHz o duty fica em 40% ou 60% (cinco ticks por período). Falta ligar ao timer e aos pinos.
 - FW-061 (lado das saídas): `lib/io/tipo_saida` guarda o tipo de cada saída (0 discreto, 1 frequência) e aplica a exclusão com o sleep: a frequência é recusada com o sleep ligado e na saída 1; `io_frequencia_sleep_permitido` é o gancho `sleep_permitido` de `energia`, ligado em `main.c` no build com `SAIDA_FREQUENCIA`. 8 testes no PC.
 - FW-023 (parcial): `lib/io/freq_saida`, frequência da saída "pulsada" a partir da corrente 4–20 mA. `freq_saida_cadastra` valida as frequências de 4 mA e de 20 mA (0 a 20 kHz); `freq_saida_calcula` interpola linearmente, prende a corrente nos extremos da faixa e leva a saída a 0 Hz na falha do sensor. 9 testes no PC. Decidido: em 0 Hz a saída fica em nível baixo, duty cycle de 50% e só as saídas 2 a 4 (PB13 a PB15) têm modo frequência. Falta gerar o sinal (timer).
 - FW-063 (parcial): `lib/io/regra_sensor`, regra do sensor de uma entrada analógica para uma saída digital. `regra_sensor_cadastra` valida por inteiro o sentido (0 liga no mínimo, 1 liga no máximo) e os limiares; `regra_sensor_avalia` devolve o pedido da fonte do sensor com histerese (entre os limiares mantém o pedido anterior). Com a regra cadastrada, a saída ignora a agenda e o CCO. 9 testes no PC. Falta o cadastro pelos endereços Modbus e por MQTT e a ligação à entrada analógica.

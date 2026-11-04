@@ -1,6 +1,6 @@
 # Status do Projeto — oLoggerIOT
 
-> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.158
+> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.159
 > **Repositório:** https://github.com/malufis/ologgerIOT
 
 ## Fase atual
@@ -361,6 +361,7 @@ A entrevista está encerrada e o firmware está em desenvolvimento. Os dois buil
 ## Histórico de atualizações
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.159 | FW-023: gerador de frequência pronto e testado |
 | 04/11/2026 | 0.3.158 | FW-061 pronto nos dois lados; FW-023 com as decisões de 0 Hz, duty de 50% e canais |
 | 04/11/2026 | 0.3.157 | FW-023 parcial (freq_saida pronto) |
 | 04/11/2026 | 0.3.156 | P-044 resolvida; FW-063 parcial (regra_sensor pronto) |

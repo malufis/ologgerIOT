@@ -1,6 +1,6 @@
 # Backlog do firmware — oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.14
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.15
 
 ## Regras
 
@@ -89,7 +89,7 @@ Entrada digital ativa com tensão no campo (de 12 a 24 V; na bancada, até 12 V)
 | ID | Tarefa | Aceite | Situação |
 |---|---|---|---|
 | FW-022 | Saídas discretas: ligar e desligar, com as saídas desligadas na partida | Testes de estado | Código pronto em 03/11/2026: ligar e desligar (`saida`, `io_saida`, `io_saidas`), com as saídas desligadas na partida. Bancada pendente |
-| FW-023 | Saída em frequência (a "pulsada") proporcional a 4–20 mA, com 4 mA e 20 mA configuráveis; só pode ser habilitada com o sleep desligado | Teste de proporcionalidade | Parcial em 04/11/2026: `lib/io/freq_saida` pronto (cálculo proporcional da frequência a partir de 4–20 mA, 0 Hz na falha, 9 testes no PC). Decidido em 04/11/2026: em 0 Hz a saída fica em nível baixo (transistor desligado), o duty cycle é de 50%, e só as saídas 2, 3 e 4 (PB13, PB14 e PB15, com canal de timer) têm modo frequência; a saída 1 (PB12) fica só discreta. Falta gerar o sinal pelo timer |
+| FW-023 | Saída em frequência (a "pulsada") proporcional a 4–20 mA, com 4 mA e 20 mA configuráveis; só pode ser habilitada com o sleep desligado | Teste de proporcionalidade | Parcial em 04/11/2026: `lib/io/freq_saida` pronto (cálculo proporcional da frequência a partir de 4–20 mA, 0 Hz na falha, 9 testes no PC). Decidido em 04/11/2026: em 0 Hz a saída fica em nível baixo (transistor desligado), o duty cycle é de 50%, e só as saídas 2, 3 e 4 (PB13, PB14 e PB15, com canal de timer) têm modo frequência; a saída 1 (PB12) fica só discreta. `lib/io/gerador_freq` pronto (onda quadrada de 50% por acumulador de fase a 100 kHz de tick, uma frequência independente por saída, 0 Hz em nível baixo, 10 testes no PC; a 20 kHz o duty fica em 40% ou 60% por ter só cinco ticks por período). Falta ligar ao timer (TIM6) e aos pinos PB13 a PB15 |
 | FW-024 | Retardo de acionamento (relé de tempo, o "acionamento por tempo") por saída discreta, com cancelamento por comando de desligar | Testes de temporização | Código pronto em 03/11/2026 (`saida_define_atraso`, `io_saidas_define_atraso`): 36 verificações no PC com o retardo, o comando descartado, o cancelamento por desligar e a volta do contador. Regras confirmadas em 03/11/2026. Bancada pendente |
 | FW-025 | Modo manual e automático por saída, com prioridade do sensor | Tabela de estados testada | Código pronto em 04/11/2026 (`controle_saida`, `io_saidas`): 82 verificações no PC com manual, automático, regra do sensor, agenda local offline, comando do CCO online, falha do sensor com espera de 5 minutos e retardo. Falta o alerta ao CCO na chegada do comando manual. Bancada pendente |
 | FW-061 | Ligar e desligar o modo sleep (modo de operação, registro 40412), com exclusão mútua: o sleep só liga se nenhuma saída estiver em frequência, e a saída em frequência só habilita com o sleep desligado | Testes: ligar o sleep com uma saída em frequência é recusado, e habilitar a frequência com o sleep ligado também | Lado do sleep pronto em 03/11/2026 (`energia_define_habilitada` devolve erro se um módulo impede). Lado das saídas pronto em 04/11/2026: `lib/io/tipo_saida` guarda o tipo de cada saída, recusa frequência com o sleep ligado e na saída 1, e `io_frequencia_sleep_permitido` é o gancho que impede ligar o sleep com saída em frequência (8 testes no PC). Falta o comando do Modbus (40166 e 40412) |
@@ -155,6 +155,7 @@ Entrada digital ativa com tensão no campo (de 12 a 24 V; na bancada, até 12 V)
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.15 | FW-023: gerador de frequência por acumulador de fase pronto e testado |
 | 04/11/2026 | 0.2.14 | FW-061 com o lado das saídas pronto; FW-023 com as decisões de 0 Hz, duty cycle e canais |
 | 04/11/2026 | 0.2.13 | FW-023 parcial: módulo `freq_saida` pronto e testado |
 | 04/11/2026 | 0.2.12 | FW-063 parcial: módulo `regra_sensor` pronto e testado |

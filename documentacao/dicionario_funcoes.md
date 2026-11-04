@@ -1,6 +1,6 @@
 # Dicionário de funções — firmware oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.8
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.9
 
 ## Como manter
 
@@ -60,6 +60,9 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `freq_saida_cadastra` | freq_saida | `lib/io/include/freq_saida.h` | Cadastra as frequências de 4 mA e de 20 mA. Só troca o cadastro se ambas forem válidas. | FREQ_SAIDA_OK, ou o código de erro (o cadastro anterior fica como estava). | ativa |
 | `freq_saida_calcula` | freq_saida | `lib/io/include/freq_saida.h` | Calcula a frequência da saída para uma corrente. | FREQ_SAIDA_OK, FREQ_SAIDA_ERRO_PARAMETRO se algum ponteiro for nulo ou ma não for numérico, ou FREQ_SAIDA_ERRO_SEM_CADASTRO se não houver cadastro (então hz recebe 0). | ativa |
 | `freq_saida_limpa` | freq_saida | `lib/io/include/freq_saida.h` | Deixa a conversão sem cadastro. | FREQ_SAIDA_OK, ou FREQ_SAIDA_ERRO_PARAMETRO se freq for nula. | ativa |
+| `gerador_freq_define` | gerador_freq | `lib/io/include/gerador_freq.h` | Define a frequência do gerador. | GERADOR_FREQ_OK, ou o código de erro (o gerador fica como estava). | ativa |
+| `gerador_freq_limpa` | gerador_freq | `lib/io/include/gerador_freq.h` | Para o gerador: nível baixo e fase zerada. | GERADOR_FREQ_OK, ou GERADOR_FREQ_ERRO_PARAMETRO se gerador for nulo. | ativa |
+| `gerador_freq_tick` | gerador_freq | `lib/io/include/gerador_freq.h` | Avança um tick e devolve o nível da saída. | true para nível alto (transistor ligado), false para nível baixo. | ativa |
 | `io_backup_grava` | io_backup | `lib/io/include/io_backup.h` | Grava uma palavra de backup. | void | ativa |
 | `io_backup_inicia` | io_backup | `lib/io/include/io_backup.h` | Liga o acesso ao domínio de backup e o clock do TAMP. | void | ativa |
 | `io_backup_le` | io_backup | `lib/io/include/io_backup.h` | Lê uma palavra de backup. | Valor da palavra; zero se o índice for inválido. | ativa |
@@ -141,6 +144,7 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.9 | Tabela regenerada com 113 funções públicas: entram as de `gerador_freq` |
 | 04/11/2026 | 0.3.8 | Tabela regenerada com 110 funções públicas: entram as de `tipo_saida` e `io_frequencia` |
 | 04/11/2026 | 0.3.7 | Tabela regenerada com 103 funções públicas: entram `freq_saida_limpa`, `freq_saida_cadastra` e `freq_saida_calcula` |
 | 04/11/2026 | 0.3.6 | Tabela regenerada com 100 funções públicas: entram `regra_sensor_limpa`, `regra_sensor_cadastra` e `regra_sensor_avalia` |
