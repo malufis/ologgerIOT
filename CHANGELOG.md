@@ -1,6 +1,6 @@
 # Changelog — oLoggerIOT firmware
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.13
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.14
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versões seguem a numeração do projeto (ver `sistema-init/STATUS_PROJETO.md`). Cada entrada cita o item do backlog (`FW-###`) quando houver.
 
@@ -10,7 +10,7 @@ Trabalho das sprints 01 (aquisição analógica), 01B (entrada digital) e 04 (sa
 
 ### Adicionado
 - FW-032 (parcial): `lib/agenda`, agenda semanal de 336 intervalos de 30 minutos por saída. `agenda_carrega_hex` valida por inteiro a cadeia de 84 caracteres hexadecimais recebida do CCO por MQTT (sem alterar a agenda anterior em caso de erro) e `agenda_estado` devolve ligada, desligada ou sem agenda para um instante. 57 verificações no PC. Falta o RTC, o armazenamento persistente, a aplicação por intervalo e o recebimento por MQTT. Formato em `documentacao/agenda_operacional_offline.md` (P-042).
-- FW-063 (backlog): regra do sensor entrada analógica para saída digital (comando automático local), com o cadastro por MQTT ou Modbus (limiares máximo e mínimo e sentido propostos no mapa, 40307 a 40381) e o avaliador com histerese.
+- FW-063 (parcial): `lib/io/regra_sensor`, regra do sensor de uma entrada analógica para uma saída digital. `regra_sensor_cadastra` valida por inteiro o sentido (0 liga no mínimo, 1 liga no máximo) e os limiares; `regra_sensor_avalia` devolve o pedido da fonte do sensor com histerese (entre os limiares mantém o pedido anterior). Com a regra cadastrada, a saída ignora a agenda e o CCO. 9 testes no PC. Falta o cadastro pelos endereços Modbus e por MQTT e a ligação à entrada analógica.
 - FW-025: modo manual e automático por saída em `lib/io` (`controle_saida`, 82 verificações no PC) e nas quatro saídas (`io_saidas_comando_manual`, `io_saidas_modo_automatico`, `io_saidas_pedido`, `io_saidas_sensor_falha`, `io_saidas_define_regra_sensor`, `io_saidas_define_conectividade`, `io_saidas_define_estabilidade`, `io_saidas_modo`). O comando manual prevalece; em automático vale a regra do sensor, se cadastrada, ou, sem ela, a agenda (comando local, só offline) e o CCO (só online); a falha do sensor desliga em automático e mantém em manual, e a saída só volta a operar pelo sensor depois de 5 minutos estáveis; a volta ao automático avalia na hora e, sem pedido, mantém o último estado válido. Compila no `ologgermulti` (26 280 bytes). Sem alerta ao CCO e sem teste em hardware.
 - FW-062 (backlog): layout da flash interna do STM32 com bootloader. ADR-0003 decidido em 04/11/2026: a atualização usa a imagem na flash externa com um bootloader.
 - `documentacao/desvios_misra.md`: registro do desvio DEV-001 (`MISRA-DEV` em `lib/adc/src/adc.c`), que estava marcado no código sem registro.

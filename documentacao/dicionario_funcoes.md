@@ -1,6 +1,6 @@
 # Dicionário de funções — firmware oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.5
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.6
 
 ## Como manter
 
@@ -107,6 +107,9 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `io_totalizador_inicia` | io_totalizador | `lib/io/include/io_totalizador.h` | Carrega os totais do armazém e guarda a referência para as gravações seguintes. | IO_TOTALIZADOR_OK ou IO_TOTALIZADOR_ERRO_PARAMETRO. | ativa |
 | `io_totalizador_le` | io_totalizador | `lib/io/include/io_totalizador.h` | Lê o total de uma entrada. | Total acumulado; zero se o canal for inválido. | ativa |
 | `io_totalizador_soma` | io_totalizador | `lib/io/include/io_totalizador.h` | Soma pulsos ao total de uma entrada e grava no armazém. | IO_TOTALIZADOR_OK ou IO_TOTALIZADOR_ERRO_PARAMETRO. | ativa |
+| `regra_sensor_avalia` | regra_sensor | `lib/io/include/regra_sensor.h` | Avalia um valor da entrada e devolve o pedido da regra. | O pedido atual: LIGA, DESLIGA, ou NENHUM se a regra não está definida ou ainda não alcançou nenhum limiar. Um valor não numérico mantém o pedido anterior. | ativa |
+| `regra_sensor_cadastra` | regra_sensor | `lib/io/include/regra_sensor.h` | Cadastra a regra. Só troca a regra se todos os campos forem válidos. | REGRA_SENSOR_OK, ou o código de erro (a regra anterior fica como estava). | ativa |
+| `regra_sensor_limpa` | regra_sensor | `lib/io/include/regra_sensor.h` | Deixa a regra sem cadastro e sem pedido. | REGRA_SENSOR_OK, ou REGRA_SENSOR_ERRO_PARAMETRO se regra for nula. | ativa |
 | `rtos_tick_handler` | rtos | `lib/rtos/include/rtos.h` | Trata o tick do sistema, chamado pela interrupção do SysTick. | void | ativa |
 | `saida_aguardando` | saida | `lib/io/include/saida.h` | Informa se a saída está esperando o retardo de acionamento. | true se há um retardo em curso; a saída continua desligada. | ativa |
 | `saida_atualiza` | saida | `lib/io/include/saida.h` | Atualiza o estado com o instante atual e devolve se a saída está ligada. | true se a saída está ligada depois da atualização. | ativa |
@@ -128,6 +131,7 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.6 | Tabela regenerada com 100 funções públicas: entram `regra_sensor_limpa`, `regra_sensor_cadastra` e `regra_sensor_avalia` |
 | 04/11/2026 | 0.3.5 | Tabela regenerada com 97 funções públicas: entra o módulo `agenda` (4 funções) |
 | 04/11/2026 | 0.3.4 | Tabela regenerada com 93 funções públicas: entram `controle_saida_define_regra_sensor`, `controle_saida_define_conectividade` e `io_saidas_define_conectividade`; `define_regra_local` virou `define_regra_sensor` |
 | 04/11/2026 | 0.3.3 | Tabela regenerada com 91 funções públicas: entram `io_saidas_define_regra_local`, `io_saidas_define_estabilidade`, `controle_saida_define_regra_local`, `controle_saida_define_estabilidade` e `controle_saida_sensor_indisponivel` |

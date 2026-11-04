@@ -1,6 +1,6 @@
 # Integração do device com o sistema — oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.4
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.5
 
 ## Para quem é
 
@@ -81,7 +81,7 @@ Aplicação Python no notebook do técnico, com chaveiro serial ligado ao STM32.
 
 A agenda semanal das saídas chega no tópico `COMANDO`, vinda do CCO, em JSON, e não tem endereço Modbus. Cada saída leva uma cadeia de 84 caracteres hexadecimais (336 intervalos de 30 minutos, um bit por intervalo). A mensagem é validada por inteiro: se qualquer saída for inválida, o device recusa tudo e responde em `RESULTADO` com o motivo, mantendo a agenda anterior. Formato completo, exemplo e regras em `documentacao/agenda_operacional_offline.md`.
 
-## Identificador do comando (proposta de 04/11/2026)
+## Identificador do comando (decidido em 04/11/2026)
 
 O device responde a cada comando em duas etapas no tópico `RESULTADO`: primeiro "recebido" e depois "executado" ou "falhou com motivo". O **identificador** liga cada resposta ao comando que a originou, mesmo com vários comandos em andamento ou com um reenvio.
 
@@ -98,7 +98,7 @@ Exemplo de resposta:
 { "id": "12346", "etapa": "falhou", "motivo": "agenda: saida 9 inexistente" }
 ```
 
-Os nomes `etapa` e `motivo` e a lista de motivos ainda são proposta.
+A proposta foi aceita pelo responsável técnico em 04/11/2026. Os nomes `etapa` e `motivo` e a lista de motivos seguem como proposta até a implementação do FW-035.
 
 ## Pendências de integração
 
@@ -114,6 +114,7 @@ Os nomes `etapa` e `motivo` e a lista de motivos ainda são proposta.
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.5 | Identificador do comando aceito (P-044) |
 | 04/11/2026 | 0.1.4 | Proposta do identificador do comando: texto de até 36 caracteres, devolvido sem alteração, com descarte de repetição |
 | 04/11/2026 | 0.1.3 | Registrada a agenda das saídas no tópico COMANDO (P-042) |
 | 04/11/2026 | 0.1.2 | Registrado o cadastro da regra do sensor por MQTT, com chaves iguais aos endereços Modbus |

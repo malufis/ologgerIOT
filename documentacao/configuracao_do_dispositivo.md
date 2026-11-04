@@ -1,6 +1,6 @@
 ﻿# Configuração do dispositivo — oLoggerIOT
 
-> **Criado em:** 29/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.56
+> **Criado em:** 29/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.57
 
 ## Origem e estado
 
@@ -153,7 +153,7 @@ Definição do responsável técnico em 04/11/2026.
 - **Retardo de acionamento:** vale para todo comando que liga a saída, qualquer que seja a origem.
 - **Cadastro da regra (decidido em 04/11/2026):** os campos **chegam por MQTT ou por Modbus e têm endereço Modbus**. As chaves do JSON do MQTT seguem o endereço Modbus do dado. O cadastro segue a regra da sessão de configuração. Os endereços propostos estão em `documentacao/mapa_modbus.md`: limiar máximo (40307–40336), limiar mínimo (40337–40366), sentido (40367–40381, proposta), além da entrada associada (40241–40255) e das frequências de 4 mA e 20 mA (40181–40240), que já existiam. Os limiares ficam na unidade de engenharia da entrada associada (por exemplo, bar).
 - **Sentido da comparação (confirmado em 04/11/2026):** sentido 0 = liga no mínimo e desliga no máximo; sentido 1 = liga no máximo e desliga no mínimo (o exemplo do B4, ligar a 5 bar e desligar a 4 bar, é o sentido 1). **Ainda a confirmar:** os endereços Modbus propostos. A agenda semanal chega por MQTT, do CCO, sem endereço Modbus: formato em `documentacao/agenda_operacional_offline.md` (P-042); o fuso horário é configurado pelo CCO (40403, proposta), o device guarda só a última agenda enviada e, depois de reinício, a agenda assume o intervalo do horário atual (P-043).
-- **Implementação:** `controle_saida` tem as três fontes (`CONTROLE_FONTE_SENSOR`, `CONTROLE_FONTE_AGENDA` e `CONTROLE_FONTE_CCO`) e sabe se a saída tem regra do sensor e se o device está online. O **cadastro e o avaliador da regra do sensor** são o item FW-063, ainda não implementado.
+- **Implementação:** `controle_saida` tem as três fontes (`CONTROLE_FONTE_SENSOR`, `CONTROLE_FONTE_AGENDA` e `CONTROLE_FONTE_CCO`) e sabe se a saída tem regra do sensor e se o device está online. O **avaliador e a validação do cadastro da regra do sensor** estão em `regra_sensor` (FW-063, parcial): com a regra cadastrada, o pedido do sensor vale e a agenda e o CCO são ignorados, ou seja, o sensor tem prioridade sobre a agenda. Falta ler e gravar o cadastro pelos endereços Modbus e por MQTT e ligar a regra à leitura da entrada analógica.
 
 ## Fluxos propostos pelo usuário
 
@@ -211,6 +211,7 @@ Depois de estabelecida a conectividade do dispositivo, a configuração continua
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.57 | Regra do sensor: avaliador implementado; sensor tem prioridade sobre a agenda |
 | 04/11/2026 | 0.1.56 | Agenda: fuso configurado pelo CCO, só a última agenda, e aplicação pelo horário atual depois de reinício |
 | 04/11/2026 | 0.1.55 | Sentido da comparação confirmado; agenda semanal por MQTT |
 | 04/11/2026 | 0.1.54 | A agenda é comando local e só vale offline; online vale o CCO; o cadastro da regra do sensor chega por MQTT ou Modbus, com endereços |

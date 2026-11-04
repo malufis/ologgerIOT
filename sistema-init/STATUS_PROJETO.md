@@ -1,6 +1,6 @@
 # Status do Projeto — oLoggerIOT
 
-> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.155
+> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.156
 > **Repositório:** https://github.com/malufis/ologgerIOT
 
 ## Fase atual
@@ -61,7 +61,7 @@
 | P-041 | Regra do sensor entrada analógica para saída digital (FW-063): cadastro e classificação da agenda | Fase 4 | RESOLVIDO em 04/11/2026 — os campos vêm por MQTT ou Modbus e têm endereço Modbus (limiares 40307–40366 e sentido 40367–40381, endereços propostos a confirmar); sentido 0 = liga no mínimo e desliga no máximo, sentido 1 = liga no máximo e desliga no mínimo; a agenda é comando local e só vale offline, e online vale o CCO |
 | P-042 | Agenda semanal offline (FW-032): formato do cadastro dos 336 intervalos de 30 minutos | Fase 6 | RESOLVIDO em 04/11/2026 (proposta a confirmar) — vem por MQTT do CCO, sem endereço Modbus, em 84 caracteres hexadecimais por saída, validada por inteiro; implementado em `lib/agenda` |
 | P-043 | Agenda: fuso, versão, momento depois de reinício, identificador do comando e tratamento de saída ausente e de cadeia vazia | Fase 6 | RESOLVIDO em 04/11/2026 — fuso horário configurado pelo CCO (40403, proposta); o device guarda só a última agenda, sem ordem de versão; depois de reinício a agenda assume o intervalo do horário atual; saída ausente mantém e cadeia vazia apaga (proposta mantida); identificador do comando em proposta (P-044) |
-| P-044 | Identificador do comando MQTT: confirmar a proposta (campo `id` de até 36 caracteres, devolvido sem alteração em cada resposta, descarte de repetição com os últimos 8), os nomes `etapa` e `motivo` e o endereço 40403 do fuso | Fase 7 | PENDENTE — confirmar |
+| P-044 | Identificador do comando MQTT | Fase 7 | RESOLVIDO em 04/11/2026 — aceito: campo `id` de até 36 caracteres, devolvido sem alteração em cada resposta, descarte de repetição com os últimos 8; nomes `etapa` e `motivo` e endereço 40403 do fuso seguem como proposta |
 
 ## Decisões tomadas
 B0 — Identificação: respostas e resumo confirmados pelo usuário em 29/10/2026.
@@ -361,6 +361,7 @@ A entrevista está encerrada e o firmware está em desenvolvimento. Os dois buil
 ## Histórico de atualizações
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.156 | P-044 resolvida; FW-063 parcial (regra_sensor pronto) |
 | 04/11/2026 | 0.3.155 | P-043 resolvida (fuso pelo CCO, só a última agenda, aplicação pelo horário atual); P-044 aberta (identificador do comando) |
 | 04/11/2026 | 0.3.154 | P-041 e P-042 resolvidas (sentido confirmado; agenda por MQTT); P-043 aberta |
 | 04/11/2026 | 0.3.153 | P-041 resolvida (cadastro por MQTT ou Modbus; agenda é comando local); P-042 aberta (cadastro da agenda) |
