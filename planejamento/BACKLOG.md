@@ -1,6 +1,6 @@
 # Backlog do firmware — oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.24
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.25
 
 ## Regras
 
@@ -99,9 +99,9 @@ Entrada digital ativa com tensão no campo (de 12 a 24 V; na bancada, até 12 V)
 
 | ID | Tarefa | Aceite | Situação |
 |---|---|---|---|
-| FW-026 | Biblioteca `lib/modbus`: quadro RTU e CRC | Testes com quadros de referência | Pendente |
+| FW-026 | Biblioteca `lib/modbus`: quadro RTU e CRC | Testes com quadros de referência | Código pronto em 04/11/2026: `lib/modbus/modbus_rtu` (quadro, CRC-16, funções 01 a 06, 15 e 16, exceções, difusão), 39 verificações no PC; **sem teste em hardware** |
 | FW-027 | Mestre com timeout de 30 s e dez tentativas a cada 30 s | Simulador com ausência de resposta | Pendente |
-| FW-028 | Escravo com mapa de `documentacao/mapa_modbus.md` | Leitura e escrita dos registradores | Pendente |
+| FW-028 | Escravo com mapa de `documentacao/mapa_modbus.md` | Leitura e escrita dos registradores | Código pronto em 04/11/2026: `modbus_mapa` liga as bobinas, as entradas discretas, os registradores de entrada e toda a configuração (retenção) ao firmware; `rs485` (USART2, 8N1) e `modbus_tarefa` atendem o escravo com endereço, velocidade e modo da configuração; compila; **sem teste em hardware** (teste de bancada com o conversor USB-RS485 CH340 na COM6). Falta o registro de status por variável (FW-050) e a paridade (P-048) |
 | FW-029 | Recuperação com cinco leituras válidas e defeito após uma hora | Teste de recuperação | Pendente |
 | FW-047 | `lib/tabela_variaveis`: 64 variáveis na RAM, com estado, marca de tempo e mutex estático | Teste de leitura e escrita concorrente no PC, estados e limite de 64 | Pendente |
 | FW-048 | `lib/mapeamento`: configuração de até 8 equipamentos, validação completa e gravação atômica em flash com CRC | Teste de configuração válida, inválida e de queda na gravação | Pendente |
@@ -156,6 +156,7 @@ Entrada digital ativa com tensão no campo (de 12 a 24 V; na bancada, até 12 V)
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.25 | FW-026 e FW-028: escravo Modbus RTU pronto, sem teste em hardware |
 | 04/11/2026 | 0.2.24 | FW-064: configuração persistente |
 | 04/11/2026 | 0.2.23 | FW-032: agenda só com o sleep desabilitado; persistência da agenda e do fuso; fuso padrão de Brasília |
 | 04/11/2026 | 0.2.22 | FW-032: tarefa que aplica a agenda pelo RTC escrita, sem teste em hardware |

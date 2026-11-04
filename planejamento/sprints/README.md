@@ -1,6 +1,6 @@
 # Sprints do firmware — índice
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.19
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.20
 
 Sprints de uma semana. Cada sprint tem um arquivo com meta, itens do backlog, estado e critério de encerramento. Itens concluídos são marcados no arquivo da sprint e no `BACKLOG.md`.
 
@@ -12,7 +12,7 @@ Sprints de uma semana. Cada sprint tem um arquivo com meta, itens do backlog, es
 | `SPRINT_02` | 16/11/2026 | Regras de sensor | FW-013 a FW-016 | Planejada |
 | `SPRINT_03` | 23/11/2026 | Média móvel, fila e alertas | FW-017 a FW-021 | Planejada |
 | `SPRINT_04` | 30/11/2026 | Saídas e controle | FW-022 a FW-025, FW-061, FW-063 e FW-064 | Em andamento: FW-022, FW-024 e FW-025 em código pronto; FW-061 com os dois lados prontos (falta o comando Modbus); FW-063 e FW-023 parciais (avaliador pronto; saída em frequência ligada ao TIM6, sem teste em hardware) |
-| `SPRINT_05` | 07/12/2026 | Modbus RTU | FW-026 a FW-029 e FW-047 a FW-050 | Planejada |
+| `SPRINT_05` | 07/12/2026 | Modbus RTU | FW-026 a FW-029 e FW-047 a FW-050 | Planejada; FW-026 e FW-028 com código pronto (escravo na RS-485) |
 | `SPRINT_06` | 14/12/2026 | Relógio e agenda offline | FW-030 a FW-032 | Planejada; FW-030 e FW-032 com a lógica pura pronta (`tempo`, `agenda`, `agenda_aplicador`) o driver do RTC, a tarefa da agenda e a persistência da agenda escritos |
 | `SPRINT_07` | 21/12/2026 | MQTT e ESP32 | FW-007 e FW-033 a FW-036 | Planejada; o ESP32 só começa depois da validação do STM32 |
 | `SPRINT_08` | 28/12/2026 | Sessão, serial e início da atualização | FW-037 a FW-040 e FW-062 | Planejada |
@@ -26,6 +26,7 @@ As datas são a sequência de semanas a partir de 02/11/2026. O protótipo de ba
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.20 | SPRINT_05 com o escravo Modbus em código pronto |
 | 04/11/2026 | 0.2.19 | SPRINT_04 inclui o FW-064 |
 | 04/11/2026 | 0.2.18 | SPRINT_06 com a persistência da agenda |
 | 04/11/2026 | 0.2.17 | SPRINT_06 com a tarefa da agenda escrita |

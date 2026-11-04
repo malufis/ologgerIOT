@@ -1,6 +1,6 @@
 ﻿# Configuração do dispositivo — oLoggerIOT
 
-> **Criado em:** 29/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.63
+> **Criado em:** 29/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.64
 
 ## Origem e estado
 
@@ -122,7 +122,8 @@ A frequência de atualização e a relação entre quantidade de entradas e saí
 - **Na partida:** o registro é lido e aplicado aos módulos. Sem registro válido, valem os padrões de fábrica (fuso de Brasília, retardo zero, estabilidade de 5 minutos, inatividade de 60 s).
 - **Regras de exclusão** aplicadas em toda escrita e na leitura do registro: a saída 1 não tem modo frequência, e o sleep não liga com saída em frequência. Numa gravação inconsistente o sleep é desligado.
 - **Regras do sensor em funcionamento:** a tarefa `regras_tarefa` lê as entradas 4–20 mA a cada 200 ms e aplica a frequência ou a regra de cada saída, conforme a entrada associada. A falha do sensor é provisória: corrente abaixo de 3,6 mA ou acima de 21 mA (NAMUR NE43, **proposta**, FW-013).
-- **Ainda sem módulo:** RS-485, intervalos de coleta e envio e modo da entrada digital ficam guardados, prontos para quando o módulo existir.
+- **RS-485:** a velocidade, o modo e o endereço (40400 a 40402) já valem para o escravo Modbus (`modbus_tarefa`); o modo mestre ainda não existe.
+- **Ainda sem módulo:** intervalos de coleta e envio e modo da entrada digital ficam guardados, prontos para quando o módulo existir.
 
 ## Entrada digital — respostas de 03/11/2026
 
@@ -223,6 +224,7 @@ Depois de estabelecida a conectividade do dispositivo, a configuração continua
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.64 | RS-485 em uso pelo escravo Modbus |
 | 04/11/2026 | 0.1.63 | Persistência de toda a configuração na flash; regras do sensor ligadas à aquisição |
 | 04/11/2026 | 0.1.62 | Saída em frequência: o sensor manda; comandos manual e automático não a influenciam |
 | 04/11/2026 | 0.1.61 | Saída em frequência: cessão do pino ao gerador e TIM6 |

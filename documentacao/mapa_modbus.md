@@ -1,6 +1,6 @@
 # Mapa Modbus do device oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.12
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.13
 
 ## Origem e estado
 
@@ -167,6 +167,23 @@ Mesmo layout do Wi-Fi, a partir de 30400: MAC 30400–30408, fabricante 30409–
 - **Não persistem** (são estado, e não configuração): o comando e o estado das saídas (coils), o modo manual ou automático (40286–40300, volta a automático e desligada depois de um reinício), o totalizador de pulsos e a hora. A agenda semanal é gravada junto, mas não tem endereço Modbus (vem por MQTT).
 - **Implementação:** `lib/config` (tabela de parâmetros, com os endereços, limites e padrões) e `lib/armazem` (dois espaços de flash com CRC-32, seguro contra queda de energia).
 
+## Implementação do escravo na RS-485 (04/11/2026)
+
+O escravo atende as funções **01, 02, 03, 04, 05, 06, 15 e 16**, com as exceções 01 (função ilegal), 02 (endereço ilegal), 03 (valor ilegal) e 04 (falha no escravo). O endereço de protocolo é o número do mapa menos a base da tabela menos 1 (retenção 40001 é o endereço 0). Difusão (endereço 0) só vale para escrita e não é respondida. Leituras de até 125 registradores e 256 bobinas; escritas de até 123 registradores e 256 bobinas.
+
+| Tabela | Números atendidos | Conteúdo |
+|---|---|---|
+| Bobinas | 00001 a 00004 | Estado das saídas; escrever liga ou desliga em modo manual |
+| Entradas discretas | 10001 a 10004, 10016 a 10019, 10031 | Entradas digitais, falha do sensor analógico n, hora válida |
+| Registradores de entrada | 30001 a 30008, 30031 a 30038, 30091 a 30098, 30121 a 30126 | Valor de engenharia (float), corrente em mA (float), frequência atual da saída (float), data e hora local |
+| Registradores de retenção | 40001 a 40413 (os da tabela de configuração) e 40286 a 40289 | Toda a configuração, e o modo manual ou automático das saídas (estado) |
+
+- **Formato serial:** 8 bits, sem paridade, 1 stop bit (8N1), **proposta** (P-048); velocidade pelo registrador 40400 (0 = 2400, 1 = 9600, 2 = 57600, 3 = 115200 bps), padrão 9600; endereço pelo 40402, padrão 1.
+- **Fim do quadro:** silêncio de 3,5 caracteres, medido pelo próprio USART.
+- **Retenção:** a escrita é atômica (valor fora do limite, float pela metade, endereço fora da configuração ou combinação proibida recusam o pedido inteiro). Um pedido não pode misturar os registradores de estado (40286 a 40289) com os de configuração.
+- **Só com o sleep desabilitado:** o USART não recebe em Stop 2.
+- **Ainda sem endereço:** o totalizador de pulsos, a tensão de alimentação, a temperatura e as cadeias de texto (número de série, versão e modelo).
+
 ## Exemplo de JSON
 
 Regras de envio: o id do módulo vai no tópico, não no corpo. O JSON é separado por grupo. A chave de cada valor é o primeiro endereço Modbus do dado. Valores são números JSON, e estados digitais são 1 ou 0.
@@ -212,6 +229,7 @@ Os nomes dos grupos (analogico, digital, falhas, sistema, rede) são uma propost
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.13 | Implementação do escravo na RS-485: funções, tabelas atendidas e formato serial |
 | 04/11/2026 | 0.1.12 | Persistência dos registradores de configuração; propostos 40382–40396 (estabilidade do sensor) e 40413 (inatividade da entrada digital) |
 | 04/11/2026 | 0.1.11 | Tipo da saída: só as saídas 2 a 4 aceitam frequência e a gravação é recusada com o sleep ligado |
 | 04/11/2026 | 0.1.10 | Proposto o endereço 40403 para o fuso horário da instalação, configurado pelo CCO |

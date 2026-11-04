@@ -1,6 +1,6 @@
 # Dicionário de funções — firmware oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.17
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.18
 
 ## Como manter
 
@@ -111,6 +111,7 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `io_frequencia_cadastra` | io_frequencia | `lib/io/include/io_frequencia.h` | Cadastra as frequências de 4 mA e de 20 mA de uma saída em modo frequência. | IO_FREQUENCIA_OK, TIPO_SAIDA_ERRO_PARAMETRO ou IO_FREQUENCIA_ERRO_FREQUENCIA. | ativa |
 | `io_frequencia_define_hz` | io_frequencia | `lib/io/include/io_frequencia.h` | Define a frequência de uma saída em modo frequência. | IO_FREQUENCIA_OK, TIPO_SAIDA_ERRO_PARAMETRO, IO_FREQUENCIA_ERRO_NAO_FREQUENCIA ou IO_FREQUENCIA_ERRO_FREQUENCIA. | ativa |
 | `io_frequencia_define_tipo` | io_frequencia | `lib/io/include/io_frequencia.h` | Define o tipo de uma saída, respeitando a exclusão com o sleep. | TIPO_SAIDA_OK ou o código de erro de tipo_saida.h. | ativa |
+| `io_frequencia_hz_atual` | io_frequencia | `lib/io/include/io_frequencia.h` | Frequência que a saída está gerando agora. | Frequência em Hz; 0 se a saída não está em modo frequência ou está parada. | ativa |
 | `io_frequencia_inicia` | io_frequencia | `lib/io/include/io_frequencia.h` | Configura o TIM6 para interromper a 100 kHz, sem iniciá-lo. | IO_FREQUENCIA_OK ou IO_FREQUENCIA_ERRO_TIMER. | ativa |
 | `io_frequencia_irq` | io_frequencia | `lib/io/include/io_frequencia.h` | Atende a interrupção do TIM6: avança os geradores e escreve os pinos. | void | ativa |
 | `io_frequencia_sleep_permitido` | io_frequencia | `lib/io/include/io_frequencia.h` | Gancho sleep_permitido de energia.h. | false se alguma saída está em frequência (o sleep não pode ligar). | ativa |
@@ -154,10 +155,20 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `io_totalizador_inicia` | io_totalizador | `lib/io/include/io_totalizador.h` | Carrega os totais do armazém e guarda a referência para as gravações seguintes. | IO_TOTALIZADOR_OK ou IO_TOTALIZADOR_ERRO_PARAMETRO. | ativa |
 | `io_totalizador_le` | io_totalizador | `lib/io/include/io_totalizador.h` | Lê o total de uma entrada. | Total acumulado; zero se o canal for inválido. | ativa |
 | `io_totalizador_soma` | io_totalizador | `lib/io/include/io_totalizador.h` | Soma pulsos ao total de uma entrada e grava no armazém. | IO_TOTALIZADOR_OK ou IO_TOTALIZADOR_ERRO_PARAMETRO. | ativa |
+| `modbus_mapa_ops` | modbus_mapa | `lib/modbus/include/modbus_mapa.h` | Operações do escravo ligadas ao firmware. | Ponteiro para uma tabela constante, válida durante toda a execução. | ativa |
+| `modbus_crc16` | modbus_rtu | `lib/modbus/include/modbus_rtu.h` | Calcula o CRC-16 do Modbus (polinômio 0xA001, valor inicial 0xFFFF). | CRC; no quadro vai o byte baixo primeiro. | ativa |
+| `modbus_rtu_processa` | modbus_rtu | `lib/modbus/include/modbus_rtu.h` | Processa um quadro recebido e monta a resposta. | Tamanho da resposta, ou 0 se não há o que responder (quadro de outro escravo, CRC errado, quadro curto ou difusão). | ativa |
+| `modbus_tarefa_inicia` | modbus_tarefa | `lib/modbus/include/modbus_tarefa.h` | Inicia a RS-485 com a velocidade da configuração e cria a tarefa do escravo. | MODBUS_TAREFA_OK ou MODBUS_TAREFA_ERRO. | ativa |
 | `regra_sensor_avalia` | regra_sensor | `lib/io/include/regra_sensor.h` | Avalia um valor da entrada e devolve o pedido da regra. | O pedido atual: LIGA, DESLIGA, ou NENHUM se a regra não está definida ou ainda não alcançou nenhum limiar. Um valor não numérico mantém o pedido anterior. | ativa |
 | `regra_sensor_cadastra` | regra_sensor | `lib/io/include/regra_sensor.h` | Cadastra a regra. Só troca a regra se todos os campos forem válidos. | REGRA_SENSOR_OK, ou o código de erro (a regra anterior fica como estava). | ativa |
 | `regra_sensor_limpa` | regra_sensor | `lib/io/include/regra_sensor.h` | Deixa a regra sem cadastro e sem pedido. | REGRA_SENSOR_OK, ou REGRA_SENSOR_ERRO_PARAMETRO se regra for nula. | ativa |
 | `regras_tarefa_inicia` | regras_tarefa | `lib/config/include/regras_tarefa.h` | Cria a tarefa das regras, com memória estática. | REGRAS_TAREFA_OK ou REGRAS_TAREFA_ERRO_TAREFA. | ativa |
+| `regras_tarefa_leitura` | regras_tarefa | `lib/config/include/regras_tarefa.h` | Última leitura de uma entrada analógica, para o Modbus. | REGRAS_TAREFA_OK, ou REGRAS_TAREFA_ERRO_TAREFA se a entrada for inválida (com valida falso). | ativa |
+| `rs485_define_velocidade` | rs485 | `lib/modbus/include/rs485.h` | Muda a velocidade (entre dois quadros). | RS485_OK ou RS485_ERRO_PARAMETRO. | ativa |
+| `rs485_envia` | rs485 | `lib/modbus/include/rs485.h` | Envia um quadro e espera o último bit sair. | RS485_OK, RS485_ERRO_PARAMETRO ou RS485_ERRO_TEMPO. | ativa |
+| `rs485_inicia` | rs485 | `lib/modbus/include/rs485.h` | Liga o USART2, os pinos e a interrupção, com a velocidade pedida. | RS485_OK ou RS485_ERRO_PARAMETRO. | ativa |
+| `rs485_irq` | rs485 | `lib/modbus/include/rs485.h` | Atende a interrupção do USART2. | void | ativa |
+| `rs485_recebe` | rs485 | `lib/modbus/include/rs485.h` | Espera um quadro completo e o copia. | Tamanho do quadro, ou 0. | ativa |
 | `rtc_define` | rtc | `lib/rtc/include/rtc.h` | Acerta o RTC com a hora UTC dada (por exemplo, a do servidor NTP). | RTC_OK, RTC_ERRO_LSE (cristal parado), RTC_ERRO_DATA ou RTC_ERRO_TEMPO. | ativa |
 | `rtc_hora_valida` | rtc | `lib/rtc/include/rtc.h` | Informa se o RTC tem uma hora válida. | true se o LSE subiu e o RTC já recebeu data e hora. | ativa |
 | `rtc_inicia` | rtc | `lib/rtc/include/rtc.h` | Liga o cristal LSE e o RTC, sem alterar a hora que o RTC já tem. | RTC_OK, RTC_ERRO_LSE ou RTC_ERRO_CONFIG. | ativa |
@@ -190,6 +201,7 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.18 | Tabela regenerada com 170 funções públicas: entram as de `modbus_rtu`, `modbus_mapa`, `rs485` e `modbus_tarefa` |
 | 04/11/2026 | 0.3.17 | Tabela regenerada com 159 funções públicas: entram as de `config`, `config_tarefa`, `regras_tarefa` e as novas de `agenda_tarefa` |
 | 04/11/2026 | 0.3.16 | Tabela regenerada com 139 funções públicas: entram as de `armazem`, `flash_interna` e `agenda_config` |
 | 04/11/2026 | 0.3.15 | Tabela regenerada com 133 funções públicas: entram as de `agenda_tarefa` e `agenda_aplicador_reavalia` |
