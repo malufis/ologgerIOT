@@ -1,15 +1,17 @@
 # Changelog — oLoggerIOT firmware
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.6
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.7
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versões seguem a numeração do projeto (ver `sistema-init/STATUS_PROJETO.md`). Cada entrada cita o item do backlog (`FW-###`) quando houver.
 
 ## Não lançado
 
+Trabalho das sprints 01 (aquisição analógica), 01B (entrada digital) e 04 (saídas), ainda em andamento, e documentação posterior à SPRINT_00.
+
 ### Adicionado
 - `documentacao/desvios_misra.md`: registro do desvio DEV-001 (`MISRA-DEV` em `lib/adc/src/adc.c`), que estava marcado no código sem registro.
 - `documentacao/adr/`: três decisões de arquitetura em estado de proposta (versão do FreeRTOS, ferramenta MISRA, atualização e proteção). Registrado o risco de espaço de flash do STM32L412C8 (64 KB, imagem atual de 25,8 KB).
-- FW-024: retardo de acionamento (relé de tempo, o "acionamento por tempo") por saída discreta: `saida_define_atraso`, `io_saidas_define_atraso` e `io_saidas_aguardando`. Todo comando que liga a saída espera o retardo; desligar durante a espera cancela a partida; ligar com a saída ligada ou com o retardo em andamento é descartado. 36 verificações no PC. Removido o acionamento que desligava sozinho (`saida_aciona_por` e `io_saidas_aciona`), por decisão de 03/11/2026.
+- FW-024: retardo de acionamento (relé de tempo, o "acionamento por tempo") por saída discreta: `saida_define_atraso`, `io_saidas_define_atraso` e `io_saidas_aguardando`. Todo comando que liga a saída espera o retardo; desligar durante a espera cancela a partida; ligar com a saída ligada ou com o retardo em andamento é descartado. 36 verificações no PC.
 - FW-061: o sleep passa a ligar e desligar por `energia_define_habilitada`, que devolve `ENERGIA_ERRO_BLOQUEADO` se um módulo impede (gancho `sleep_permitido`). Serve à exclusão mútua com a saída em frequência (FW-023). `energia_ganchos_t` ganhou o campo `sleep_permitido`.
 - `documentacao/melhorias_hardware.md`: lista das mudanças de hardware para a próxima revisão das placas (pull-down das saídas, resistor e proteção das entradas, VBAT).
 - FW-022: saídas digitais discretas no OloggerMulti. `saida` (estado: desligada, aguardando o retardo ou ligada, lógica pura), `io_saida` (pinos PB12 a PB15, com o nível desligado escrito antes de virar saída) e `io_saidas` (quatro saídas e tarefa de 100 ms que liga as saídas ao fim do retardo). As saídas partem desligadas. Compila no `ologgermulti` (25 792 bytes); o `y7080` não muda. Sem teste em hardware.
@@ -26,14 +28,27 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 - FW-052: leitura das entradas digitais D1 a D4 em `lib/io` (`io_entrada`). A polaridade vem de `pinos.h`: o optoacoplador inverte, então ativo é pino em nível baixo. Compila no `ologgermulti`; leitura em bancada pendente. Achado HW-008 na análise de hardware (proteção D1 de ~6 V com campo de 12 a 24 V; D1 retirada na bancada).
 - FW-053: filtro de ruído da entrada digital em `lib/io` (`io_filtro`): a mudança de estado só é aceita após N amostras seguidas do nível oposto. Conversão de tempo em amostras (`io_filtro_amostras_do_tempo`), com padrão de 50 ms arredondado para cima. Testes no PC em `tests/io`. Builds STM32 de `ologgermulti` (L412) e `y7080` (L071) compilam sem avisos com `-Werror`.
 - Planejamento da entrada digital: fase 1B no backlog (FW-052 a FW-060) e SPRINT_01B. Decisões registradas em `documentacao/configuracao_do_dispositivo.md`.
+- Aquisição analógica (fase 1, em bancada): driver do ADC com TIM6, ADC1 e DMA, tarefa de aquisição e módulo `sensor` (média por segundo e conversão 4-20 mA). Entrada 4 medida com 8 mA: 8,007 mA. Calibração de bancada por dois pontos, referência efetiva de 2,367 V; causa do fator ~1,37 em aberto.
+
+### Alterado
+- `saida_liga` passou a receber o instante atual, para aplicar o retardo de acionamento.
+- `energia_define_habilitada` passou de `void` para `int32_t` e pode recusar com `ENERGIA_ERRO_BLOQUEADO`.
+- Padrão de código C (`documentacao/padrao_codigo_c.md`): as cinco regras de interrupções, sleep e armazenamento foram confirmadas pelo responsável técnico em 04/11/2026.
+
+### Removido
+- `saida_aciona_por` e `io_saidas_aciona` (acionamento que desligava sozinho depois de um tempo), por decisão de 03/11/2026: o "acionamento por tempo" é o retardo de acionamento.
+
+## 0.2.0 — 06/11/2026 (SPRINT_00, base do projeto)
+
+Fechada em 04/11/2026, antes do fim da semana da sprint. A numeração 0.1.0 já existia (estrutura inicial, 01/11/2026), então esta versão é a 0.2.0. O FW-007 (build do ESP32) foi movido para a SPRINT_07.
+
+### Adicionado
 - FW-001: estrutura de pastas `src/`, `include/`, `lib/`, `devices/`, `tests/` e `tools/`, com README em cada uma.
 - Padrão de desenvolvimento ESP-IDF (`documentacao/padrao_esp_idf.md`).
 - Composição dos builds: `builds/composicao.cmake`, confirmada pelo responsável técnico em 02/11/2026, e `documentacao/composicao_builds.md`. Validado no CMake para os dois builds e para os casos de erro.
 - Funcionalidade `RADIO_UART_EXTERNO` no catálogo: rádio externo em UART, modo transparente, no OloggerMulti.
-- Aquisição analógica (fase 1, em bancada): driver do ADC com TIM6, ADC1 e DMA, tarefa de aquisição e módulo `sensor` (média por segundo e conversão 4-20 mA). Entrada 4 medida com 8 mA: 8,007 mA. Calibração de bancada por dois pontos, referência efetiva de 2,367 V; causa do fator ~1,37 em aberto.
 - FW-046 (STM32): FreeRTOS com alocação estática nos dois builds (V10.3.1 no L4 e V10.2.0 no L0), com `include/FreeRTOSConfig.h`, `lib/rtos` (tabela de prioridades, memória da tarefa ociosa, gancho de pilha e tick) e `lib/vida` (tarefa de vida). SysTick compartilhado com o HAL. No L412 real: 9,9 ciclos/s medidos para 10 esperados e 101 de 128 palavras de pilha livres. Dicionário de funções com as 4 primeiras funções públicas.
 - FW-003: pinagem das duas placas em `devices/<build>/pinos.h` (31 funções no OloggerMulti e 26 no y7080), conferida contra as netlists, e `tools/verifica_pinos.py`. 27 testes das ferramentas.
-- Corrigido o aviso do linker (segmento RWX) no y7080: os dois builds fecham com zero avisos.
 - FW-006 (hardware): imagem vazia do OloggerMulti gravada e executando no STM32L412 real, com o BOOT0 sem ligação contornado por bits de opção (`nSWBOOT0=0`, `nBOOT0=1`). Achado HW-006 na análise de hardware e item FW-051 no backlog.
 - FW-004: `Doxyfile` em português que falha em função ou parâmetro sem documentação, e `tools/gera_dicionario.py`, que gera a tabela do dicionário de funções a partir do XML do Doxygen.
 - FW-005: modelos de arquivo C em `tools/modelos/` (`modelo.h` e `modelo.c`).
@@ -51,6 +66,9 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 - Padrão de código C (`documentacao/padrao_codigo_c.md`, 0.3.0): funcionalidade por `#if OLOG_FEAT_<NOME>`, pinagem por placa e boas práticas, com pequenos códigos e bibliotecas.
 - Modelo de build: um projeto com todas as funcionalidades e um build por tipo de device (`ologgermulti`, `y7080`), com a composição de cada build em `builds/composicao.cmake`. Esclarecido pelo responsável técnico em 02/11/2026.
 - Skills `c-firmware-standards`, `device-profile-build`, `doc-sync` e `sprint-task`; agentes `firmware-dev` e `doc-keeper`.
+
+### Corrigido
+- Corrigido o aviso do linker (segmento RWX) no y7080: os dois builds fecham com zero avisos.
 
 ## 0.1.0 — 01/11/2026
 

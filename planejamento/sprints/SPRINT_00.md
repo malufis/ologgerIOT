@@ -1,7 +1,8 @@
 # SPRINT_00 — Base do projeto
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.10
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.11
 > **Período:** 02/11/2026 a 06/11/2026
+> **Situação:** Concluída em 04/11/2026 (fechada antes do fim da semana)
 
 ## Meta
 
@@ -27,10 +28,19 @@ Base do projeto pronta para as sprints seguintes: estrutura de pastas, CMake com
 - Build vazio dos dois builds STM32 sem erro: `ologgermulti` e `y7080`. A imagem ESP32 do `ologgermulti` sai deste critério junto com o FW-007 e vai para a SPRINT_07.
 - `documentacao/README.md`, `documentacao/padrao_codigo_c.md` e `BACKLOG.md` atualizados.
 
+## Fechamento
+
+- **Data:** 04/11/2026, dois dias antes do fim previsto da sprint (06/11/2026).
+- **Versão do changelog:** 0.2.0, datada de 06/11/2026. O número 0.1.0 já estava em uso pela estrutura inicial de 01/11/2026.
+- **Itens:** FW-001 a FW-006, FW-008 e FW-046 (parte STM32) concluídos. FW-007 e a parte ESP32 do FW-046 movidos para a SPRINT_07, depois da validação do STM32 (decisão de 03/11/2026).
+- **Verificação final (04/11/2026):** `doc-keeper` leu a documentação e rodou os comandos. `gera_dicionario.py --check` (73 funções), `verifica_padrao.py` (38 arquivos, 0 violações), `doxygen Doxyfile` sem avisos, 27 testes das ferramentas e 5 de 5 testes do PC passam (57, 135, 25, 36 e 36 verificações). Os dois builds compilam sem avisos com `-Werror`: `ologgermulti` com 25 792 bytes de código e `y7080` com 4 944. Dos 17 achados do `doc-keeper`, todos de documentação, os que se confirmaram foram corrigidos no commit `3253619`; o achado sobre o kit antigo da entrevista recebeu uma nota, e o do `SKILL.md` do `c-firmware-standards` (texto "criado quando houver desvio") não foi alterado.
+- **Fora do que a sprint comprovou:** só o FreeRTOS e a aquisição analógica (parcial) foram vistos no chip. O que veio depois, nas sprints 01B e 04, só compila e tem teste de lógica no PC.
+
 ## Histórico
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.11 | Sprint fechada em 04/11/2026: versão 0.2.0 do changelog (06/11/2026) e verificação final do doc-keeper |
 | 04/11/2026 | 0.1.10 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |
 | 03/11/2026 | 0.1.9 | FW-007 movido para a SPRINT_07 (decisão de 03/11/2026). Todos os itens restantes estão concluídos; sprint pronta para o `sprint-close`, que ainda não foi executado |
 | 03/11/2026 | 0.1.8 | Conferido o estado: 8 dos 9 itens concluídos; FW-007 adiado e sem sprint definida. Cabeçalho duplicado corrigido. Os dois builds STM32 seguem compilando sem avisos com o código das sprints 01 e 01B (24 952 e 4 944 bytes de código) |

@@ -1,6 +1,6 @@
 # Padrão de código C — firmware oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.6.0
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.6.1
 
 ## Base
 
@@ -59,9 +59,9 @@ Definidas em `lib/rtos/include/rtos.h`. O kernel tem 7 níveis (`configMAX_PRIOR
 
 O SysTick é compartilhado entre o HAL e o FreeRTOS: `SysTick_Handler` (`src/interrupcoes.c`) avança o tick do HAL e chama `rtos_tick_handler`. Os dois ticks têm 1 ms.
 
-## Interrupções, sleep e armazenamento (proposta de 03/11/2026, a confirmar)
+## Interrupções, sleep e armazenamento (regras confirmadas em 04/11/2026)
 
-Regras que saíram da implementação da entrada digital. Proposta, a confirmar pelo responsável técnico.
+Regras que saíram da implementação da entrada digital. Confirmadas pelo responsável técnico em 04/11/2026.
 
 - **Tratador de vetor fraco fica em `src/`, não em `lib/`.** O startup define os vetores como referência fraca, e o linker não extrai um objeto de uma biblioteca estática para resolver uma referência fraca. Um tratador definido em `lib/` não é ligado e a interrupção cai no tratador padrão, sem erro de compilação. O módulo expõe uma função (por exemplo, `io_entrada_irq`) e o tratador, em `src/interrupcoes.c`, a chama.
 - **Tratador de interrupção curto e sem FreeRTOS.** Quem não usa as variantes `FromISR` não precisa de prioridade acima do limite do FreeRTOS. Registrar o evento, contar ou pedir para acordar, e sair.
@@ -125,6 +125,7 @@ int32_t conv_corrente_para_valor(float corrente_ma, float span, float zero, floa
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.6.1 | As cinco regras de interrupções, sleep e armazenamento passam de proposta a regra, confirmadas pelo responsável técnico |
 | 03/11/2026 | 0.6.0 | Adicionada a seção de interrupções, sleep e armazenamento, a confirmar pelo responsável técnico |
 | 01/11/2026 | 0.1.0 | Criado padrão de código com base MISRA C:2012 e regras do projeto |
 | 02/11/2026 | 0.2.0 | Regra 10 trocada: composição por setup, não por `#if` de perfil; incluídas regras de pequenos códigos, bibliotecas e boas práticas de C; referência ao padrão ESP-IDF |

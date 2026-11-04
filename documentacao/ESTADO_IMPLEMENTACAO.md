@@ -1,12 +1,12 @@
 # Estado da implementação — oLoggerIOT
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.7
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.8
 
 Documento vivo. Diz o que existe no código, o que está em teste e o que falta. Agentes e desenvolvedores leem aqui antes de começar um item. Atualizado pela skill `doc-sync` a cada item fechado e revisado pela skill `sprint-close`.
 
 ## Situação atual
 
-- **Sprints em andamento:** SPRINT_00 (todos os itens concluídos ou movidos; pronta para o `sprint-close`) e SPRINT_01B (entrada digital e contador de pulsos). A SPRINT_01 (aquisição analógica) está bloqueada pela ferrite L2.
+- **Sprints em andamento:** SPRINT_01B (entrada digital e contador de pulsos) e SPRINT_04 (saídas), em código pronto. A SPRINT_01 (aquisição analógica) está bloqueada pela ferrite L2. A SPRINT_00 foi concluída em 04/11/2026.
 - **Dois builds compilam sem avisos com `-Werror`** (03/11/2026): `ologgermulti` com 25 792 bytes de código e `y7080` com 4 944. O `y7080` não leva `ENTRADA_DIGITAL`, nem a gerência de energia.
 - **Testes no PC (03/11/2026):** sensor (57 verificações), filtro de ruído (135), contador de pulsos (25), totalizador (36) e estado da saída digital (36); verificadores das ferramentas (27 testes). Todos passam. O executável do `sensor` foi bloqueado uma vez pela política de Controle de Aplicativo do Windows depois de um relink, mas recompilado rodou e passou.
 - **Hardware verificado em 02/11/2026:** a imagem do OloggerMulti executa no STM32L412 real, com FreeRTOS e a tarefa de vida. A aquisição analógica mede a entrada 4 com 8 mA injetados e mostra 8,007 mA.
@@ -88,7 +88,7 @@ Legenda de estado: **Não iniciado**, **Em desenvolvimento**, **Em teste**, **Im
 
 ## Próxima sprint
 
-- **SPRINT_00** fica pronta para o fechamento (`sprint-close`): todos os itens estão concluídos, exceto o FW-007, que foi para a SPRINT_07.
+- **SPRINT_00** foi concluída em 04/11/2026 (versão 0.2.0 do changelog); o FW-007 foi para a SPRINT_07.
 - **SPRINT_01B** (entrada digital) e **SPRINT_04** (saídas) seguem em andamento, em código pronto. A validação em bancada depende do device e do roteiro `documentacao/roteiro_bancada_entrada_digital.md`.
 - **SPRINT_01** (aquisição analógica) depende de soldar a ferrite L2 (HW-007).
 - Próximos itens de código: FW-025 (modo manual e automático por saída) e FW-023 (saída em frequência, só com o sleep desligado).
@@ -97,6 +97,7 @@ Legenda de estado: **Não iniciado**, **Em desenvolvimento**, **Em teste**, **Im
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.8 | SPRINT_00 concluída em 04/11/2026 |
 | 04/11/2026 | 0.2.7 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |
 | 04/11/2026 | 0.2.6 | Adicionados o risco do espaço de flash do STM32L412C8, as referências aos ADRs e a seção "Próxima sprint" |
 | 03/11/2026 | 0.2.5 | O "acionamento por tempo" é o retardo de acionamento; ligar com a saída ligada ou aguardando é descartado; mapa Modbus das saídas ajustado (P-037) |

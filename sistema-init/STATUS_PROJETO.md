@@ -1,10 +1,10 @@
 # Status do Projeto — oLoggerIOT
 
-> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.148
+> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.149
 > **Repositório:** https://github.com/malufis/ologgerIOT
 
 ## Fase atual
-**Desenvolvimento do firmware** — entrevista encerrada (B0 a B8 confirmados; B9 a B17 registrados como fora do device, confirmado pelo usuário em 01/11/2026). Fase 0 do plano concluída, exceto o FW-007; fases 1 e 1B em andamento (`planejamento/sprints/`).
+**Desenvolvimento do firmware** — entrevista encerrada (B0 a B8 confirmados; B9 a B17 registrados como fora do device, confirmado pelo usuário em 01/11/2026). Fase 0 do plano concluída em 04/11/2026 (SPRINT_00 fechada, o FW-007 foi para a SPRINT_07); fases 1, 1B e 4 em andamento (`planejamento/sprints/`).
 **Progresso da entrevista:** concluída (9/18 blocos no device; B9 a B17 são do sistema e não têm perguntas de firmware). O estado do código está em `documentacao/ESTADO_IMPLEMENTACAO.md`.
 
 ## Concluído
@@ -354,6 +354,7 @@ A entrevista está encerrada e o firmware está em desenvolvimento. Os dois buil
 ## Histórico de atualizações
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.149 | SPRINT_00 concluída em 04/11/2026 (changelog 0.2.0); cinco regras do padrão de código confirmadas; ADR-0003 escolhido como o primeiro a decidir |
 | 04/11/2026 | 0.3.148 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |
 | 04/11/2026 | 0.3.147 | Pendências P-038 (espaço de flash do STM32L412C8) e P-039 (ADRs de FreeRTOS e MISRA); criada a pasta `documentacao/adr/` |
 | 03/11/2026 | 0.3.146 | O "acionamento por tempo" é o retardo de acionamento; ligar com a saída ligada ou aguardando é descartado; mapa Modbus das saídas ajustado (P-037) |
