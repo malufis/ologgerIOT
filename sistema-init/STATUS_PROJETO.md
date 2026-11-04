@@ -1,6 +1,6 @@
 # Status do Projeto — oLoggerIOT
 
-> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.156
+> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.157
 > **Repositório:** https://github.com/malufis/ologgerIOT
 
 ## Fase atual
@@ -361,6 +361,7 @@ A entrevista está encerrada e o firmware está em desenvolvimento. Os dois buil
 ## Histórico de atualizações
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.157 | FW-023 parcial (freq_saida pronto) |
 | 04/11/2026 | 0.3.156 | P-044 resolvida; FW-063 parcial (regra_sensor pronto) |
 | 04/11/2026 | 0.3.155 | P-043 resolvida (fuso pelo CCO, só a última agenda, aplicação pelo horário atual); P-044 aberta (identificador do comando) |
 | 04/11/2026 | 0.3.154 | P-041 e P-042 resolvidas (sentido confirmado; agenda por MQTT); P-043 aberta |

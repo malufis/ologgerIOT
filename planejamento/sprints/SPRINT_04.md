@@ -1,6 +1,6 @@
 # SPRINT_04 — Saídas e controle
 
-> **Criado em:** 03/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.10
+> **Criado em:** 03/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.11
 > **Período:** 30/11/2026 a 04/12/2026
 
 Em andamento desde 03/11/2026: o FW-022 e o FW-024 estão em código pronto; os demais itens estão pendentes. As datas são a sequência de semanas a partir de 02/11/2026 e mudam se a SPRINT_00, a SPRINT_01 ou a SPRINT_01B atrasarem.
@@ -14,7 +14,7 @@ Saídas discretas (ligar e desligar, com retardo de acionamento), saída em freq
 | ID | Tarefa | Situação |
 |---|---|---|
 | FW-022 | Saídas discretas: ligar e desligar, com as saídas desligadas na partida | Código pronto em 03/11/2026: ligar e desligar (`saida`, `io_saida`, `io_saidas`), com as saídas desligadas na partida. Bancada pendente |
-| FW-023 | Saída em frequência (a "pulsada") proporcional a 4–20 mA, com 4 mA e 20 mA configuráveis; só pode ser habilitada com o sleep desligado | Pendente |
+| FW-023 | Saída em frequência (a "pulsada") proporcional a 4–20 mA, com 4 mA e 20 mA configuráveis; só pode ser habilitada com o sleep desligado | Parcial em 04/11/2026: `lib/io/freq_saida` pronto (cálculo proporcional da frequência a partir de 4–20 mA, 0 Hz na falha, 9 testes no PC); falta gerar o sinal (timer), a escolha do canal (PB12 não tem canal de timer) e o lado das saídas da exclusão com o sleep (FW-061) |
 | FW-024 | Retardo de acionamento (relé de tempo, o "acionamento por tempo") por saída discreta, com cancelamento por comando de desligar | Código pronto em 03/11/2026 (`saida_define_atraso`, `io_saidas_define_atraso`): 36 verificações no PC com o retardo, o comando descartado, o cancelamento por desligar e a volta do contador. Regras confirmadas em 03/11/2026. Bancada pendente |
 | FW-025 | Modo manual e automático por saída, com prioridade do sensor | Código pronto em 04/11/2026 (`controle_saida`, `io_saidas`): 82 verificações no PC com manual, automático, regra do sensor, agenda local offline, comando do CCO online, falha do sensor com espera de 5 minutos e retardo. Falta o alerta ao CCO na chegada do comando manual. Bancada pendente |
 | FW-061 | Ligar e desligar o modo sleep (modo de operação, registro 40412), com exclusão mútua: o sleep só liga se nenhuma saída estiver em frequência, e a saída em frequência só habilita com o sleep desligado | Lado do sleep pronto em 03/11/2026 (`energia_define_habilitada` devolve erro se um módulo impede). Falta o lado das saídas (FW-023) e o comando do Modbus |
@@ -52,7 +52,7 @@ Implementado conforme o B4 e as definições de 04/11/2026 (`documentacao/config
 - **Cadastro da regra:** os campos vêm por MQTT ou Modbus e têm endereço Modbus (proposta no mapa, 40307 a 40381). O cadastro e o avaliador são o FW-063.
 - **Alerta ao CCO** na chegada do comando manual: depende do espaço de alertas (FW-021) e ainda não existe. `io_saidas_comando_manual` informa se houve mudança de modo.
 
-**Regra do sensor (FW-063, parcial):** `lib/io/regra_sensor` guarda sentido, mínimo e máximo, valida o cadastro por inteiro e devolve o pedido da fonte do sensor com histerese; com a regra cadastrada, a saída ignora a agenda e o CCO (o sensor tem prioridade sobre a agenda). **Falta:** o cadastro pelos endereços Modbus e por MQTT e a ligação à leitura da entrada analógica (FW-063), a saída em frequência (FW-023), o alerta ao CCO e a ligação com os comandos do sistema e do Modbus. A interação do modo manual com a saída em frequência segue em aberto.
+**Regra do sensor (FW-063, parcial):** `lib/io/regra_sensor` guarda sentido, mínimo e máximo, valida o cadastro por inteiro e devolve o pedido da fonte do sensor com histerese; com a regra cadastrada, a saída ignora a agenda e o CCO (o sensor tem prioridade sobre a agenda). **Saída em frequência (FW-023, parcial):** `lib/io/freq_saida` calcula a frequência proporcional entre os valores de 4 mA e de 20 mA (a de 4 mA pode ser maior), prende a corrente nos extremos e leva a saída a 0 Hz na falha. **Falta:** o cadastro pelos endereços Modbus e por MQTT e a ligação à leitura da entrada analógica (FW-063), a geração do sinal (FW-023), o alerta ao CCO e a ligação com os comandos do sistema e do Modbus. A interação do modo manual com a saída em frequência segue em aberto.
 
 ### Ainda a confirmar
 
@@ -69,6 +69,7 @@ Implementado conforme o B4 e as definições de 04/11/2026 (`documentacao/config
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.11 | FW-023 parcial: módulo `freq_saida` pronto e testado |
 | 04/11/2026 | 0.1.10 | FW-063 parcial: módulo `regra_sensor` pronto e testado |
 | 04/11/2026 | 0.1.9 | FW-063 com o sentido da comparação confirmado |
 | 04/11/2026 | 0.1.8 | Agenda como comando local (só offline) e CCO online; cadastro da regra do sensor por MQTT ou Modbus; 82 verificações |

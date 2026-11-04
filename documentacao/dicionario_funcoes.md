@@ -1,6 +1,6 @@
 # Dicionário de funções — firmware oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.6
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.7
 
 ## Como manter
 
@@ -57,6 +57,9 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `energia_habilitada` | energia | `lib/energia/include/energia.h` | Informa se o sleep está habilitado. | true se o equipamento pode entrar em sleep. | ativa |
 | `energia_inicia` | energia | `lib/energia/include/energia.h` | Cria a tarefa de gerência de energia com memória estática. | ENERGIA_OK ou ENERGIA_ERRO. | ativa |
 | `energia_solicita_acordar` | energia | `lib/energia/include/energia.h` | Pede para o equipamento sair do sleep na próxima oportunidade. | void | ativa |
+| `freq_saida_cadastra` | freq_saida | `lib/io/include/freq_saida.h` | Cadastra as frequências de 4 mA e de 20 mA. Só troca o cadastro se ambas forem válidas. | FREQ_SAIDA_OK, ou o código de erro (o cadastro anterior fica como estava). | ativa |
+| `freq_saida_calcula` | freq_saida | `lib/io/include/freq_saida.h` | Calcula a frequência da saída para uma corrente. | FREQ_SAIDA_OK, FREQ_SAIDA_ERRO_PARAMETRO se algum ponteiro for nulo ou ma não for numérico, ou FREQ_SAIDA_ERRO_SEM_CADASTRO se não houver cadastro (então hz recebe 0). | ativa |
+| `freq_saida_limpa` | freq_saida | `lib/io/include/freq_saida.h` | Deixa a conversão sem cadastro. | FREQ_SAIDA_OK, ou FREQ_SAIDA_ERRO_PARAMETRO se freq for nula. | ativa |
 | `io_backup_grava` | io_backup | `lib/io/include/io_backup.h` | Grava uma palavra de backup. | void | ativa |
 | `io_backup_inicia` | io_backup | `lib/io/include/io_backup.h` | Liga o acesso ao domínio de backup e o clock do TAMP. | void | ativa |
 | `io_backup_le` | io_backup | `lib/io/include/io_backup.h` | Lê uma palavra de backup. | Valor da palavra; zero se o índice for inválido. | ativa |
@@ -131,6 +134,7 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.7 | Tabela regenerada com 103 funções públicas: entram `freq_saida_limpa`, `freq_saida_cadastra` e `freq_saida_calcula` |
 | 04/11/2026 | 0.3.6 | Tabela regenerada com 100 funções públicas: entram `regra_sensor_limpa`, `regra_sensor_cadastra` e `regra_sensor_avalia` |
 | 04/11/2026 | 0.3.5 | Tabela regenerada com 97 funções públicas: entra o módulo `agenda` (4 funções) |
 | 04/11/2026 | 0.3.4 | Tabela regenerada com 93 funções públicas: entram `controle_saida_define_regra_sensor`, `controle_saida_define_conectividade` e `io_saidas_define_conectividade`; `define_regra_local` virou `define_regra_sensor` |

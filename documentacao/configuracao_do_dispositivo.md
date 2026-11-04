@@ -1,6 +1,6 @@
 ﻿# Configuração do dispositivo — oLoggerIOT
 
-> **Criado em:** 29/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.57
+> **Criado em:** 29/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.58
 
 ## Origem e estado
 
@@ -132,7 +132,7 @@ A frequência de atualização e a relação entre quantidade de entradas e saí
 - **Comandos implementados:** ligar e desligar. O "acionamento por tempo" é o retardo de acionamento (próximo item).
 - **Retardo de acionamento (relé de tempo, confirmado em 03/11/2026):** a saída discreta pode ter um retardo configurável por saída, em segundos. **Todo comando que liga a saída espera o retardo**; retardo zero liga na hora. Um comando de desligar durante a espera cancela a partida. Com o retardo em andamento, outro comando de ligar é descartado e a contagem continua. Com a saída já ligada, outro comando de ligar é descartado (o retardo não é reaplicado).
 - **Modo manual e automático (FW-025, 04/11/2026):** cada saída tem o seu modo. O comando manual direto prevalece, põe a saída em manual e vale até o comando de modo automático. Em automático valem os comandos locais (regra do sensor e agenda offline) ou o do CCO (online), como descrito na seção seguinte. A volta ao automático avalia e executa a regra válida na hora e, sem nenhum pedido válido, **mantém o último estado válido do comando** (confirmado em 04/11/2026). **Depois de um reinício a saída volta desligada e em modo automático** (confirmado em 04/11/2026). O alerta ao CCO na chegada do comando manual depende do espaço de alertas (FW-021) e ainda não existe.
-- **Ainda não implementado:** saída em frequência (FW-023) e o alerta ao CCO na chegada do comando manual.
+- **Implementado em parte:** o cálculo da frequência da saída em frequência está em `freq_saida` (FW-023, parcial: proporcional entre as frequências de 4 mA e de 20 mA, 0 Hz na falha). **Ainda não implementado:** gerar o sinal e o alerta ao CCO na chegada do comando manual.
 - **"Pulsada" é a saída em frequência (decidido em 03/11/2026):** não é acionamento por tempo. A saída discreta é só ligada ou desligada, com o retardo de acionamento. O tipo da saída no mapa Modbus ficou 0 = discreto e 1 = frequência.
 - **Sleep e frequência (decidido em 03/11/2026):** a saída em frequência só pode ser habilitada se o modo sleep não estiver ativo, e o sleep só liga se nenhuma saída estiver em frequência. O sleep tem uma função de ligar e desligar (modo de operação 40412).
 - **Carga indutiva:** o diodo de roda livre fica no relé externo, instalado pelo responsável técnico.
@@ -211,6 +211,7 @@ Depois de estabelecida a conectividade do dispositivo, a configuração continua
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.58 | Saída em frequência: cálculo implementado (FW-023 parcial) |
 | 04/11/2026 | 0.1.57 | Regra do sensor: avaliador implementado; sensor tem prioridade sobre a agenda |
 | 04/11/2026 | 0.1.56 | Agenda: fuso configurado pelo CCO, só a última agenda, e aplicação pelo horário atual depois de reinício |
 | 04/11/2026 | 0.1.55 | Sentido da comparação confirmado; agenda semanal por MQTT |
