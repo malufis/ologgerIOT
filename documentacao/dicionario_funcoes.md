@@ -1,6 +1,6 @@
 # Dicionário de funções — firmware oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.14
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.15
 
 ## Como manter
 
@@ -36,6 +36,10 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `agenda_aplicador_atualiza` | agenda_aplicador | `lib/agenda/include/agenda_aplicador.h` | Avalia as agendas no horário atual e informa as saídas com um estado a pedir. | Quantidade de saídas com um estado a pedir, ou zero se algum ponteiro for nulo. | ativa |
 | `agenda_aplicador_carrega` | agenda_aplicador | `lib/agenda/include/agenda_aplicador.h` | Carrega a agenda de uma saída; só troca a agenda se a cadeia for válida por inteiro. | AGENDA_OK, AGENDA_ERRO_PARAMETRO (nulo ou canal inválido), AGENDA_ERRO_TAMANHO ou AGENDA_ERRO_CARACTERE. | ativa |
 | `agenda_aplicador_limpa` | agenda_aplicador | `lib/agenda/include/agenda_aplicador.h` | Apaga todas as agendas e volta ao estado de partida. | AGENDA_OK, ou AGENDA_ERRO_PARAMETRO se ap for nulo. | ativa |
+| `agenda_aplicador_reavalia` | agenda_aplicador | `lib/agenda/include/agenda_aplicador.h` | Marca todas as saídas para serem avaliadas de novo na próxima atualização. | AGENDA_OK, ou AGENDA_ERRO_PARAMETRO se ap for nulo. | ativa |
+| `agenda_tarefa_carrega` | agenda_tarefa | `lib/agenda/include/agenda_tarefa.h` | Carrega a agenda de uma saída, recebida do CCO. | Os códigos de agenda.h: AGENDA_OK ou o erro de parâmetro, tamanho ou caractere. | ativa |
+| `agenda_tarefa_define_fuso` | agenda_tarefa | `lib/agenda/include/agenda_tarefa.h` | Define o fuso horário da instalação, enviado pelo CCO. | AGENDA_TAREFA_OK ou AGENDA_TAREFA_ERRO_FUSO. | ativa |
+| `agenda_tarefa_inicia` | agenda_tarefa | `lib/agenda/include/agenda_tarefa.h` | Cria a tarefa que aplica as agendas, com memória estática. | AGENDA_TAREFA_OK ou AGENDA_TAREFA_ERRO_TAREFA. | ativa |
 | `aquisicao_contagens` | aquisicao | `lib/aquisicao/include/aquisicao.h` | Lê a média de contagens do ADC do último segundo de uma entrada. | AQUISICAO_OK, AQUISICAO_ERRO_PARAMETRO ou AQUISICAO_ERRO_SEM_DADO. | ativa |
 | `aquisicao_inicia` | aquisicao | `lib/aquisicao/include/aquisicao.h` | Cria a tarefa de aquisição e inicia o ADC. | AQUISICAO_OK, AQUISICAO_ERRO_PARAMETRO ou AQUISICAO_ERRO_INICIO. | ativa |
 | `aquisicao_ma` | aquisicao | `lib/aquisicao/include/aquisicao.h` | Lê a corrente média do último segundo de uma entrada. | AQUISICAO_OK, AQUISICAO_ERRO_PARAMETRO ou AQUISICAO_ERRO_SEM_DADO. | ativa |
@@ -160,6 +164,7 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.15 | Tabela regenerada com 133 funções públicas: entram as de `agenda_tarefa` e `agenda_aplicador_reavalia` |
 | 04/11/2026 | 0.3.14 | Tabela regenerada com 129 funções públicas: entram as de `rtc` e `tempo_de_utc` |
 | 04/11/2026 | 0.3.13 | Tabela regenerada com 124 funções públicas: entram as de `agenda_aplicador` |
 | 04/11/2026 | 0.3.12 | Tabela regenerada com 121 funções públicas: entram `tempo_para_local` e `tempo_inicio_de_intervalo` |
