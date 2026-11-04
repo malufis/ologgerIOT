@@ -1,6 +1,6 @@
 # Status do Projeto — oLoggerIOT
 
-> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.161
+> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.162
 > **Repositório:** https://github.com/malufis/ologgerIOT
 
 ## Fase atual
@@ -361,6 +361,7 @@ A entrevista está encerrada e o firmware está em desenvolvimento. Os dois buil
 ## Histórico de atualizações
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.162 | FW-030 parcial: módulo `tempo` pronto |
 | 04/11/2026 | 0.3.161 | Saída em frequência: o sensor manda; teste na bancada |
 | 04/11/2026 | 0.3.160 | FW-023: gerador ligado ao TIM6 e aos pinos (sem teste em hardware) |
 | 04/11/2026 | 0.3.159 | FW-023: gerador de frequência pronto e testado |

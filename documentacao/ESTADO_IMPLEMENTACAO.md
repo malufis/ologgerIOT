@@ -1,6 +1,6 @@
 # Estado da implementação — oLoggerIOT
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.19
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.20
 
 Documento vivo. Diz o que existe no código, o que está em teste e o que falta. Agentes e desenvolvedores leem aqui antes de começar um item. Atualizado pela skill `doc-sync` a cada item fechado e revisado pela skill `sprint-close`.
 
@@ -8,7 +8,7 @@ Documento vivo. Diz o que existe no código, o que está em teste e o que falta.
 
 - **Sprints em andamento:** SPRINT_01B (entrada digital e contador de pulsos) e SPRINT_04 (saídas), em código pronto. A SPRINT_01 (aquisição analógica) está bloqueada pela ferrite L2. A SPRINT_00 foi concluída em 04/11/2026.
 - **Dois builds compilam sem avisos com `-Werror`** (03/11/2026): `ologgermulti` com 26 280 bytes de código e `y7080` com 4 944. O `y7080` não leva `ENTRADA_DIGITAL`, nem a gerência de energia.
-- **Testes no PC (03/11/2026):** sensor (57 verificações), filtro de ruído (135), contador de pulsos (25), totalizador (36) estado da saída digital (36), controle manual e automático (82), agenda (57) e regra do sensor (9 testes) frequência da saída (9 testes) gerador de frequência (10 testes) e tipo da saída (8 testes); verificadores das ferramentas (27 testes). Todos passam. O executável do `sensor` foi bloqueado uma vez pela política de Controle de Aplicativo do Windows depois de um relink, mas recompilado rodou e passou.
+- **Testes no PC (03/11/2026):** sensor (57 verificações), conversão de tempo (23), filtro de ruído (135), contador de pulsos (25), totalizador (36) estado da saída digital (36), controle manual e automático (82), agenda (57) e regra do sensor (9 testes) frequência da saída (9 testes) gerador de frequência (10 testes) e tipo da saída (8 testes); verificadores das ferramentas (27 testes). Todos passam. O executável do `sensor` foi bloqueado uma vez pela política de Controle de Aplicativo do Windows depois de um relink, mas recompilado rodou e passou.
 - **Hardware verificado em 02/11/2026:** a imagem do OloggerMulti executa no STM32L412 real, com FreeRTOS e a tarefa de vida. A aquisição analógica mede a entrada 4 com 8 mA injetados e mostra 8,007 mA.
 - **Nada da entrada digital, do contador de pulsos, do totalizador e da gerência de energia foi testado em hardware.** Só compilam e têm testes de lógica no PC. O roteiro de bancada está em `documentacao/roteiro_bancada_entrada_digital.md`.
 - **Saídas digitais (FW-022, FW-024 e FW-025, 04/11/2026):** ligar, desligar, retardo de acionamento (relé de tempo, o "acionamento por tempo") e modo manual e automático por saída em código, com 36 e 82 verificações no PC. O comando manual prevalece; em automático valem a regra do sensor, se cadastrada, ou, sem ela, a agenda (offline) e o CCO (online); a falha do sensor desliga e a saída só volta a operar pelo sensor depois de 5 minutos estáveis. O que falta: o cadastro e o avaliador da regra do sensor (FW-063, com campos por MQTT ou Modbus), a saída em frequência (FW-023), o alerta ao CCO e a ligação com comandos. Sem teste em hardware.
@@ -57,6 +57,7 @@ Documento vivo. Diz o que existe no código, o que está em teste e o que falta.
 | Contagem em hardware (LPTIM1, D4) | `lib/io/` | Não iniciado; a confirmar | FW-059 | — |
 | Fila de telemetria | `lib/fila/` | Não iniciado | FW-019 | — |
 | Modbus RTU | `lib/modbus/` | Não iniciado | FW-026 a FW-029 | — |
+| Conversão do tempo em data e hora locais | `lib/tempo/` | Pronta e testada no PC (fuso, bissexto, virada de dia e de ano); falta o driver do RTC | FW-030 | 04/11/2026 |
 | Agenda offline | `lib/agenda/` | Parcial: formato, validação e consulta de intervalo prontos; falta o RTC, o armazenamento persistente, a aplicação por intervalo e o recebimento por MQTT | FW-032 | 57 verificações no PC |
 | Sessão de configuração | `lib/sessao/` | Não iniciado | FW-037 | — |
 | MQTT no ESP32 | `esp32/components/` | Não iniciado | FW-034 | — |
@@ -98,6 +99,7 @@ Legenda de estado: **Não iniciado**, **Em desenvolvimento**, **Em teste**, **Im
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.20 | Módulo `tempo` pronto (FW-030 parcial) |
 | 04/11/2026 | 0.2.19 | Saída em frequência: o sensor manda; teste na bancada |
 | 04/11/2026 | 0.2.18 | Saída em frequência ligada ao TIM6 e aos pinos (sem teste em hardware) |
 | 04/11/2026 | 0.2.17 | Gerador de frequência pronto (FW-023 parcial) |

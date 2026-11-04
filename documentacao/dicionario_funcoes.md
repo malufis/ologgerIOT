@@ -1,6 +1,6 @@
 # Dicionário de funções — firmware oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.11
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.12
 
 ## Como manter
 
@@ -137,6 +137,8 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `sensor_ma_para_valor` | sensor | `lib/sensor/include/sensor.h` | Converte corrente 4-20 mA em valor de engenharia, com zero, span e offset. | SENSOR_OK ou SENSOR_ERRO_PARAMETRO. | ativa |
 | `sensor_media_acumula` | sensor | `lib/sensor/include/sensor.h` | Acumula uma amostra e, ao fechar um segundo, entrega a média. | SENSOR_OK ou SENSOR_ERRO_PARAMETRO. | ativa |
 | `sensor_media_inicia` | sensor | `lib/sensor/include/sensor.h` | Inicia o acumulador para uma taxa de amostragem. | SENSOR_OK, SENSOR_ERRO_PARAMETRO ou SENSOR_ERRO_TAXA. | ativa |
+| `tempo_inicio_de_intervalo` | tempo | `lib/tempo/include/tempo.h` | Diz se o instante local é o início de um intervalo de 30 minutos da agenda. | true se o minuto é 0 ou 30. Falso se local for nulo. | ativa |
+| `tempo_para_local` | tempo | `lib/tempo/include/tempo.h` | Converte o tempo UTC na data e hora locais. | TEMPO_OK, TEMPO_ERRO_PARAMETRO ou TEMPO_ERRO_FUSO. | ativa |
 | `tipos_saida_algum_em_frequencia` | tipo_saida | `lib/io/include/tipo_saida.h` | Diz se alguma saída está em frequência. | true se há uma saída em frequência: o sleep não pode ligar. Falso se tipos for nulo. | ativa |
 | `tipos_saida_define` | tipo_saida | `lib/io/include/tipo_saida.h` | Define o tipo de uma saída, respeitando a exclusão com o sleep. | TIPO_SAIDA_OK, ou o código de erro (o tipo anterior fica como estava). | ativa |
 | `tipos_saida_limpa` | tipo_saida | `lib/io/include/tipo_saida.h` | Põe todas as saídas no tipo discreto. | TIPO_SAIDA_OK, ou TIPO_SAIDA_ERRO_PARAMETRO se tipos for nulo. | ativa |
@@ -150,6 +152,7 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.12 | Tabela regenerada com 121 funções públicas: entram `tempo_para_local` e `tempo_inicio_de_intervalo` |
 | 04/11/2026 | 0.3.11 | Tabela regenerada com 119 funções públicas: entram `io_frequencia_cadastra` e `io_frequencia_atualiza` |
 | 04/11/2026 | 0.3.10 | Tabela regenerada com 117 funções públicas: entram `io_frequencia_inicia`, `_define_hz`, `_irq` e `io_saidas_cede_pino` |
 | 04/11/2026 | 0.3.9 | Tabela regenerada com 113 funções públicas: entram as de `gerador_freq` |
