@@ -1,6 +1,6 @@
 # Backlog do firmware — oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.20
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.21
 
 ## Regras
 
@@ -112,7 +112,7 @@ Entrada digital ativa com tensão no campo (de 12 a 24 V; na bancada, até 12 V)
 
 | ID | Tarefa | Aceite | Situação |
 |---|---|---|---|
-| FW-030 | Driver do RTC e conferência NTP quatro vezes ao dia; fuso horário da instalação configurado pelo CCO (40403, proposta) | Teste de atualização | Parcial em 04/11/2026: `lib/tempo` pronto (conversão do tempo UTC em data, hora e dia da semana locais com o fuso da instalação, 12 testes no PC, anos bissextos e virada de dia e de ano). Falta o driver do RTC (no OloggerMulti, com o cristal de 32,768 kHz; bateria no VBAT opcional; o y7080 não tem cristal), a conferência NTP e o recebimento do fuso (40403, proposta) |
+| FW-030 | Driver do RTC e conferência NTP quatro vezes ao dia; fuso horário da instalação configurado pelo CCO (40403, proposta) | Teste de atualização | Parcial em 04/11/2026: `lib/tempo` pronto (conversão do tempo UTC em data, hora e dia da semana locais com o fuso da instalação, 12 testes no PC, anos bissextos e virada de dia e de ano). `lib/rtc` escrito (OloggerMulti, feature `RELOGIO`): liga o LSE e o RTC sem reiniciar o domínio de backup, mantém a hora em UTC e `tempo_de_utc` faz o caminho inverso (testado no PC); compila sem avisos e **não foi testado em hardware** (bancada: subir o cristal, acertar, ler e conferir a hora depois de Stop 2 e de reinício). Falta a conferência NTP (FW-035 e ESP32), o recebimento do fuso (40403, proposta) e a hora inválida do FW-031 |
 | FW-031 | Hora inválida: medições sem validade, saídas mantêm estado, aviso guardado | Teste de perda e correção de hora | Pendente |
 | FW-032 | Agenda semanal de 336 intervalos por saída, recebida do CCO por MQTT: formato (84 caracteres hexadecimais por saída), validação, armazenamento persistente com CRC só da última agenda, e aplicação pelo horário atual: a cada 30 minutos somente offline, na hora em que o device fica offline e depois de reinício | Teste de transição de intervalo; cadastro recusado por inteiro quando inválido, sem alterar a agenda anterior | Parcial em 04/11/2026: formato e validação prontos (`lib/agenda`, 57 verificações no PC). A aplicação pelo horário atual está pronta em `lib/agenda/agenda_aplicador` (13 testes, 42 verificações no PC): pede o estado do intervalo atual na primeira avaliação depois da partida, a cada virada de intervalo de 30 minutos e logo depois de carregar ou apagar a agenda; com hora inválida não pede nada. Falta o driver do RTC (FW-030), o armazenamento persistente, entregar o pedido à saída como fonte agenda (`io_saidas_pedido`) e o recebimento por MQTT (FW-035) |
 
@@ -155,6 +155,7 @@ Entrada digital ativa com tensão no campo (de 12 a 24 V; na bancada, até 12 V)
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.21 | FW-030: driver do RTC escrito, sem teste em hardware |
 | 04/11/2026 | 0.2.20 | FW-030: cristais do OloggerMulti e bateria opcional |
 | 04/11/2026 | 0.2.19 | FW-032: aplicador das agendas pelo horário atual pronto e testado |
 | 04/11/2026 | 0.2.18 | FW-030 parcial: módulo `tempo` pronto e testado |

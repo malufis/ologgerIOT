@@ -1,6 +1,6 @@
 # Changelog — oLoggerIOT firmware
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.22
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.23
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versões seguem a numeração do projeto (ver `sistema-init/STATUS_PROJETO.md`). Cada entrada cita o item do backlog (`FW-###`) quando houver.
 
@@ -10,6 +10,7 @@ Trabalho das sprints 01 (aquisição analógica), 01B (entrada digital) e 04 (sa
 
 ### Adicionado
 - FW-032 (parcial): `lib/agenda`, agenda semanal de 336 intervalos de 30 minutos por saída. `agenda_carrega_hex` valida por inteiro a cadeia de 84 caracteres hexadecimais recebida do CCO por MQTT (sem alterar a agenda anterior em caso de erro) e `agenda_estado` devolve ligada, desligada ou sem agenda para um instante. 57 verificações no PC. Falta o driver do RTC, o armazenamento persistente, entregar o pedido à saída e o recebimento por MQTT. Formato em `documentacao/agenda_operacional_offline.md` (P-042).
+- FW-030 (parcial): `lib/rtc`, driver do RTC do STM32L412 com o cristal de 32,768 kHz (funcionalidade nova `RELOGIO`, só no OloggerMulti). `rtc_inicia` liga o LSE e o RTC sem reiniciar o domínio de backup (preserva o totalizador), `rtc_define` acerta a hora em UTC (2000 a 2099), `rtc_le` lê a hora e `rtc_hora_valida` diz se há hora. Sem cristal, o firmware segue com hora inválida. `tempo_de_utc` faz a conversão inversa e foi testado em todo o intervalo de 32 bits. **Sem teste em hardware.**
 - FW-032 (parcial): `agenda_aplicador`, aplicação das agendas das quatro saídas pelo horário atual. Pede o estado do intervalo atual na primeira avaliação depois da partida (se reiniciou às 9h30, vale o agendado para as 9h30), a cada virada de intervalo de 30 minutos e logo depois de carregar ou apagar a agenda; com hora inválida não pede nada e as saídas mantêm o estado. Só a última agenda enviada vale; cadeia vazia apaga a agenda e cadeia inválida mantém a anterior. 13 testes (42 verificações) no PC.
 - FW-030 (parcial): `lib/tempo`, conversão do tempo UTC em segundos para data, hora e dia da semana locais (0 = segunda) com o fuso da instalação em minutos (−720 a +840). 12 testes no PC, com anos bissextos (2000, 2024 e 2100), virada de dia e de ano, fuso de meia hora e limite de 32 bits. Falta o driver do RTC e a conferência NTP.
 - FW-023 (parcial): `io_frequencia_cadastra` e `io_frequencia_atualiza`, que replicam na saída em frequência a leitura do sensor (frequência de 4 mA a 20 mA, 0 Hz na falha). Decidido: o sensor manda na saída em frequência e os comandos manual e automático não a influenciam.

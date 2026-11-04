@@ -1,6 +1,6 @@
 # Status do Projeto — oLoggerIOT
 
-> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.164
+> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.165
 > **Repositório:** https://github.com/malufis/ologgerIOT
 
 ## Fase atual
@@ -361,6 +361,7 @@ A entrevista está encerrada e o firmware está em desenvolvimento. Os dois buil
 ## Histórico de atualizações
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.165 | FW-030: driver do RTC escrito, sem teste em hardware |
 | 04/11/2026 | 0.3.164 | P-030 resolvida: bateria VBAT opcional; cristais só no OloggerMulti |
 | 04/11/2026 | 0.3.163 | FW-032: aplicador da agenda pelo horário atual pronto |
 | 04/11/2026 | 0.3.162 | FW-030 parcial: módulo `tempo` pronto |

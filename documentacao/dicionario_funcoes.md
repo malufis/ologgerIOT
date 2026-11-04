@@ -1,6 +1,6 @@
 # Dicionário de funções — firmware oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.13
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.14
 
 ## Como manter
 
@@ -128,6 +128,10 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `regra_sensor_avalia` | regra_sensor | `lib/io/include/regra_sensor.h` | Avalia um valor da entrada e devolve o pedido da regra. | O pedido atual: LIGA, DESLIGA, ou NENHUM se a regra não está definida ou ainda não alcançou nenhum limiar. Um valor não numérico mantém o pedido anterior. | ativa |
 | `regra_sensor_cadastra` | regra_sensor | `lib/io/include/regra_sensor.h` | Cadastra a regra. Só troca a regra se todos os campos forem válidos. | REGRA_SENSOR_OK, ou o código de erro (a regra anterior fica como estava). | ativa |
 | `regra_sensor_limpa` | regra_sensor | `lib/io/include/regra_sensor.h` | Deixa a regra sem cadastro e sem pedido. | REGRA_SENSOR_OK, ou REGRA_SENSOR_ERRO_PARAMETRO se regra for nula. | ativa |
+| `rtc_define` | rtc | `lib/rtc/include/rtc.h` | Acerta o RTC com a hora UTC dada (por exemplo, a do servidor NTP). | RTC_OK, RTC_ERRO_LSE (cristal parado), RTC_ERRO_DATA ou RTC_ERRO_TEMPO. | ativa |
+| `rtc_hora_valida` | rtc | `lib/rtc/include/rtc.h` | Informa se o RTC tem uma hora válida. | true se o LSE subiu e o RTC já recebeu data e hora. | ativa |
+| `rtc_inicia` | rtc | `lib/rtc/include/rtc.h` | Liga o cristal LSE e o RTC, sem alterar a hora que o RTC já tem. | RTC_OK, RTC_ERRO_LSE ou RTC_ERRO_CONFIG. | ativa |
+| `rtc_le` | rtc | `lib/rtc/include/rtc.h` | Lê a hora atual em UTC. | RTC_OK, RTC_ERRO_PARAMETRO ou RTC_ERRO_INVALIDA. | ativa |
 | `rtos_tick_handler` | rtos | `lib/rtos/include/rtos.h` | Trata o tick do sistema, chamado pela interrupção do SysTick. | void | ativa |
 | `saida_aguardando` | saida | `lib/io/include/saida.h` | Informa se a saída está esperando o retardo de acionamento. | true se há um retardo em curso; a saída continua desligada. | ativa |
 | `saida_atualiza` | saida | `lib/io/include/saida.h` | Atualiza o estado com o instante atual e devolve se a saída está ligada. | true se a saída está ligada depois da atualização. | ativa |
@@ -140,6 +144,7 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `sensor_ma_para_valor` | sensor | `lib/sensor/include/sensor.h` | Converte corrente 4-20 mA em valor de engenharia, com zero, span e offset. | SENSOR_OK ou SENSOR_ERRO_PARAMETRO. | ativa |
 | `sensor_media_acumula` | sensor | `lib/sensor/include/sensor.h` | Acumula uma amostra e, ao fechar um segundo, entrega a média. | SENSOR_OK ou SENSOR_ERRO_PARAMETRO. | ativa |
 | `sensor_media_inicia` | sensor | `lib/sensor/include/sensor.h` | Inicia o acumulador para uma taxa de amostragem. | SENSOR_OK, SENSOR_ERRO_PARAMETRO ou SENSOR_ERRO_TAXA. | ativa |
+| `tempo_de_utc` | tempo | `lib/tempo/include/tempo.h` | Converte data e hora em UTC nos segundos desde 01/01/1970 (o inverso com fuso zero). | TEMPO_OK, TEMPO_ERRO_PARAMETRO ou TEMPO_ERRO_DATA. | ativa |
 | `tempo_inicio_de_intervalo` | tempo | `lib/tempo/include/tempo.h` | Diz se o instante local é o início de um intervalo de 30 minutos da agenda. | true se o minuto é 0 ou 30. Falso se local for nulo. | ativa |
 | `tempo_para_local` | tempo | `lib/tempo/include/tempo.h` | Converte o tempo UTC na data e hora locais. | TEMPO_OK, TEMPO_ERRO_PARAMETRO ou TEMPO_ERRO_FUSO. | ativa |
 | `tipos_saida_algum_em_frequencia` | tipo_saida | `lib/io/include/tipo_saida.h` | Diz se alguma saída está em frequência. | true se há uma saída em frequência: o sleep não pode ligar. Falso se tipos for nulo. | ativa |
@@ -155,6 +160,7 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.14 | Tabela regenerada com 129 funções públicas: entram as de `rtc` e `tempo_de_utc` |
 | 04/11/2026 | 0.3.13 | Tabela regenerada com 124 funções públicas: entram as de `agenda_aplicador` |
 | 04/11/2026 | 0.3.12 | Tabela regenerada com 121 funções públicas: entram `tempo_para_local` e `tempo_inicio_de_intervalo` |
 | 04/11/2026 | 0.3.11 | Tabela regenerada com 119 funções públicas: entram `io_frequencia_cadastra` e `io_frequencia_atualiza` |
