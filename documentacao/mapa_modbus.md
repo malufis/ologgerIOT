@@ -1,6 +1,6 @@
 # Mapa Modbus do device oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.6
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.7
 
 ## Origem e estado
 
@@ -191,11 +191,13 @@ Os nomes dos grupos (analogico, digital, falhas, sistema, rede) são uma propost
 - Lista final de campos do heartbeat e formato das mensagens SETUP e INFO.
 - Entrada digital (aberto em 03/11/2026): o registrador de modo da entrada (40151–40165) hoje diz "0 = discreto, 1 = pulsado". Falta definir os modos (discreto, contador de pulsos e frequência em Hz) e o endereço do totalizador de 32 bits de cada entrada, que será lido como valor absoluto (o servidor calcula as diferenças). Item P-032 em `STATUS_PROJETO.md`.
 - Saída digital (resolvido em 03/11/2026): "pulsada" é a saída em frequência, então o tipo da saída (40166–40180) ficou 0 = discreto, 1 = frequência e 2 reservado. O "acionamento por tempo" é o retardo de acionamento (40256–40270), e o registrador 40271–40285 ficou reservado. O modo de operação (40412: 0 = contínuo, 1 = sleep) só pode ser 1 se nenhuma saída estiver em frequência, e a saída só pode ir para frequência com o modo de operação em 0.
+- Regra local entrada analógica para saída digital (aberto em 04/11/2026): o mapa tem a entrada analógica associada à saída (40241–40255) e a frequência em 4 mA e 20 mA (40181–40240), mas **não tem os limiares máximo e mínimo, nem o sentido da comparação**, que o cadastro da regra local exige para a saída discreta. Os endereços ficam a definir. Sem regra cadastrada, vale o comando automático remoto do CCO. Item P-041 em `STATUS_PROJETO.md`.
 
 ## Histórico
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.7 | Pendência: limiares máximo e mínimo da regra local para a saída discreta |
 | 04/11/2026 | 0.1.6 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |
 | 03/11/2026 | 0.1.5 | O "acionamento por tempo" é o retardo de acionamento; ligar com a saída ligada ou aguardando é descartado; mapa Modbus das saídas ajustado (P-037) |
 | 03/11/2026 | 0.1.4 | Registrada a pendência do modo da saída (pulsada é frequência) e a exclusão mútua com o sleep |

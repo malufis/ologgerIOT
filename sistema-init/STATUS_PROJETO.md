@@ -1,6 +1,6 @@
 # Status do Projeto — oLoggerIOT
 
-> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.151
+> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.152
 > **Repositório:** https://github.com/malufis/ologgerIOT
 
 ## Fase atual
@@ -57,7 +57,8 @@
 | P-037 | Mapa Modbus: o tipo da saída (40166–40180) tinha 1 = pulsado e 2 = frequência, que são a mesma coisa | Fase 4 | RESOLVIDO em 03/11/2026 — 0 = discreto, 1 = frequência (pulsada), 2 reservado; 40271–40285 reservado (o tempo de acionamento é o retardo de 40256–40270) |
 | P-038 | Espaço de flash do STM32L412C8: 64 KB, com a imagem atual em 25,8 KB | Fase 9 | RESOLVIDO em 04/11/2026 — ADR-0003: imagem na flash externa com bootloader; novo FW-062 reserva o espaço e mede a folga por fase |
 | P-039 | ADR-0001 (versão do FreeRTOS nos dois builds) e ADR-0002 (ferramenta MISRA): propostas aguardando decisão | Fase 0 | PENDENTE |
-| P-040 | Modo manual e automático das saídas (FW-025): confirmar o que o B4 não especifica — o fim da falha do sensor reaplica o pedido válido; a volta ao automático sem pedido mantém o estado; depois de reinício a saída volta desligada e em automático (o modo manual não é guardado); o alerta ao CCO na chegada do comando manual depende do espaço de alertas (FW-021) | Fase 4 | PENDENTE — confirmar |
+| P-040 | Modo manual e automático das saídas (FW-025) | Fase 4 | RESOLVIDO em 04/11/2026 — o sensor volta a operar depois de 5 minutos estáveis; sem pedido válido mantém o último estado válido; depois de reinício a saída volta desligada e em automático. Resta o alerta ao CCO na chegada do comando manual, que depende do espaço de alertas (FW-021) |
+| P-041 | Regra local entrada analógica para saída digital (comando automático local, FW-063): campos exatos do cadastro (máximo, mínimo, frequência, sentido da comparação, histerese e tempos), endereços Modbus dos limiares máximo e mínimo, e se a agenda offline fica na fonte remota (comando automático do CCO) | Fase 4 | PENDENTE — definir |
 
 ## Decisões tomadas
 B0 — Identificação: respostas e resumo confirmados pelo usuário em 29/10/2026.
@@ -315,7 +316,7 @@ Regra de processo: a entrevista do firmware só pergunta o que é do device. O q
 ## Processo de desenvolvimento (01/11/2026)
 - **Git:** repositório local iniciado em `firmware/`, com remoto `origin` para `https://github.com/malufis/ologgerIOT.git`. Em 03/11/2026 o branch `feat/fw-002-cmake-raiz` tem commits enviados ao remoto e o PR #1 está aberto para `main`; commit e push seguem dependendo de ordem explícita do usuário.
 - **Documentação:** índice em `documentacao/README.md`. Dicionário de funções, padrão de código C (base MISRA C:2012), contrato de integração e manual de operação criados como esqueletos.
-- **Backlog:** `planejamento/BACKLOG.md`, com 62 itens (FW-001 a FW-062) em 12 fases, incluindo a fase 1B. Sprints de uma semana, de SPRINT_00 a SPRINT_09, em `planejamento/sprints/`.
+- **Backlog:** `planejamento/BACKLOG.md`, com 63 itens (FW-001 a FW-063) em 12 fases, incluindo a fase 1B. Sprints de uma semana, de SPRINT_00 a SPRINT_09, em `planejamento/sprints/`.
 - **Skills:** `c-firmware-standards`, `doc-sync`, `device-profile-build` e `sprint-task` em `firmware/.claude/skills/`.
 - **Agentes:** `firmware-dev` e `doc-keeper` em `firmware/.claude/agents/`.
 - **Scripts prontos (02/11/2026):** `tools/verifica_padrao.py` e `tools/gera_dicionario.py` (FW-004 e FW-008), citados pelas skills.
@@ -349,12 +350,15 @@ Regra de processo: a entrevista do firmware só pergunta o que é do device. O q
 - **Sleep e frequência:** a saída em frequência só habilita com o sleep desligado, e o sleep só liga sem saída em frequência (FW-061). Diodo de roda livre no relé externo. Melhorias de hardware em `documentacao/melhorias_hardware.md`.
 - Detalhes em `planejamento/sprints/SPRINT_04.md` e `documentacao/configuracao_do_dispositivo.md`.
 
+- **Comandos automáticos (04/11/2026):** o **comando automático local** é o gerado no device por uma regra cadastrada, de uma entrada analógica para uma saída digital (máximo, mínimo, frequência); o **comando automático remoto** é o do CCO e só vale quando a saída não tem regra local. Falha do sensor: a saída só volta a operar pelo sensor depois de 5 minutos estáveis. Sem pedido válido, mantém o último estado válido do comando. Depois de reinício, desligada e em automático.
+
 ## Próximo passo recomendado
 A entrevista está encerrada e o firmware está em desenvolvimento. Os dois builds STM32 compilam sem avisos. Próximo: executar o roteiro de bancada da entrada digital (FW-056) quando o device estiver disponível, soldar a L2 e fechar o FW-012. O FW-007 (ESP32) e a parte ESP32 do FW-046 foram para a SPRINT_07 e só começam depois de finalizados os testes do STM32 e de o STM32 estar validado (decisão de 03/11/2026). O estado de cada módulo está em `documentacao/ESTADO_IMPLEMENTACAO.md`; o backlog e as sprints, em `planejamento/`. As pendências de heartbeat, formato de SETUP e INFO e nomes dos grupos do JSON ficam para a fase 7. Execução do teste NB-IoT (P-026) fica para a fase de bancada.
 
 ## Histórico de atualizações
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.152 | Comandos automáticos locais e remotos; P-040 resolvida; P-041 aberta; novo FW-063 |
 | 04/11/2026 | 0.3.151 | FW-025 em código pronto; pendência P-040 com o que o B4 não especifica |
 | 04/11/2026 | 0.3.150 | ADR-0003 decidido (imagem na flash externa com bootloader); P-038 resolvida; novo FW-062 |
 | 04/11/2026 | 0.3.149 | SPRINT_00 concluída em 04/11/2026 (changelog 0.2.0); cinco regras do padrão de código confirmadas; ADR-0003 escolhido como o primeiro a decidir |

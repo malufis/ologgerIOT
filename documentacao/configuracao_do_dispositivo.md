@@ -1,6 +1,6 @@
 ﻿# Configuração do dispositivo — oLoggerIOT
 
-> **Criado em:** 29/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.52
+> **Criado em:** 29/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.53
 
 ## Origem e estado
 
@@ -131,12 +131,24 @@ A frequência de atualização e a relação entre quantidade de entradas e saí
 - **Estado na partida:** todas as saídas partem desligadas. Não religam sozinhas depois de falta de energia: aguardam novo comando, conforme a regra do B4.
 - **Comandos implementados:** ligar e desligar. O "acionamento por tempo" é o retardo de acionamento (próximo item).
 - **Retardo de acionamento (relé de tempo, confirmado em 03/11/2026):** a saída discreta pode ter um retardo configurável por saída, em segundos. **Todo comando que liga a saída espera o retardo**; retardo zero liga na hora. Um comando de desligar durante a espera cancela a partida. Com o retardo em andamento, outro comando de ligar é descartado e a contagem continua. Com a saída já ligada, outro comando de ligar é descartado (o retardo não é reaplicado).
-- **Modo manual e automático (FW-025, 04/11/2026):** cada saída tem o seu modo. O comando manual direto prevalece, põe a saída em manual e vale até o comando de modo automático. Em automático, o pedido do sensor local prevalece sobre o da fonte externa (agenda, só offline, ou regra da plataforma). Falha do sensor: em automático desliga, em manual mantém o comando manual. A volta ao automático avalia e executa a regra válida na hora. Não especificado e tratado de forma conservadora, a confirmar (P-040): fim da falha reaplica o pedido válido; volta ao automático sem pedido mantém o estado; depois de reinício a saída volta desligada e em automático; o alerta ao CCO na chegada do comando manual depende do espaço de alertas e ainda não existe.
+- **Modo manual e automático (FW-025, 04/11/2026):** cada saída tem o seu modo. O comando manual direto prevalece, põe a saída em manual e vale até o comando de modo automático. Em automático valem os comandos automáticos locais ou remotos, como descrito na seção seguinte. A volta ao automático avalia e executa a regra válida na hora e, sem nenhum pedido válido, **mantém o último estado válido do comando** (confirmado em 04/11/2026). **Depois de um reinício a saída volta desligada e em modo automático** (confirmado em 04/11/2026). O alerta ao CCO na chegada do comando manual depende do espaço de alertas (FW-021) e ainda não existe.
 - **Ainda não implementado:** saída em frequência (FW-023) e o alerta ao CCO na chegada do comando manual.
 - **"Pulsada" é a saída em frequência (decidido em 03/11/2026):** não é acionamento por tempo. A saída discreta é só ligada ou desligada, com o retardo de acionamento. O tipo da saída no mapa Modbus ficou 0 = discreto e 1 = frequência.
 - **Sleep e frequência (decidido em 03/11/2026):** a saída em frequência só pode ser habilitada se o modo sleep não estiver ativo, e o sleep só liga se nenhuma saída estiver em frequência. O sleep tem uma função de ligar e desligar (modo de operação 40412).
 - **Carga indutiva:** o diodo de roda livre fica no relé externo, instalado pelo responsável técnico.
 - **Stop 2:** o pino mantém o estado, mas o retardo não corre durante o sleep.
+
+## Comandos automáticos locais e remotos — saídas digitais (04/11/2026)
+
+Definição do responsável técnico em 04/11/2026.
+
+- **Comando automático local:** o comando que o próprio device gera a partir de uma **entrada analógica** para uma saída digital, por uma regra **cadastrada**. O cadastro leva **máximo, mínimo e frequência**: nas saídas discretas, o máximo e o mínimo são os limiares que ligam e desligam a saída (exemplo do B4: ligar a 5 bar e desligar a 4 bar); na saída em frequência, a frequência em Hz correspondente ao mínimo e ao máximo da faixa (4 mA e 20 mA). A regra pode ser cadastrada na instalação ou enviada pelo CCO, mas o comando é gerado e executado **localmente**, inclusive sem comunicação.
+- **Comando automático remoto:** o que vem do **CCO**: a regra automática da plataforma e a agenda offline, que tem origem no CCO. **Só vale quando a saída não tem regra local definida.** Se a saída tem regra local, o comando remoto é ignorado.
+- **Ordem de prioridade em cada saída:** (1) comando manual; (2) falha do sensor, que desliga; (3) regra local, se definida; (4) comando automático remoto, se não há regra local.
+- **Falha do sensor:** em automático, a saída desliga. Quando a falha termina, a saída só **volta a operar pelo sensor depois de 5 minutos estáveis** (sem nova falha); uma falha dentro desse tempo reinicia a contagem. Até lá a saída continua desligada. Em manual, o comando manual se mantém. O código aceita configurar o tempo; o padrão é de 5 minutos.
+- **Retardo de acionamento:** vale para todo comando que liga a saída, local ou remoto, como em qualquer outro comando.
+- **A definir (P-041):** os campos exatos do cadastro (sentido das comparações, histerese e tempos), os endereços Modbus dos limiares máximo e mínimo (hoje o mapa só tem a entrada associada e as frequências de 4 mA e 20 mA), e se a agenda offline fica na fonte remota, como está hoje.
+- **Implementação:** o código separa as duas fontes em `controle_saida` (`CONTROLE_FONTE_LOCAL` e `CONTROLE_FONTE_REMOTA`) e sabe se a saída tem regra local. O **cadastro e o avaliador da regra local** são o item FW-063, ainda não implementado.
 
 ## Fluxos propostos pelo usuário
 
@@ -194,6 +206,7 @@ Depois de estabelecida a conectividade do dispositivo, a configuração continua
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.53 | Comandos automáticos locais (regra cadastrada) e remotos (CCO), espera de 5 minutos depois da falha do sensor, último estado válido e estado depois de reinício |
 | 04/11/2026 | 0.1.52 | FW-025: modo manual e automático por saída, prioridade do sensor local e falha do sensor |
 | 04/11/2026 | 0.1.51 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |
 | 03/11/2026 | 0.1.50 | O "acionamento por tempo" é o retardo de acionamento; ligar com a saída ligada ou aguardando é descartado; mapa Modbus das saídas ajustado (P-037) |
