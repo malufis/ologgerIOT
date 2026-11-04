@@ -1,6 +1,6 @@
 # Changelog — oLoggerIOT firmware
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.12
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.13
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versões seguem a numeração do projeto (ver `sistema-init/STATUS_PROJETO.md`). Cada entrada cita o item do backlog (`FW-###`) quando houver.
 
@@ -35,6 +35,7 @@ Trabalho das sprints 01 (aquisição analógica), 01B (entrada digital) e 04 (sa
 - Aquisição analógica (fase 1, em bancada): driver do ADC com TIM6, ADC1 e DMA, tarefa de aquisição e módulo `sensor` (média por segundo e conversão 4-20 mA). Entrada 4 medida com 8 mA: 8,007 mA. Calibração de bancada por dois pontos, referência efetiva de 2,367 V; causa do fator ~1,37 em aberto.
 
 ### Alterado
+- Agenda das saídas (P-043, 04/11/2026): o fuso horário é configurado pelo CCO; o device guarda só a última agenda enviada, sem ordem de versão; depois de reinício a agenda assume o intervalo do horário atual.
 - Sentido da regra do sensor (mapa Modbus 40367–40381) confirmado: 0 = liga no mínimo e desliga no máximo; 1 = liga no máximo e desliga no mínimo.
 - `controle_saida`: as fontes de pedido passaram a se chamar `CONTROLE_FONTE_SENSOR` (regra cadastrada), `CONTROLE_FONTE_AGENDA` (local, só offline) e `CONTROLE_FONTE_CCO` (remota, só online). A agenda deixou de ser tratada como comando remoto. `io_saidas_define_regra_local` virou `io_saidas_define_regra_sensor`.
 - `saida_liga` passou a receber o instante atual, para aplicar o retardo de acionamento.

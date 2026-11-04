@@ -1,6 +1,6 @@
 # Mapa Modbus do device oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.9
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.10
 
 ## Origem e estado
 
@@ -152,6 +152,7 @@ Mesmo layout do Wi-Fi, a partir de 30400: MAC 30400–30408, fabricante 30409–
 | 40400 | uint16 | Velocidade da porta RS-485: 0 = 2400 bps, 1 = 9600 bps, 2 = 57600 bps, 3 = 115200 bps |
 | 40401 | uint16 | Modo RS-485: 0 = mestre, 1 = escravo |
 | 40402 | uint16 | Endereço do escravo, pela norma de 1 a 247 (confirmado em 01/11/2026; o manual Raptor usa 0 a 99) |
+| 40403 | int16 | Fuso horário da instalação, em minutos em relação ao UTC, em complemento de dois (por exemplo, −180 para o horário de Brasília), configurado pelo CCO (**proposta de 04/11/2026**, endereço a confirmar) |
 | 40410 | uint16 | Intervalo de coleta em segundos |
 | 40411 | uint16 | Intervalo de envio em segundos |
 | 40412 | uint16 | Modo de operação: 0 = contínuo, 1 = sleep |
@@ -201,6 +202,7 @@ Os nomes dos grupos (analogico, digital, falhas, sistema, rede) são uma propost
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.10 | Proposto o endereço 40403 para o fuso horário da instalação, configurado pelo CCO |
 | 04/11/2026 | 0.1.9 | Sentido da regra do sensor confirmado (0 liga no mínimo, 1 liga no máximo); registrado que a agenda não tem registradores Modbus |
 | 04/11/2026 | 0.1.8 | Propostos os endereços dos limiares máximo e mínimo e do sentido da regra do sensor (40307 a 40381) |
 | 04/11/2026 | 0.1.7 | Pendência: limiares máximo e mínimo da regra local para a saída discreta |

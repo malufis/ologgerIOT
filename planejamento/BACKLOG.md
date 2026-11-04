@@ -1,6 +1,6 @@
 # Backlog do firmware — oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.10
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.11
 
 ## Regras
 
@@ -112,9 +112,9 @@ Entrada digital ativa com tensão no campo (de 12 a 24 V; na bancada, até 12 V)
 
 | ID | Tarefa | Aceite | Situação |
 |---|---|---|---|
-| FW-030 | Driver do RTC e conferência NTP quatro vezes ao dia | Teste de atualização | Pendente |
+| FW-030 | Driver do RTC e conferência NTP quatro vezes ao dia; fuso horário da instalação configurado pelo CCO (40403, proposta) | Teste de atualização | Pendente |
 | FW-031 | Hora inválida: medições sem validade, saídas mantêm estado, aviso guardado | Teste de perda e correção de hora | Pendente |
-| FW-032 | Agenda semanal de 336 intervalos por saída, recebida do CCO por MQTT: formato (84 caracteres hexadecimais por saída), validação, armazenamento persistente com CRC, e aplicação a cada 30 minutos somente offline e na hora em que o device fica offline | Teste de transição de intervalo; cadastro recusado por inteiro quando inválido, sem alterar a agenda anterior | Parcial em 04/11/2026: formato e validação prontos (`lib/agenda`, 57 verificações no PC). Falta o RTC (FW-030), o armazenamento persistente, a aplicação por intervalo e o recebimento por MQTT (FW-035) |
+| FW-032 | Agenda semanal de 336 intervalos por saída, recebida do CCO por MQTT: formato (84 caracteres hexadecimais por saída), validação, armazenamento persistente com CRC só da última agenda, e aplicação pelo horário atual: a cada 30 minutos somente offline, na hora em que o device fica offline e depois de reinício | Teste de transição de intervalo; cadastro recusado por inteiro quando inválido, sem alterar a agenda anterior | Parcial em 04/11/2026: formato e validação prontos (`lib/agenda`, 57 verificações no PC). Falta o RTC (FW-030), o armazenamento persistente, a aplicação por intervalo e o recebimento por MQTT (FW-035) |
 
 ### Fase 7 — MQTT e ESP32 (SPRINT_07)
 
@@ -155,6 +155,7 @@ Entrada digital ativa com tensão no campo (de 12 a 24 V; na bancada, até 12 V)
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.11 | FW-030 com o fuso configurado pelo CCO; FW-032 com a aplicação pelo horário atual depois de reinício |
 | 04/11/2026 | 0.2.10 | FW-063 com o sentido confirmado; FW-032 com o formato da agenda por MQTT (parcial) |
 | 04/11/2026 | 0.2.9 | FW-063 com o cadastro por MQTT ou Modbus; FW-025 com a agenda local e o CCO online |
 | 04/11/2026 | 0.2.8 | FW-025 com a regra local, o comando remoto do CCO e a espera de 5 minutos; novo FW-063 (regra local) |
