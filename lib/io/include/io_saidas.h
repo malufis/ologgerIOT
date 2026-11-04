@@ -138,6 +138,18 @@ int32_t io_saidas_define_conectividade(bool online);
 int32_t io_saidas_define_estabilidade(uint8_t canal, uint32_t segundos);
 
 /**
+ * @brief Cede o pino da saída ao gerador de frequência, ou o devolve ao controle discreto.
+ *
+ * Com o pino cedido, o estado da saída continua sendo calculado, mas não chega ao pino: quem o
+ * comanda é o gerador (io_frequencia.h). Ao devolver o pino, o estado atual da saída é aplicado.
+ *
+ * @param canal Saída de 1 a IO_SAIDAS_QTD.
+ * @param cede true para ceder o pino, false para devolvê-lo.
+ * @return IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO.
+ */
+int32_t io_saidas_cede_pino(uint8_t canal, bool cede);
+
+/**
  * @brief Define o retardo de acionamento (relé de tempo) de uma saída.
  *
  * Vale para os próximos comandos que ligam a saída. Um retardo já em curso não muda. Corresponde

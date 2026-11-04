@@ -22,6 +22,8 @@
 static StaticTask_t tcb_saidas;
 static StackType_t pilha_saidas[IO_SAIDAS_PILHA_PALAVRAS];
 static controle_saida_t saidas[IO_SAIDAS_QTD];
+/** true se o pino da saída foi cedido ao gerador de frequência (io_frequencia). */
+static volatile bool cedidas[IO_SAIDAS_QTD];
 
 /**
  * @brief Instante atual em milissegundos, a partir do tick do FreeRTOS.
@@ -40,6 +42,10 @@ static uint32_t agora_ms(void)
  */
 static void aplica_no_pino(uint8_t indice)
 {
+  if (cedidas[indice])
+  {
+    return;
+  }
   (void)io_saida_define((uint8_t)(indice + 1U), controle_saida_ligada(&saidas[indice]));
 }
 
@@ -198,6 +204,23 @@ int32_t io_saidas_define_estabilidade(uint8_t canal, uint32_t segundos)
 
   taskENTER_CRITICAL();
   controle_saida_define_estabilidade(&saidas[canal - 1U], segundos * 1000U);
+  taskEXIT_CRITICAL();
+  return IO_SAIDAS_OK;
+}
+
+int32_t io_saidas_cede_pino(uint8_t canal, bool cede)
+{
+  if (!canal_valido(canal))
+  {
+    return IO_SAIDAS_ERRO_PARAMETRO;
+  }
+
+  taskENTER_CRITICAL();
+  cedidas[canal - 1U] = cede;
+  if (!cede)
+  {
+    aplica_no_pino((uint8_t)(canal - 1U));
+  }
   taskEXIT_CRITICAL();
   return IO_SAIDAS_OK;
 }

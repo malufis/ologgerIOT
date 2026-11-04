@@ -3,8 +3,8 @@
  * @brief Tratadores de interrupção do núcleo que o firmware precisa definir.
  *
  * @date criacao 02/11/2026
- * @date modificacao 03/11/2026
- * @version 0.2.0
+ * @date modificacao 04/11/2026
+ * @version 0.3.0
  */
 
 #include "hal_stm32.h"
@@ -12,6 +12,10 @@
 
 #ifdef OLOG_TEM_ENTRADA_DIGITAL
   #include "io_entrada.h"
+#endif
+
+#ifdef OLOG_TEM_SAIDA_FREQUENCIA
+  #include "io_frequencia.h"
 #endif
 
 #ifdef OLOG_TEM_ENERGIA
@@ -44,5 +48,18 @@ void EXTI9_5_IRQHandler(void)
    * inatividade sem pulso, então um pulso constante não fica acordando e dormindo. */
   energia_solicita_acordar();
 #endif
+}
+#endif
+
+#ifdef OLOG_TEM_SAIDA_FREQUENCIA
+/**
+ * @brief Tratador do TIM6: avança os geradores das saídas em frequência.
+ *
+ * Fica aqui pelo mesmo motivo do EXTI9_5_IRQHandler: o vetor do startup é fraco e o linker não
+ * extrai um objeto de uma biblioteca estática só para resolver uma referência fraca.
+ */
+void TIM6_IRQHandler(void)
+{
+  io_frequencia_irq();
 }
 #endif

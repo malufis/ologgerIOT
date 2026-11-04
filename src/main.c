@@ -70,6 +70,28 @@ static const energia_ganchos_t ganchos_energia = {
 };
 #endif
 
+#ifdef OLOG_TEM_SAIDA_DISCRETA
+/**
+ * @brief Cria a tarefa das saídas digitais e configura o timer das saídas em frequência.
+ *
+ * @return 0 em sucesso, código negativo se alguma falhar.
+ */
+static int32_t inicia_saidas(void)
+{
+  if (io_saidas_inicia() != IO_SAIDAS_OK)
+  {
+    return -1;
+  }
+#ifdef OLOG_TEM_SAIDA_FREQUENCIA
+  if (io_frequencia_inicia() != IO_FREQUENCIA_OK)
+  {
+    return -1;
+  }
+#endif
+  return 0;
+}
+#endif
+
 /**
  * @brief Cria as tarefas do firmware.
  *
@@ -97,7 +119,7 @@ static int32_t cria_tarefas(void)
 #endif
 
 #ifdef OLOG_TEM_SAIDA_DISCRETA
-  if (io_saidas_inicia() != IO_SAIDAS_OK)
+  if (inicia_saidas() != 0)
   {
     return -1;
   }
