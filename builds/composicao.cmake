@@ -21,7 +21,7 @@ set(OLOG_FEATURES_CATALOGO
   ENTRADA_4_20MA       # Entrada analógica 4–20 mA (lib/adc, lib/sensor)
   ENTRADA_DIFERENCIAL  # Entrada analógica diferencial (lib/adc)
   ENTRADA_DIGITAL      # Entrada digital (lib/io)
-  SAIDA_DISCRETA       # Saída digital liga/desliga e pulsada (lib/io)
+  SAIDA_DISCRETA       # Saída digital liga/desliga, com retardo de acionamento (lib/io)
   SAIDA_FREQUENCIA     # Saída digital em Hz proporcional a 4–20 mA (lib/io)
   RS485_MODBUS         # Modbus RTU mestre e escravo na RS-485 (lib/modbus)
   FLASH_EXTERNA        # Flash SPI externa de 16 MiB (lib/flash, lib/fila)
@@ -29,6 +29,7 @@ set(OLOG_FEATURES_CATALOGO
   RADIO_CELULAR        # Modem celular (lib/modem)
   RADIO_UART_EXTERNO   # Rádio externo em UART, modo transparente (lib/radio_externo)
   MQTT                 # Comunicação MQTT com o broker (lib/mqtt, esp32/)
+  RELOGIO              # RTC com cristal de 32,768 kHz (lib/rtc); só o OloggerMulti tem o cristal
 )
 
 # -----------------------------------------------------------------------------
@@ -48,6 +49,7 @@ if(DEVICE STREQUAL "ologgermulti")
     RADIO_WIFI           # ESP32-C6-MINI-1, único rádio da placa
     RADIO_UART_EXTERNO   # UART de comunicação externa, para outro rádio em modo transparente
     MQTT
+    RELOGIO              # RTC com o cristal LSE; o y7080 não tem cristal
   )
 
 # -----------------------------------------------------------------------------

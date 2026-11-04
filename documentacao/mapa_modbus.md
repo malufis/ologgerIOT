@@ -1,6 +1,6 @@
 # Mapa Modbus do device oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 01/11/2026 · **Versão:** 0.1.2
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.14
 
 ## Origem e estado
 
@@ -51,13 +51,17 @@ Mapa definido pelo usuário em 01/11/2026: seguir a norma Modbus, com float ocup
 |---|---|---|
 | 00001–00015 | coil | Comando e estado da saída n (1 = ligada, 0 = desligada) |
 | 30091–30120 | input float | Frequência atual da saída n em Hz (0 quando não está em modo frequência) |
-| 40166–40180 | holding uint16 | Modo da saída n: 0 = discreto, 1 = pulsado, 2 = frequência |
+| 40166–40180 | holding uint16 | Tipo da saída n: 0 = discreto, 1 = frequência (a saída "pulsada"), 2 = reservado (ajustado em 03/11/2026). Só as saídas 2 a 4 aceitam 1: a saída 1 não tem canal de timer (04/11/2026). Gravar 1 com o sleep ligado é recusado |
 | 40181–40210 | holding float | Frequência em Hz correspondente a 4 mA da saída n |
 | 40211–40240 | holding float | Frequência em Hz correspondente a 20 mA da saída n |
 | 40241–40255 | holding uint16 | Entrada analógica associada à saída n (0 = nenhuma) |
-| 40256–40270 | holding uint16 | Atraso de partida da saída n, em segundos |
-| 40271–40285 | holding uint16 | Tempo de acionamento da saída n, em segundos (confirmado em 01/11/2026) |
-| 40286–40300 | holding uint16 | Modo da saída n: 0 = automático, 1 = manual |
+| 40256–40270 | holding uint16 | Retardo de acionamento da saída n (relé de tempo), em segundos; 0 = liga na hora. É também o "atraso de partida" e o "tempo de acionamento" |
+| 40271–40285 | holding uint16 | Reservado: o tempo de acionamento é o mesmo retardo de acionamento (40256–40270), decisão de 03/11/2026 |
+| 40286–40300 | holding uint16 | Modo manual/automático da saída n: 0 = automático, 1 = manual |
+| 40307–40336 | holding float | Limiar máximo da regra do sensor da saída n, na unidade de engenharia da entrada associada (**proposta de 04/11/2026**) |
+| 40337–40366 | holding float | Limiar mínimo da regra do sensor da saída n, na unidade de engenharia da entrada associada (**proposta de 04/11/2026**) |
+| 40367–40381 | holding uint16 | Sentido da regra do sensor da saída n: 0 = liga no mínimo e desliga no máximo, 1 = liga no máximo e desliga no mínimo (**confirmado em 04/11/2026**; endereços ainda a confirmar) |
+| 40382–40396 | holding uint16 | Tempo de estabilidade do sensor da saída n depois de uma falha, em segundos; padrão 300 (5 minutos) (**confirmado em 04/11/2026**) |
 
 ## Sistema trifásico (reservado, sem hardware identificado)
 
@@ -149,9 +153,36 @@ Mesmo layout do Wi-Fi, a partir de 30400: MAC 30400–30408, fabricante 30409–
 | 40400 | uint16 | Velocidade da porta RS-485: 0 = 2400 bps, 1 = 9600 bps, 2 = 57600 bps, 3 = 115200 bps |
 | 40401 | uint16 | Modo RS-485: 0 = mestre, 1 = escravo |
 | 40402 | uint16 | Endereço do escravo, pela norma de 1 a 247 (confirmado em 01/11/2026; o manual Raptor usa 0 a 99) |
+| 40403 | int16 | Fuso horário da instalação, em minutos em relação ao UTC, em complemento de dois (por exemplo, −180 para o horário de Brasília), configurado pelo CCO (**proposta de 04/11/2026**, endereço a confirmar) |
 | 40410 | uint16 | Intervalo de coleta em segundos |
 | 40411 | uint16 | Intervalo de envio em segundos |
 | 40412 | uint16 | Modo de operação: 0 = contínuo, 1 = sleep |
+| 40413 | uint16 | Tempo sem pulso para o STM32 dormir, em segundos, de 1 a 65535; padrão 60 (**confirmado em 04/11/2026**) |
+
+## Persistência dos registradores de configuração (decidido em 04/11/2026)
+
+**Todos os registradores de retenção (holding, 4xxxx) deste mapa são configuração e setup, e ficam na memória flash do device:** o que o CCO ou o Modbus gravam sobrevive ao reinício e à falta de energia, sem depender de bateria. A gravação ocorre 5 segundos depois da última escrita. Valem os padrões de fábrica quando não há registro válido, e um valor gravado inválido volta ao padrão.
+
+- **Escrita atômica:** o pedido só vale se todos os valores estiverem nos limites; um float escrito pela metade, um endereço fora da configuração ou uma combinação proibida (frequência na saída 1, ou frequência com o sleep ligado) recusa o pedido inteiro.
+- **Não persistem** (são estado, e não configuração): o comando e o estado das saídas (coils), o modo manual ou automático (40286–40300, volta a automático e desligada depois de um reinício), o totalizador de pulsos e a hora. A agenda semanal é gravada junto, mas não tem endereço Modbus (vem por MQTT).
+- **Implementação:** `lib/config` (tabela de parâmetros, com os endereços, limites e padrões) e `lib/armazem` (dois espaços de flash com CRC-32, seguro contra queda de energia).
+
+## Implementação do escravo na RS-485 (04/11/2026)
+
+O escravo atende as funções **01, 02, 03, 04, 05, 06, 15 e 16**, com as exceções 01 (função ilegal), 02 (endereço ilegal), 03 (valor ilegal) e 04 (falha no escravo). O endereço de protocolo é o número do mapa menos a base da tabela menos 1 (retenção 40001 é o endereço 0). Difusão (endereço 0) só vale para escrita e não é respondida. Leituras de até 125 registradores e 256 bobinas; escritas de até 123 registradores e 256 bobinas.
+
+| Tabela | Números atendidos | Conteúdo |
+|---|---|---|
+| Bobinas | 00001 a 00004 | Estado das saídas; escrever liga ou desliga em modo manual |
+| Entradas discretas | 10001 a 10004, 10016 a 10019, 10031 | Entradas digitais, falha do sensor analógico n, hora válida |
+| Registradores de entrada | 30001 a 30008, 30031 a 30038, 30091 a 30098, 30121 a 30126 | Valor de engenharia (float), corrente em mA (float), frequência atual da saída (float), data e hora local |
+| Registradores de retenção | 40001 a 40413 (os da tabela de configuração) e 40286 a 40289 | Toda a configuração, e o modo manual ou automático das saídas (estado) |
+
+- **Formato serial:** 8 bits, sem paridade, 1 stop bit (8N1), **confirmado em 04/11/2026** (P-048); velocidade pelo registrador 40400 (0 = 2400, 1 = 9600, 2 = 57600, 3 = 115200 bps), padrão 9600; endereço pelo 40402, padrão 1.
+- **Fim do quadro:** silêncio de 3,5 caracteres, medido pelo próprio USART.
+- **Retenção:** a escrita é atômica (valor fora do limite, float pela metade, endereço fora da configuração ou combinação proibida recusam o pedido inteiro). Um pedido não pode misturar os registradores de estado (40286 a 40289) com os de configuração.
+- **Só com o sleep desabilitado:** o USART não recebe em Stop 2.
+- **Ainda sem endereço:** o totalizador de pulsos, a tensão de alimentação, a temperatura e as cadeias de texto (número de série, versão e modelo).
 
 ## Exemplo de JSON
 
@@ -189,11 +220,27 @@ Os nomes dos grupos (analogico, digital, falhas, sistema, rede) são uma propost
 - Resolvidas em 01/11/2026: ordem do float (ABCD), unidade do tempo de acionamento (segundos), faixa do endereço escravo (1 a 247) e configuração pelo Modbus.
 - Bloco trifásico mantido como reservado, pois o device poderá integrar com MGE ou inversores pelo Modbus.
 - Lista final de campos do heartbeat e formato das mensagens SETUP e INFO.
+- Entrada digital (aberto em 03/11/2026): o registrador de modo da entrada (40151–40165) hoje diz "0 = discreto, 1 = pulsado". Falta definir os modos (discreto, contador de pulsos e frequência em Hz) e o endereço do totalizador de 32 bits de cada entrada, que será lido como valor absoluto (o servidor calcula as diferenças). Item P-032 em `STATUS_PROJETO.md`.
+- Saída digital (resolvido em 03/11/2026): "pulsada" é a saída em frequência, então o tipo da saída (40166–40180) ficou 0 = discreto, 1 = frequência e 2 reservado. O "acionamento por tempo" é o retardo de acionamento (40256–40270), e o registrador 40271–40285 ficou reservado. O modo de operação (40412: 0 = contínuo, 1 = sleep) só pode ser 1 se nenhuma saída estiver em frequência, e a saída só pode ir para frequência com o modo de operação em 0.
+- Regra do sensor entrada analógica para saída digital (04/11/2026): o cadastro vem por MQTT ou Modbus, com endereço Modbus para cada campo; as chaves do JSON seguem o endereço. Foram acrescentados os limiares máximo (40307–40336) e mínimo (40337–40366) e o sentido (40367–40381), com endereços **propostos a confirmar**. O **sentido foi confirmado**: 0 = liga no mínimo e desliga no máximo; 1 = liga no máximo e desliga no mínimo. A saída tem regra do sensor quando a entrada associada (40241–40255) é diferente de zero. Sem regra, valem a agenda offline e o CCO online.
+- Agenda semanal das saídas (04/11/2026): **não tem registradores Modbus**; é cadastrada por MQTT, pelo CCO (`documentacao/agenda_operacional_offline.md`).
 
 ## Histórico
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.14 | Confirmados 40382–40396, 40413 e o formato serial 8N1 |
+| 04/11/2026 | 0.1.13 | Implementação do escravo na RS-485: funções, tabelas atendidas e formato serial |
+| 04/11/2026 | 0.1.12 | Persistência dos registradores de configuração; propostos 40382–40396 (estabilidade do sensor) e 40413 (inatividade da entrada digital) |
+| 04/11/2026 | 0.1.11 | Tipo da saída: só as saídas 2 a 4 aceitam frequência e a gravação é recusada com o sleep ligado |
+| 04/11/2026 | 0.1.10 | Proposto o endereço 40403 para o fuso horário da instalação, configurado pelo CCO |
+| 04/11/2026 | 0.1.9 | Sentido da regra do sensor confirmado (0 liga no mínimo, 1 liga no máximo); registrado que a agenda não tem registradores Modbus |
+| 04/11/2026 | 0.1.8 | Propostos os endereços dos limiares máximo e mínimo e do sentido da regra do sensor (40307 a 40381) |
+| 04/11/2026 | 0.1.7 | Pendência: limiares máximo e mínimo da regra local para a saída discreta |
+| 04/11/2026 | 0.1.6 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |
+| 03/11/2026 | 0.1.5 | O "acionamento por tempo" é o retardo de acionamento; ligar com a saída ligada ou aguardando é descartado; mapa Modbus das saídas ajustado (P-037) |
+| 03/11/2026 | 0.1.4 | Registrada a pendência do modo da saída (pulsada é frequência) e a exclusão mútua com o sleep |
+| 03/11/2026 | 0.1.3 | Registrada a pendência dos modos da entrada digital (discreto, contador de pulsos e frequência) e do endereço do totalizador |
 | 01/11/2026 | 0.1.2 | Confirmados float big-endian (ABCD), tempo de acionamento em segundos e endereço escravo de 1 a 247; trifásico mantido reservado para integração com MGE e inversores |
 | 01/11/2026 | 0.1.1 | Configuração válida pelo Modbus e pelo MQTT, com a mesma regra de sessão única; sessão de configuração termina após 5 minutos sem atividade |
 | 01/11/2026 | 0.1.0 | Criado mapa Modbus com 15 posições por tipo, float em 2 registradores, conectividade e configurações, com base na norma e no manual Raptor |

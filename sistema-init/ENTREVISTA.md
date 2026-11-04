@@ -1,6 +1,8 @@
 # Entrevista de Inicialização de Projeto
 
-> **Criado em:** 15/10/2026 · **Última modificação:** 15/10/2026 · **Versão:** 1.2.0
+> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 1.2.1
+
+> **Nota de 04/11/2026:** os documentos de sistema citados abaixo (`documentacao/01_visao_do_projeto.md`, `02_requisitos.md`, `03_glossario.md`, `04_riscos_e_pendencias.md`, `05_arquitetura.md`, `apps_moveis.md`, `lgpd.md`, `seguranca_e_dados.md`, `adr/ADR-0001-backend.md`, `adr/ADR-0002-frontend.md` e `planejamento/ROADMAP.md`) pertencem ao kit genérico de inicialização do **sistema** e **não existem neste repositório do firmware**. As decisões do device estão em `sistema-init/STATUS_PROJETO.md` e em `documentacao/`. A pasta `documentacao/adr/` deste repositório trata das decisões de arquitetura do firmware, com outros assuntos.
 
 ## Como funciona
 
@@ -325,3 +327,10 @@ Para cada funcionalidade citada pelo usuário, pergunte:
 - [ ] Conflitos entre respostas resolvidos ou registrados
 - [ ] Stack e arquitetura decididas no B17 e registradas em ADR
 - [ ] Estado do projeto atualizado
+
+## Histórico
+
+| Data | Versão | Alteração |
+|---|---|---|
+| 04/11/2026 | 1.2.1 | Adicionada a nota sobre os documentos de sistema que não existem neste repositório e a tabela de histórico |
+| 15/10/2026 | 1.2.0 | Versão anterior à tabela de histórico |

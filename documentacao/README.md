@@ -1,6 +1,6 @@
 # Documentação do oLoggerIOT — índice
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 02/11/2026 · **Versão:** 0.2.0
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.5
 
 Ponto de entrada para agentes e programadores. Comece por `INICIAR.md` na raiz do repositório. Para achar um assunto, use `INDICE_AGENTES.md`. Este arquivo lista todos os documentos. Cada documento informa a versão e tem tabela de histórico.
 
@@ -27,6 +27,10 @@ Ponto de entrada para agentes e programadores. Comece por `INICIAR.md` na raiz d
 | `modelos_e_versoes_firmware.md` | Modelos OloggerMulti e y7080 e a decisão de um build por device. |
 | `composicao_builds.md` | Funcionalidades de cada build, catálogo e composição proposta. A lista fica em `builds/composicao.cmake`. |
 | `analise_hardware_ologgeriot.md` | Análise dos esquemáticos e Gerbers. |
+| `roteiro_bancada_entrada_digital.md` | Roteiro de bancada da entrada digital, do contador de pulsos, do totalizador e do sleep (FW-056). |
+| `melhorias_hardware.md` | Mudanças de hardware anotadas para a próxima revisão das placas (pull-down das saídas, resistor e proteção das entradas, VBAT). |
+| `adr/README.md` | Decisões de arquitetura (ADR): versão do FreeRTOS, ferramenta MISRA, atualização e proteção. Todas em estado de proposta. |
+| `desvios_misra.md` | Registro dos desvios deliberados das regras MISRA C:2012 (DEV-001 em `lib/adc`). |
 
 ## Interfaces
 
@@ -56,3 +60,12 @@ Ponto de entrada para agentes e programadores. Comece por `INICIAR.md` na raiz d
 - Toda tarefa concluída atualiza os documentos afetados (regra de pronto em `planejamento/BACKLOG.md` e checklist da skill `doc-sync`).
 - Toda sprint fechada passa pelo checklist da skill `sprint-close`.
 - Comunicação do device é sempre por MQTT ou serial.
+
+## Histórico
+
+| Data | Versão | Alteração |
+|---|---|---|
+| 04/11/2026 | 0.2.5 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |
+| 04/11/2026 | 0.2.4 | Adicionada a pasta `adr/` com três decisões de arquitetura em proposta |
+| 04/11/2026 | 0.2.3 | Adicionada a tabela de histórico, que faltava. As alterações anteriores não foram registradas aqui; ver o histórico do git |
+| 01/11/2026 | 0.1.0 | Criado |

@@ -1,6 +1,6 @@
 # Plano de implantação do firmware — oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 01/11/2026 · **Versão:** 0.1.0
+> **Criado em:** 01/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.2.3
 
 ## Objetivo e escopo
 
@@ -33,6 +33,13 @@ Prazo de referência: protótipo de bancada em um mês a partir de 29/10/2026, d
 - Corrente em mA e valor de engenharia por entrada, com span, zero e offset.
 - **Aceite:** em bancada, a taxa configurada e a média por segundo batem com um gerador de corrente.
 
+### Fase 1B — Entrada digital e contador de pulsos
+- Entrada digital ativa com tensão no campo (12 a 24 V; na bancada, até 12 V), em modo discreto, de frequência em Hz (faixa de 0 a 20 kHz, ajuste depois) ou de contador de pulsos.
+- Filtro de ruído: 50 ms no estado discreto e 20 ms nos pulsos, com leitura a cada 2 ms.
+- Contador de pulsos de leitores (até quatro, de 5 a 10 pulsos por segundo), com totalizador de 32 bits estilo hodômetro guardado nos registradores de backup, gravado a cada pulso.
+- Stop 2: o pulso acorda o STM32, que fica acordado e só dorme de novo depois de 60 s sem pulso (configurável). O ESP32 só acorda para transmitir. Dormindo, a aquisição analógica para.
+- **Aceite:** testes no PC do filtro, do contador e do totalizador; em bancada, o roteiro `documentacao/roteiro_bancada_entrada_digital.md` com contagem sem perda, total que sobrevive a reset e sono medido em corrente.
+
 ### Fase 2 — Regras de sensor
 - Falha abaixo de 4 mA ou acima de 20 mA.
 - Dente de serra: inversão de sentido acima do percentual, em janela de 5 segundos. Padrão de 2% sem inversor e 10% com inversor de frequência.
@@ -49,7 +56,7 @@ Prazo de referência: protótipo de bancada em um mês a partir de 29/10/2026, d
 - **Aceite:** testes de fila cheia, envio perdido e confirmação recebida.
 
 ### Fase 4 — Saídas e controle
-- Saídas digitais discretas, pulsadas e em frequência (Hz proporcional a 4–20 mA, com 4 mA e 20 mA configuráveis).
+- Saídas digitais discretas (ligar e desligar, com retardo de acionamento, o relé de tempo) e em frequência, a "pulsada" (Hz proporcional a 4–20 mA, com 4 mA e 20 mA configuráveis). A saída em frequência só habilita com o sleep desligado.
 - Partida com atraso configurável por saída. Comando de desligar cancela a partida.
 - Modo manual e automático por saída. Manual prevalece e alerta o CCO. Retorno ao automático executa a regra válida imediatamente.
 - Prioridade: sensor local, depois agenda, depois regra da plataforma.
@@ -110,11 +117,17 @@ Prazo de referência: protótipo de bancada em um mês a partir de 29/10/2026, d
 - Formato de SETUP e INFO.
 - Campos do heartbeat (STATUS), incluindo conectividade do módulo.
 - Nomes dos grupos do JSON (`analogico`, `digital`, `falhas`, `sistema`, `rede`), a confirmar.
-- Build do ESP32 pelo ESP-IDF.
+- Build do ESP32 pelo ESP-IDF (FW-007), na SPRINT_07: só começa depois de finalizados os testes do STM32 e de o STM32 estar validado (decisão de 03/11/2026).
+- Modos da entrada digital no mapa Modbus e endereço do totalizador (P-032).
+- Despertar do módulo para transmitir por RTC e por entrada analógica (outra sprint).
 - Validação de TLS 1.3 na memória do STM32L4 e L0.
 
 ## Histórico
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 03/11/2026 | 0.2.3 | O "acionamento por tempo" é o retardo de acionamento; ligar com a saída ligada ou aguardando é descartado; mapa Modbus das saídas ajustado (P-037) |
+| 03/11/2026 | 0.2.2 | Fase 4: "pulsada" é a saída em frequência; retardo de acionamento na saída discreta; exclusão com o sleep |
+| 03/11/2026 | 0.2.1 | FW-007 posicionado depois da validação do STM32 (SPRINT_07) |
+| 03/11/2026 | 0.2.0 | Adicionada a fase 1B (entrada digital e contador de pulsos) e atualizadas as pendências do device |
 | 01/11/2026 | 0.1.0 | Criado plano de implantação do firmware, em fases com aceite e testes no PC, simulador e bancada |

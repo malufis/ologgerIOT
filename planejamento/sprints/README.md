@@ -1,26 +1,51 @@
 # Sprints do firmware — índice
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 01/11/2026 · **Versão:** 0.1.0
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.20
 
-Sprints de uma semana. Cada sprint tem meta, itens do backlog e critério de encerramento. Itens concluídos são marcados no arquivo da sprint e no `BACKLOG.md`.
+Sprints de uma semana. Cada sprint tem um arquivo com meta, itens do backlog, estado e critério de encerramento. Itens concluídos são marcados no arquivo da sprint e no `BACKLOG.md`.
 
-| Sprint | Semana (início) | Meta | Itens |
-|---|---|---|---|
-| SPRINT_00 | 02/11/2026 | Base do projeto e build vazio | FW-001 a FW-008 |
-| SPRINT_01 | 09/11/2026 | Aquisição analógica | FW-009 a FW-012 |
-| SPRINT_02 | 16/11/2026 | Regras de sensor | FW-013 a FW-016 |
-| SPRINT_03 | 23/11/2026 | Média móvel, fila e alertas | FW-017 a FW-021 |
-| SPRINT_04 | 30/11/2026 | Saídas e controle | FW-022 a FW-025 |
-| SPRINT_05 | 07/12/2026 | Modbus RTU | FW-026 a FW-029 |
-| SPRINT_06 | 14/12/2026 | Relógio e agenda offline | FW-030 a FW-032 |
-| SPRINT_07 | 21/12/2026 | MQTT e ESP32 | FW-033 a FW-036 |
-| SPRINT_08 | 28/12/2026 | Sessão, serial e início da atualização | FW-037 a FW-039, FW-040 |
-| SPRINT_09 | 04/01/2027 | Atualização e bancada | FW-041 a FW-045 |
+| Sprint | Semana | Meta | Itens | Situação em 03/11/2026 |
+|---|---|---|---|---|
+| `SPRINT_00` | 02/11/2026 | Base do projeto e build vazio | FW-001 a FW-006, FW-008 e FW-046 | **Concluída em 04/11/2026** (versão 0.2.0 do changelog); FW-007 movido para a SPRINT_07 |
+| `SPRINT_01` | 09/11/2026 | Aquisição analógica | FW-009 a FW-012 | Código pronto e medido em bancada; bloqueada pela ferrite L2 (HW-007) |
+| `SPRINT_01B` | 03/11/2026 (paralela) | Entrada digital e contador de pulsos | FW-052 a FW-060 | Código pronto, lógica testada no PC; bancada pendente |
+| `SPRINT_02` | 16/11/2026 | Regras de sensor | FW-013 a FW-016 | Planejada |
+| `SPRINT_03` | 23/11/2026 | Média móvel, fila e alertas | FW-017 a FW-021 | Planejada |
+| `SPRINT_04` | 30/11/2026 | Saídas e controle | FW-022 a FW-025, FW-061, FW-063 e FW-064 | Em andamento: FW-022, FW-024 e FW-025 em código pronto; FW-061 com os dois lados prontos (falta o comando Modbus); FW-063 e FW-023 parciais (avaliador pronto; saída em frequência ligada ao TIM6, sem teste em hardware) |
+| `SPRINT_05` | 07/12/2026 | Modbus RTU | FW-026 a FW-029 e FW-047 a FW-050 | Planejada; FW-026 e FW-028 com código pronto (escravo na RS-485) |
+| `SPRINT_06` | 14/12/2026 | Relógio e agenda offline | FW-030 a FW-032 | Planejada; FW-030 e FW-032 com a lógica pura pronta (`tempo`, `agenda`, `agenda_aplicador`) o driver do RTC, a tarefa da agenda e a persistência da agenda escritos |
+| `SPRINT_07` | 21/12/2026 | MQTT e ESP32 | FW-007 e FW-033 a FW-036 | Planejada; o ESP32 só começa depois da validação do STM32 |
+| `SPRINT_08` | 28/12/2026 | Sessão, serial e início da atualização | FW-037 a FW-040 e FW-062 | Planejada |
+| `SPRINT_09` | 04/01/2027 | Atualização e bancada | FW-041 a FW-045 e FW-051 | Planejada |
 
-As datas são a sequência de semanas a partir de 02/11/2026. O protótipo de bancada tem referência em 29/11/2026, que cai na SPRINT_04. **Risco de prazo:** ver `planejamento/BACKLOG.md`. A reavaliação do escopo acontece antes da SPRINT_03.
+As datas são a sequência de semanas a partir de 02/11/2026. O protótipo de bancada tem referência em 29/11/2026, que é a véspera do início da SPRINT_04. **Risco de prazo:** ver `planejamento/BACKLOG.md`, seção "Prazo e risco", que traz a reavaliação de 03/11/2026. A reavaliação do escopo com o responsável técnico acontece antes da SPRINT_03.
+
+**ESP32 (03/11/2026).** O FW-007 (build do ESP32) e a parte ESP32 do FW-046 estão na SPRINT_07 e só começam depois de finalizados os testes do STM32 e de o STM32 estar validado (decisão de 03/11/2026). A SPRINT_00 foi fechada em 04/11/2026 pela skill `sprint-close`.
 
 ## Histórico
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.20 | SPRINT_05 com o escravo Modbus em código pronto |
+| 04/11/2026 | 0.2.19 | SPRINT_04 inclui o FW-064 |
+| 04/11/2026 | 0.2.18 | SPRINT_06 com a persistência da agenda |
+| 04/11/2026 | 0.2.17 | SPRINT_06 com a tarefa da agenda escrita |
+| 04/11/2026 | 0.2.16 | SPRINT_06 com o driver do RTC escrito |
+| 04/11/2026 | 0.2.15 | SPRINT_06 com o aplicador da agenda pronto |
+| 04/11/2026 | 0.2.14 | SPRINT_06 com a lógica pura do FW-030 pronta |
+| 04/11/2026 | 0.2.13 | SPRINT_04 com o FW-023 ligado ao timer |
+| 04/11/2026 | 0.2.12 | SPRINT_04 com o FW-061 pronto nos dois lados |
+| 04/11/2026 | 0.2.11 | SPRINT_04 com o FW-023 parcial |
+| 04/11/2026 | 0.2.10 | SPRINT_04 com o FW-063 parcial |
+| 04/11/2026 | 0.2.9 | SPRINT_04: agenda local e CCO online no FW-025 |
+| 04/11/2026 | 0.2.8 | SPRINT_04 inclui o FW-063 (regra local) |
+| 04/11/2026 | 0.2.7 | SPRINT_04: FW-025 em código pronto |
+| 04/11/2026 | 0.2.6 | SPRINT_08 inclui o FW-062 |
+| 04/11/2026 | 0.2.5 | SPRINT_00 concluída em 04/11/2026 |
+| 04/11/2026 | 0.2.4 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |
+| 03/11/2026 | 0.2.3 | SPRINT_04 inclui o FW-061 (sleep liga e desliga); FW-022 e FW-024 em código pronto |
+| 03/11/2026 | 0.2.2 | SPRINT_04 em andamento: FW-022 em código pronto |
+| 03/11/2026 | 0.2.1 | FW-007 movido para a SPRINT_07; SPRINT_00 pronta para o `sprint-close` |
+| 03/11/2026 | 0.2.0 | Criados os arquivos das sprints 01 e 02 a 09, que só existiam no índice. Adicionada a coluna de situação. Corrigidos os itens: FW-047 a FW-050 na SPRINT_05, FW-051 na SPRINT_09 e FW-046 na SPRINT_00 |
+| 03/11/2026 | 0.1.1 | Adicionada SPRINT_01B (entrada digital), paralela à SPRINT_01 |
 | 01/11/2026 | 0.1.0 | Criado índice das sprints de SPRINT_00 a SPRINT_09 |

@@ -1,6 +1,6 @@
 ﻿# Configuração do dispositivo — oLoggerIOT
 
-> **Criado em:** 29/10/2026 · **Última modificação:** 01/11/2026 · **Versão:** 0.1.36
+> **Criado em:** 29/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.65
 
 ## Origem e estado
 
@@ -46,7 +46,7 @@ O usuário confirmou: **span é a faixa de medição do sensor**, com exemplo de
 Em 30/10/2026, Rodrigo Maluf definiu que as saídas deverão permitir:
 
 - **Ligar e desligar** por comando.
-- **Acionar por um tempo**, desligando automaticamente ao final do intervalo.
+- **Acionar por um tempo:** é o **retardo de acionamento** da saída (esclarecido em 03/11/2026). Não há desligamento automático ao final de um intervalo; ver "Saídas digitais — implementação" abaixo.
 - **Relé de partida com atraso configurável:** depois da falta de energia, o sistema volta e informa que está normal. Um novo comando de ligar inicia a contagem; ao terminar o tempo configurado, a porta digital é ligada.
 
 O requisito descreve o comportamento funcional esperado; não decide se o relé temporizado será implementado em firmware ou por componente externo. O tempo de partida será **configurável por saída**, conforme definição do usuário; valores, limites e padrão ainda serão esclarecidos.
@@ -113,6 +113,61 @@ O usuário esclareceu que sua referência anterior a **escala logarítmica** diz
 
 A frequência de atualização e a relação entre quantidade de entradas e saídas ainda não foram definidas. Não foram definidos largura de pulso, duty cycle, estado elétrico em 0 Hz ou forma de geração do sinal.
 
+## Persistência da configuração (decidido em 04/11/2026)
+
+**Toda a configuração e o setup do device ficam na memória flash** e sobrevivem ao reinício e à falta de energia (sem depender da bateria do VBAT). Isso vale para todos os registradores de retenção do mapa Modbus (`mapa_modbus.md`): spans, zeros e offsets das entradas, modo das entradas digitais, tipo das saídas, frequências, entrada associada, retardo, limiares e sentido da regra do sensor, estabilidade do sensor, RS-485, fuso horário, intervalos, modo de operação e inatividade da entrada digital. A agenda semanal das saídas é gravada no mesmo registro.
+
+- **Onde:** nas duas últimas páginas de 2 KB da flash interna do STM32 (confirmado em 04/11/2026, P-046), em dois espaços que se alternam, com CRC-32. Uma queda de energia durante a gravação deixa a configuração anterior intacta.
+- **Quando:** 5 segundos depois da última mudança, para juntar várias escritas do CCO numa gravação só e poupar a flash.
+- **Na partida:** o registro é lido e aplicado aos módulos. Sem registro válido, valem os padrões de fábrica (fuso de Brasília, retardo zero, estabilidade de 5 minutos, inatividade de 60 s).
+- **Regras de exclusão** aplicadas em toda escrita e na leitura do registro: a saída 1 não tem modo frequência, e o sleep não liga com saída em frequência. Numa gravação inconsistente o sleep é desligado.
+- **Regras do sensor em funcionamento:** a tarefa `regras_tarefa` lê as entradas 4–20 mA a cada 200 ms e aplica a frequência ou a regra de cada saída, conforme a entrada associada. Falha do sensor (confirmada em 04/11/2026, P-047): corrente abaixo de 3,6 mA ou acima de 21 mA (NAMUR NE43); a detecção de dente de serra continua no FW-013.
+- **RS-485:** a velocidade, o modo e o endereço (40400 a 40402) já valem para o escravo Modbus (`modbus_tarefa`); o modo mestre ainda não existe.
+- **Ainda sem módulo:** intervalos de coleta e envio e modo da entrada digital ficam guardados, prontos para quando o módulo existir.
+
+## Entrada digital — respostas de 03/11/2026
+
+- **Sinal ativo:** a entrada é ativa quando há tensão, ou seja, em nível alto.
+- **Filtro de ruído:** a mudança de estado só é aceita depois de um tempo estável. Tempo padrão de **50 ms**, definido pelo responsável técnico em 03/11/2026. O firmware converte o tempo em número de amostras, arredondando para cima; a entrada é lida a cada 2 ms.
+- **Tensão de campo:** de 12 a 24 V, a mesma fonte da entrada do CLP (03/11/2026). Na placa de bancada, a D1 foi retirada e o limite é 12 V, com o resistor de 4K7 em 0402 mantido até o novo layout (0603). Análise do circuito em `analise_hardware_ologgeriot.md`, achado HW-008.
+- **Polaridade no pino:** no OloggerMulti o optoacoplador inverte o sinal. Com tensão no campo, o pino do STM32 fica em nível baixo; o firmware entrega o estado já corrigido (ativa = há tensão).
+- **Sleep:** a entrada pode acordar o STM32 do sleep.
+- **Contador de pulsos (03/11/2026):** o device pode ser usado como contador de pulsos, para economizar energia. O pulso acorda o STM32 (Stop 2), que fica acordado contando e só dorme de novo depois do tempo sem pulso, de 60 s por padrão e configurável; com pulso constante ele não acorda e dorme a cada pulso. Dormindo, só a entrada digital fica ativa. Os pulsos vêm de leitores, sem repique, a 5 a 10 por segundo no máximo, com até quatro leitores ao mesmo tempo. O filtro dos pulsos acordado é de 20 ms. Cada entrada tem um totalizador de 32 bits, como um hodômetro: só soma, volta a zero ao estourar, é guardado fora da RAM e sobrevive a reset e à falta de energia; o servidor calcula as diferenças. O ESP32 só é acordado para transmitir (1, 2 ou 5 vezes ao dia, ou por uma entrada analógica), em outra sprint. Contar dormindo é preferível, mas nenhum pulso pode ser perdido antes da transmissão. Detalhes e pendências em `planejamento/sprints/SPRINT_01B.md`.
+- **Tipos de uso:** a entrada pode ser discreta (0 ou 1), contador de pulsos ou de frequência em Hz (faixa de projeto de 0 a 20 kHz; faixa máxima, janela de medição e filtro do modo de frequência ainda a definir).
+- **Implementação:** o módulo `lib/io` atende a funcionalidade `ENTRADA_DIGITAL` do OloggerMulti. A escolha entre os modos fica em cada entrada, na configuração.
+- **Itens de backlog:** FW-052 a FW-060, na fase 1B (SPRINT_01B).
+
+## Saídas digitais — implementação (03/11/2026)
+
+- **Circuito:** cada saída é um transistor NPN em coletor aberto: ligada é `OUT-n` puxado ao terra. Pino de controle em nível alto liga. A carga é externa.
+- **Estado na partida:** todas as saídas partem desligadas. Não religam sozinhas depois de falta de energia: aguardam novo comando, conforme a regra do B4.
+- **Comandos implementados:** ligar e desligar. O "acionamento por tempo" é o retardo de acionamento (próximo item).
+- **Retardo de acionamento (relé de tempo, confirmado em 03/11/2026):** a saída discreta pode ter um retardo configurável por saída, em segundos. **Todo comando que liga a saída espera o retardo**; retardo zero liga na hora. Um comando de desligar durante a espera cancela a partida. Com o retardo em andamento, outro comando de ligar é descartado e a contagem continua. Com a saída já ligada, outro comando de ligar é descartado (o retardo não é reaplicado).
+- **Modo manual e automático (FW-025, 04/11/2026):** cada saída tem o seu modo. O comando manual direto prevalece, põe a saída em manual e vale até o comando de modo automático. Em automático valem os comandos locais (regra do sensor e agenda offline) ou o do CCO (online), como descrito na seção seguinte. A volta ao automático avalia e executa a regra válida na hora e, sem nenhum pedido válido, **mantém o último estado válido do comando** (confirmado em 04/11/2026). **Depois de um reinício a saída volta desligada e em modo automático** (confirmado em 04/11/2026). O alerta ao CCO na chegada do comando manual depende do espaço de alertas (FW-021) e ainda não existe.
+- **Implementado em parte:** o cálculo da frequência da saída em frequência está em `freq_saida` (FW-023, parcial: proporcional entre as frequências de 4 mA e de 20 mA, 0 Hz na falha). **Ainda não implementado:** gerar o sinal e o alerta ao CCO na chegada do comando manual.
+- **"Pulsada" é a saída em frequência (decidido em 03/11/2026):** não é acionamento por tempo. A saída discreta é só ligada ou desligada, com o retardo de acionamento. O tipo da saída no mapa Modbus ficou 0 = discreto e 1 = frequência.
+- **Sleep e frequência (decidido em 03/11/2026):** a saída em frequência só pode ser habilitada se o modo sleep não estiver ativo, e o sleep só liga se nenhuma saída estiver em frequência. O sleep tem uma função de ligar e desligar (modo de operação 40412). **Implementado em 04/11/2026** em `tipo_saida` e `io_frequencia`: a frequência é recusada com o sleep ligado e o gancho `sleep_permitido` recusa ligar o sleep com saída em frequência.
+- **Saída em frequência (decidido em 04/11/2026):** A saída em frequência só pode ser usada com o módulo fora do modo sleep (decidido em 04/11/2026). Em **0 Hz a saída fica em nível baixo** (transistor desligado); o **duty cycle é de 50%**; **só as saídas 2, 3 e 4 (PB13, PB14 e PB15, os pinos com canal de timer) têm o modo frequência**. A saída 1 (PB12) não tem canal de timer e fica só discreta: pedir frequência para ela é recusado. **Quem manda na saída em frequência (decidido em 04/11/2026): o sensor.** A saída replica a frequência da leitura da entrada analógica (`io_frequencia_atualiza`), e os comandos manual e automático não a influenciam: em modo frequência a saída cede o pino ao gerador. Com o sensor em falha, a saída vai para 0 Hz. A saída em frequência só tem sentido se o sensor está funcionando corretamente. O sinal é gerado por acumulador de fase em `gerador_freq`, avançado pelo TIM6 em `io_frequencia` (uma frequência independente por saída, avançado a 100 kHz por um timer); a 20 kHz o duty fica em 40% ou 60%, e abaixo disso se aproxima de 50%.
+- **Carga indutiva:** o diodo de roda livre fica no relé externo, instalado pelo responsável técnico.
+- **Stop 2:** o pino mantém o estado, mas o retardo não corre durante o sleep.
+
+## Comandos automáticos locais e remotos — saídas digitais (04/11/2026)
+
+Definição do responsável técnico em 04/11/2026.
+
+- **Comandos automáticos locais** (funcionam sem conectividade): são de duas origens.
+  - **Regra do sensor:** o comando que o próprio device gera, a partir de uma **entrada analógica**, para uma saída digital, por uma regra **cadastrada**. O cadastro leva **máximo, mínimo e frequência**: nas saídas discretas, o máximo e o mínimo são os limiares que ligam e desligam a saída (exemplo do B4: ligar a 5 bar e desligar a 4 bar); na saída em frequência, a frequência em Hz correspondente a 4 mA e a 20 mA. A saída tem regra do sensor quando a entrada analógica associada é diferente de zero.
+  - **Agenda:** é um comando local, porque funciona sem conectividade. Vale **só com o device offline**.
+- **Comando automático remoto:** o do **CCO**. **Com conectividade, em automático, é o comando do CCO que vale**; a agenda não é aplicada enquanto o device está online.
+- **Ordem de prioridade em cada saída:** (1) comando manual; (2) falha do sensor, que desliga; (3) regra do sensor, se cadastrada; (4) comando do CCO, se o device está online, ou agenda, se está offline.
+- **Quando a saída não tem regra do sensor,** valem a agenda (offline) e o CCO (online). Com regra do sensor cadastrada, a agenda e o CCO são ignorados.
+- **Conectividade:** ao ficar offline, a saída aplica na hora o estado do intervalo atual da agenda. Ao reconectar, avisa, **mantém o último estado e espera um novo comando do CCO**; o comando antigo do CCO não volta a valer.
+- **Falha do sensor:** em automático, a saída desliga. Quando a falha termina, a saída só **volta a operar pelo sensor depois de 5 minutos estáveis** (sem nova falha); uma falha dentro desse tempo reinicia a contagem. Até lá a saída continua desligada. Em manual, o comando manual se mantém. O código aceita configurar o tempo; o padrão é de 5 minutos.
+- **Retardo de acionamento:** vale para todo comando que liga a saída, qualquer que seja a origem.
+- **Cadastro da regra (decidido em 04/11/2026):** os campos **chegam por MQTT ou por Modbus e têm endereço Modbus**. As chaves do JSON do MQTT seguem o endereço Modbus do dado. O cadastro segue a regra da sessão de configuração. Os endereços propostos estão em `documentacao/mapa_modbus.md`: limiar máximo (40307–40336), limiar mínimo (40337–40366), sentido (40367–40381, proposta), além da entrada associada (40241–40255) e das frequências de 4 mA e 20 mA (40181–40240), que já existiam. Os limiares ficam na unidade de engenharia da entrada associada (por exemplo, bar).
+- **Sentido da comparação (confirmado em 04/11/2026):** sentido 0 = liga no mínimo e desliga no máximo; sentido 1 = liga no máximo e desliga no mínimo (o exemplo do B4, ligar a 5 bar e desligar a 4 bar, é o sentido 1). **Ainda a confirmar:** os endereços Modbus propostos. A agenda semanal chega por MQTT, do CCO, sem endereço Modbus: formato em `documentacao/agenda_operacional_offline.md` (P-042); o fuso horário é configurado pelo CCO (40403, proposta), o device guarda só a última agenda enviada e, depois de reinício, a agenda assume o intervalo do horário atual (P-043).
+- **Implementação:** `controle_saida` tem as três fontes (`CONTROLE_FONTE_SENSOR`, `CONTROLE_FONTE_AGENDA` e `CONTROLE_FONTE_CCO`) e sabe se a saída tem regra do sensor e se o device está online. O **avaliador e a validação do cadastro da regra do sensor** estão em `regra_sensor` (FW-063, parcial): com a regra cadastrada, o pedido do sensor vale e a agenda e o CCO são ignorados, ou seja, o sensor tem prioridade sobre a agenda. Falta ler e gravar o cadastro pelos endereços Modbus e por MQTT e ligar a regra à leitura da entrada analógica.
+
 ## Fluxos propostos pelo usuário
 
 ### 1. Dispositivo com conectividade própria
@@ -169,6 +224,26 @@ Depois de estabelecida a conectividade do dispositivo, a configuração continua
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.65 | Confirmados o local da persistência e a faixa de falha do sensor |
+| 04/11/2026 | 0.1.64 | RS-485 em uso pelo escravo Modbus |
+| 04/11/2026 | 0.1.63 | Persistência de toda a configuração na flash; regras do sensor ligadas à aquisição |
+| 04/11/2026 | 0.1.62 | Saída em frequência: o sensor manda; comandos manual e automático não a influenciam |
+| 04/11/2026 | 0.1.61 | Saída em frequência: cessão do pino ao gerador e TIM6 |
+| 04/11/2026 | 0.1.60 | Saída em frequência: só fora do sleep; gerador por acumulador de fase implementado |
+| 04/11/2026 | 0.1.59 | Saída em frequência: 0 Hz em nível baixo, duty de 50%, só as saídas 2 a 4; exclusão com o sleep implementada |
+| 04/11/2026 | 0.1.58 | Saída em frequência: cálculo implementado (FW-023 parcial) |
+| 04/11/2026 | 0.1.57 | Regra do sensor: avaliador implementado; sensor tem prioridade sobre a agenda |
+| 04/11/2026 | 0.1.56 | Agenda: fuso configurado pelo CCO, só a última agenda, e aplicação pelo horário atual depois de reinício |
+| 04/11/2026 | 0.1.55 | Sentido da comparação confirmado; agenda semanal por MQTT |
+| 04/11/2026 | 0.1.54 | A agenda é comando local e só vale offline; online vale o CCO; o cadastro da regra do sensor chega por MQTT ou Modbus, com endereços |
+| 04/11/2026 | 0.1.53 | Comandos automáticos locais (regra cadastrada) e remotos (CCO), espera de 5 minutos depois da falha do sensor, último estado válido e estado depois de reinício |
+| 04/11/2026 | 0.1.52 | FW-025: modo manual e automático por saída, prioridade do sensor local e falha do sensor |
+| 04/11/2026 | 0.1.51 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |
+| 03/11/2026 | 0.1.50 | O "acionamento por tempo" é o retardo de acionamento; ligar com a saída ligada ou aguardando é descartado; mapa Modbus das saídas ajustado (P-037) |
+| 03/11/2026 | 0.1.49 | Saídas digitais: "pulsada" é a saída em frequência, retardo de acionamento (relé de tempo), exclusão mútua entre frequência e sleep e diodo no relé externo |
+| 03/11/2026 | 0.1.48 | Registrada a implementação das saídas digitais: circuito, estado na partida, comandos e o que falta |
+| 03/11/2026 | 0.1.47 | Corrigidos o período de leitura (2 ms), os modos da entrada (discreto, contador de pulsos e frequência) e a faixa de itens do backlog (FW-052 a FW-060) |
+| 03/11/2026 | 0.1.46 | Tensão de campo da entrada digital: D1 retirada na bancada e limite de 12 V até o novo layout |
 | 29/10/2026 | 0.1.0 | Registrada configuração em linguagem natural pelo WhatsApp, gateway USB no celular e modo local restrito para estabelecer conectividade |
 | 29/10/2026 | 0.1.1 | Explicitada a camada de módulos de comunicação e rede entre STM32 e broker MQTT, conforme correção do usuário |
 | 29/10/2026 | 0.1.2 | Registrada dependência do gateway USB em relação ao MCU, com incompatibilidade no y7080 indicado pelos esquemáticos |
@@ -206,4 +281,13 @@ Depois de estabelecida a conectividade do dispositivo, a configuração continua
 | 31/10/2026 | 0.1.26 | Usuário definiu prioridade do sensor local sobre regra automática da plataforma em conflito na mesma saída |
 | 31/10/2026 | 0.1.27 | Usuário definiu agenda local apenas offline e regra automática da plataforma com conectividade, preservada a prioridade do sensor local |
 | 31/10/2026 | 0.1.28 | Usuário definiu aviso de reconexão, manutenção do último estado e espera por novo comando da plataforma |
+| 03/11/2026 | 0.1.37 | Entrada digital: sinal ativo em nível alto, filtro de ruído, despertar do sleep e modo discreto ou de frequência em Hz; itens FW-052 a FW-056 criados |
+| 03/11/2026 | 0.1.45 | Correção da lógica do sleep do contador de pulsos: o pulso acorda o STM32, que fica acordado até o tempo de inatividade; o ESP32 só acorda para transmitir |
+| 03/11/2026 | 0.1.44 | Contador de pulsos: até quatro leitores, uso de Stop 2 e totalizador estilo hodômetro por entrada |
+| 03/11/2026 | 0.1.43 | Modo sleep do contador de pulsos: a interrupção conta e o STM32 volta a dormir; pulsos de leitores, sem repique, de 5 a 10 por segundo |
+| 03/11/2026 | 0.1.42 | Contador de pulsos: filtro de 20 ms, inatividade de 60 s configurável, despertar para transmitir em 1, 2 ou 5 vezes ao dia e requisito de não perder pulsos |
+| 03/11/2026 | 0.1.41 | Registrado o uso da entrada digital como contador de pulsos que dorme após 1 minuto sem pulso e acorda com o pulso |
+| 03/11/2026 | 0.1.40 | Registrada a polaridade da entrada digital no pino: ativo em nível baixo, por causa do optoacoplador |
+| 03/11/2026 | 0.1.39 | Tensão de campo das entradas digitais definida em 12 a 24 V, mesma fonte da entrada do CLP |
+| 03/11/2026 | 0.1.38 | Tempo padrão do filtro de ruído definido em 50 ms, com conversão para amostras arredondada para cima; limite de frequência de entrada a confirmar no datasheet do STM32L412 |
 

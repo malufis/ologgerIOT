@@ -1,6 +1,6 @@
 # Índice para agentes — oLoggerIOT
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 02/11/2026 · **Versão:** 0.1.0
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.5
 
 Use este índice para achar o documento de cada assunto. Comece sempre por `INICIAR.md`. Para o índice completo, use `documentacao/README.md`.
 
@@ -32,8 +32,16 @@ Use este índice para achar o documento de cada assunto. Comece sempre por `INIC
 | Atualização de firmware e recuperação | `documentacao/atualizacao_firmware.md` |
 | Operação em campo (comissionamento, sessão) | `documentacao/manual_operacao_device.md` |
 | Esquemas, pinos e componentes de hardware | `documentacao/analise_hardware_ologgeriot.md` |
+| Entrada digital, contador de pulsos e totalizador | `documentacao/configuracao_do_dispositivo.md`, `planejamento/sprints/SPRINT_01B.md`, `lib/io/` |
+| Sleep, Stop 2 e despertar do STM32 | `planejamento/sprints/SPRINT_01B.md`, `documentacao/telemetria_e_armazenamento.md`, `lib/energia/` |
+| Roteiro de teste de bancada da entrada digital | `documentacao/roteiro_bancada_entrada_digital.md` |
+| Saídas digitais (circuito, estado, comandos, frequência) | `planejamento/sprints/SPRINT_04.md`, `documentacao/configuracao_do_dispositivo.md`, `lib/io/` (`saida`, `io_saida`, `io_saidas`) |
+| Bloqueios de bancada (L2, D1, limite de 12 V) | `documentacao/analise_hardware_ologgeriot.md` (HW-007 e HW-008) |
+| Melhorias de hardware para a próxima revisão das placas | `documentacao/melhorias_hardware.md` |
+| Decisões de arquitetura (atualização e espaço de flash decididos; versão do FreeRTOS e ferramenta MISRA em proposta) | `documentacao/adr/` |
+| Módulos existentes em `lib/` | `lib/README.md` |
 | Testes e critérios de aceite | `planejamento/PLANO_IMPLANTACAO_FIRMWARE.md`, `planejamento/BACKLOG.md` |
-| Desvio do MISRA | `documentacao/desvios_misra.md` (criado quando houver desvio) |
+| Desvio do MISRA | `documentacao/desvios_misra.md` (primeiro desvio registrado em 04/11/2026) |
 
 ## Skill → quando usar
 
@@ -54,3 +62,15 @@ Use este índice para achar o documento de cada assunto. Comece sempre por `INIC
 | `esp-idf-dev` | Implementar item no ESP32 |
 | `firmware-reviewer` | Revisar alteração antes de fechar (não edita) |
 | `doc-keeper` | Conferir documentação antes de fechar sprint (não edita código) |
+
+## Histórico
+
+| Data | Versão | Alteração |
+|---|---|---|
+| 04/11/2026 | 0.2.5 | Atualizada a linha das decisões de arquitetura |
+| 04/11/2026 | 0.2.4 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |
+| 04/11/2026 | 0.2.3 | Adicionada a entrada das decisões de arquitetura (ADR) |
+| 03/11/2026 | 0.2.2 | Adicionada a entrada de melhorias de hardware |
+| 03/11/2026 | 0.2.1 | Adicionada a entrada de saídas digitais |
+| 03/11/2026 | 0.2.0 | Adicionadas as entradas de entrada digital, sleep, roteiro de bancada, bloqueios de bancada e módulos de lib |
+| 02/11/2026 | 0.1.0 | Criado |

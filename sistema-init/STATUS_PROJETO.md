@@ -1,11 +1,11 @@
 # Status do Projeto — oLoggerIOT
 
-> **Criado em:** 15/10/2026 · **Última modificação:** 02/11/2026 · **Versão:** 0.3.134
+> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.170
 > **Repositório:** https://github.com/malufis/ologgerIOT
 
 ## Fase atual
-**Fase 0 — Entrevista e concepção** (B0 a B8 confirmados; B9 a B17 registrados como fora do device, confirmado pelo usuário em 01/11/2026)
-**Progresso da entrevista:** 9/18 blocos confirmados no device; B9 a B17 são do sistema e não têm perguntas de firmware.
+**Desenvolvimento do firmware** — entrevista encerrada (B0 a B8 confirmados; B9 a B17 registrados como fora do device, confirmado pelo usuário em 01/11/2026). Fase 0 do plano concluída em 04/11/2026 (SPRINT_00 fechada, o FW-007 foi para a SPRINT_07); fases 1, 1B e 4 em andamento (`planejamento/sprints/`).
+**Progresso da entrevista:** concluída (9/18 blocos no device; B9 a B17 são do sistema e não têm perguntas de firmware). O estado do código está em `documentacao/ESTADO_IMPLEMENTACAO.md`.
 
 ## Concluído
 - Kit de inicialização criado (`sistema-init/`)
@@ -45,6 +45,27 @@
 | P-026 | Validar recepção de comandos NB-IoT em baixo consumo, modo do módulo/operadora, despertar do STM32 e caminho MQTT | B3 | DEFINIDO — validação por teste com módulo real e operadora; execução pendente |
 
 | P-027 | Amostragem de 10 a 1000 amostras/s com média simples por segundo; envio por média móvel de janela de um envio; falha por dente de serra com inversão acima de 2% sem inversor e 10% com inversor, em 5 s; falha vai para 0 Hz; primeira leitura após zero sem comparação; escala logarítmica não é requisito | B4 | CONCLUÍDO em 01/11/2026 |
+| P-028 | HW-007: soldar a ferrite L2 na placa de bancada, conferir o VDDA (3,25 V) e refazer a calibração em 4, 8, 12, 16 e 20 mA | Fase 1 | PENDENTE — bloqueia o FW-012 |
+| P-029 | HW-008: entrada digital com D1 retirada e limite de 12 V na bancada; resistor de 4K7 em 0402 passa a 0603 no próximo layout, e 24 V ainda pede potência maior; avaliar supressor de ~30 V para campo industrial | Fase 1B | PARCIAL — 12 V na bancada; decidir o layout |
+| P-030 | Bateria no pino VBAT e cristais do relógio | Fase 1B | RESOLVIDO em 04/11/2026 — a bateria é opcional, conforme a implantação; o OloggerMulti tem os dois cristais (LSE para o RTC) e o y7080 não tem cristal. Sem bateria, o totalizador e a hora se perdem na falta de energia (hora restaurada pelo NTP, totalizador recomeça); com bateria, sobrevivem |
+| P-031 | Confirmar que os leitores geram pulsos mais largos que 20 ms (com folga) e a taxa de 5 a 10 pulsos por segundo | Fase 1B | PENDENTE — confirmar com os leitores |
+| P-032 | Mapa Modbus: definir os modos da entrada digital (discreto, contador de pulsos e frequência) e o endereço do totalizador; hoje o mapa diz "discreto ou pulsado" | Fase 1B | PENDENTE |
+| P-033 | Frequência em Hz (FW-054): limite do pino no datasheet e do optoacoplador TLP291, faixa de 0 a 20 kHz, janela de medição e filtro próprio do modo | Fase 1B | PENDENTE — ajuste fica para depois |
+| P-034 | Saída digital "pulsada" (modo 1 do mapa Modbus) | Fase 4 | RESOLVIDO em 03/11/2026 — "pulsada" é a saída em frequência; o acionamento por tempo da saída discreta é o retardo de acionamento (relé de tempo) |
+| P-035 | HW-009: saídas digitais sem pull-down na base do transistor; estado durante reset e bootloader não garantido | Fase 4 | ANOTADO em 03/11/2026 em `documentacao/melhorias_hardware.md` para a próxima revisão; pull-down de ~10 kΩ |
+| P-036 | Saída em frequência (FW-023): PB12 não tem canal de timer e o temporizador de software não roda em Stop 2 | Fase 4 | RESOLVIDO em 03/11/2026 — a frequência só habilita com o sleep desligado e o sleep só liga sem saída em frequência (FW-061); falta implementar o lado das saídas |
+| P-037 | Mapa Modbus: o tipo da saída (40166–40180) tinha 1 = pulsado e 2 = frequência, que são a mesma coisa | Fase 4 | RESOLVIDO em 03/11/2026 — 0 = discreto, 1 = frequência (pulsada), 2 reservado; 40271–40285 reservado (o tempo de acionamento é o retardo de 40256–40270) |
+| P-038 | Espaço de flash do STM32L412C8: 64 KB, com a imagem atual em 25,8 KB | Fase 9 | RESOLVIDO em 04/11/2026 — ADR-0003: imagem na flash externa com bootloader; novo FW-062 reserva o espaço e mede a folga por fase |
+| P-039 | ADR-0001 (versão do FreeRTOS nos dois builds) e ADR-0002 (ferramenta MISRA): propostas aguardando decisão | Fase 0 | PENDENTE |
+| P-040 | Modo manual e automático das saídas (FW-025) | Fase 4 | RESOLVIDO em 04/11/2026 — o sensor volta a operar depois de 5 minutos estáveis; sem pedido válido mantém o último estado válido; depois de reinício a saída volta desligada e em automático. Resta o alerta ao CCO na chegada do comando manual, que depende do espaço de alertas (FW-021) |
+| P-041 | Regra do sensor entrada analógica para saída digital (FW-063): cadastro e classificação da agenda | Fase 4 | RESOLVIDO em 04/11/2026 — os campos vêm por MQTT ou Modbus e têm endereço Modbus (limiares 40307–40366 e sentido 40367–40381, endereços propostos a confirmar); sentido 0 = liga no mínimo e desliga no máximo, sentido 1 = liga no máximo e desliga no mínimo; a agenda é comando local e só vale offline, e online vale o CCO |
+| P-042 | Agenda semanal offline (FW-032): formato do cadastro dos 336 intervalos de 30 minutos | Fase 6 | RESOLVIDO em 04/11/2026 (proposta a confirmar) — vem por MQTT do CCO, sem endereço Modbus, em 84 caracteres hexadecimais por saída, validada por inteiro; implementado em `lib/agenda` |
+| P-043 | Agenda: fuso, versão, momento depois de reinício, identificador do comando e tratamento de saída ausente e de cadeia vazia | Fase 6 | RESOLVIDO em 04/11/2026 — fuso horário configurado pelo CCO (40403, proposta); o device guarda só a última agenda, sem ordem de versão; depois de reinício a agenda assume o intervalo do horário atual; saída ausente mantém e cadeia vazia apaga (proposta mantida); identificador do comando em proposta (P-044) |
+| P-044 | Identificador do comando MQTT | Fase 7 | RESOLVIDO em 04/11/2026 — aceito: campo `id` de até 36 caracteres, devolvido sem alteração em cada resposta, descarte de repetição com os últimos 8; nomes `etapa` e `motivo` e endereço 40403 do fuso seguem como proposta |
+| P-045 | Agenda sem fuso configurado | Fase 6 | RESOLVIDO em 04/11/2026 — o fuso começa em Brasília (−180), e a agenda e o fuso gravados persistem ao reinício; a agenda só funciona com o sleep desabilitado |
+| P-046 | Onde guardar a agenda e o fuso | Fase 6 | RESOLVIDO em 04/11/2026 — nas duas últimas páginas de 2 KB da flash interna (0x0800F000 a 0x0800FFFF), com a área do programa em 60 KB; a posição final será conferida com o layout do bootloader (FW-062) |
+| P-047 | Propostas da configuração persistente | Fase 6 | RESOLVIDO em 04/11/2026 — confirmados os endereços 40382–40396 (estabilidade do sensor) e 40413 (inatividade da entrada digital), os padrões de fábrica e a falha do sensor abaixo de 3,6 mA ou acima de 21 mA (NAMUR NE43) |
+| P-048 | Formato serial da RS-485 | Fase 5 | RESOLVIDO em 04/11/2026 — fica 8N1 (8 bits, sem paridade, 1 stop bit) |
 
 ## Decisões tomadas
 B0 — Identificação: respostas e resumo confirmados pelo usuário em 29/10/2026.
@@ -300,12 +321,12 @@ Regra de processo: a entrevista do firmware só pergunta o que é do device. O q
 - Pendentes do device: build do ESP32 (ESP-IDF), lista de campos do heartbeat, formato de SETUP e INFO, nomes dos grupos do JSON.
 
 ## Processo de desenvolvimento (01/11/2026)
-- **Git:** repositório local iniciado em `firmware/`, com remoto `origin` para `https://github.com/malufis/ologgerIOT.git`. Nada enviado ao remoto e nenhum commit feito ainda, porque commit e push dependem de ordem explícita.
+- **Git:** repositório local iniciado em `firmware/`, com remoto `origin` para `https://github.com/malufis/ologgerIOT.git`. Em 03/11/2026 o branch `feat/fw-002-cmake-raiz` tem commits enviados ao remoto e o PR #1 está aberto para `main`; commit e push seguem dependendo de ordem explícita do usuário.
 - **Documentação:** índice em `documentacao/README.md`. Dicionário de funções, padrão de código C (base MISRA C:2012), contrato de integração e manual de operação criados como esqueletos.
-- **Backlog:** `planejamento/BACKLOG.md`, com 45 itens FW-001 a FW-045 em 11 fases. Sprints de uma semana, de SPRINT_00 a SPRINT_09, em `planejamento/sprints/`.
+- **Backlog:** `planejamento/BACKLOG.md`, com 64 itens (FW-001 a FW-064) em 12 fases, incluindo a fase 1B. Sprints de uma semana, de SPRINT_00 a SPRINT_09, em `planejamento/sprints/`.
 - **Skills:** `c-firmware-standards`, `doc-sync`, `device-profile-build` e `sprint-task` em `firmware/.claude/skills/`.
 - **Agentes:** `firmware-dev` e `doc-keeper` em `firmware/.claude/agents/`.
-- **Pendente:** scripts `tools/verifica_padrao.py` e `tools/gera_dicionario.py` (FW-004 e FW-008), citados pelas skills.
+- **Scripts prontos (02/11/2026):** `tools/verifica_padrao.py` e `tools/gera_dicionario.py` (FW-004 e FW-008), citados pelas skills.
 - **Risco de prazo:** o escopo do protótipo de 29/11/2026 não cabe no cronograma de uma semana por sprint. Reavaliar antes da SPRINT_03.
 
 ## Decisões de desenvolvimento (02/11/2026)
@@ -322,12 +343,57 @@ Regra de processo: a entrevista do firmware só pergunta o que é do device. O q
 - **FreeRTOS em todo o sistema** (STM32 e ESP32), com alocação estática. Regras em `documentacao/padrao_codigo_c.md`, seção FreeRTOS.
 - **Modbus aprovado** conforme `documentacao/modbus_mapeamento_dados.md` (v0.2.0). Escrita em equipamento externo fora do escopo. Backlog: FW-046 na SPRINT_00 e FW-047 a FW-050 na fase de Modbus.
 
+## Decisões de entrada digital e contador de pulsos (03/11/2026)
+- **Uso:** o device pode ser contador de pulsos, com até quatro leitores ao mesmo tempo, pulsos sem repique de 5 a 10 por segundo. Tensão de campo de 12 a 24 V, a mesma fonte da entrada do CLP; na bancada, até 12 V e sem a D1 (HW-008).
+- **Filtros:** 50 ms no estado discreto e 20 ms nos pulsos; leitura a cada 2 ms.
+- **Sleep:** Stop 2. O pulso acorda o STM32, que fica acordado e só dorme de novo depois de 60 s sem pulso (configurável); com pulso constante não acorda e dorme a cada pulso. O ESP32 só é acordado para transmitir (1, 2 ou 5 vezes ao dia, ou por entrada analógica), em outra sprint. O sleep começa desabilitado.
+- **Totalizador:** cada entrada tem um total de 32 bits que só soma, como um hodômetro, guardado nos registradores de backup (duas cópias com complemento) e gravado a cada pulso. Quem lê calcula a diferença. Nenhum pulso pode ser perdido antes da transmissão.
+- **Frequência em Hz:** faixa de projeto de 0 a 20 kHz; o ajuste fica para depois.
+- Detalhes em `documentacao/configuracao_do_dispositivo.md` e `planejamento/sprints/SPRINT_01B.md`.
+
+## Saídas digitais (03/11/2026)
+- **Circuito:** NPN BC847 em coletor aberto por saída; pino em nível alto liga e puxa `OUT-n` ao terra; base com 1k e sem pull-down (HW-009).
+- **Implementado (FW-022, FW-024 e FW-025):** ligar, desligar e retardo de acionamento (relé de tempo), com as saídas desligadas na partida. O "acionamento por tempo" é o retardo; não há desligamento automático. Todo comando de ligar espera o retardo; com a saída ligada ou com o retardo em andamento, outro ligar é descartado; desligar cancela a partida. Modo manual e automático por saída, com prioridade do sensor local e falha do sensor (FW-025), em código. Falta a saída em frequência (FW-023) e o alerta ao CCO. "Pulsada" é a saída em frequência.
+- **Sleep e frequência:** a saída em frequência só habilita com o sleep desligado, e o sleep só liga sem saída em frequência (FW-061). Diodo de roda livre no relé externo. Melhorias de hardware em `documentacao/melhorias_hardware.md`.
+- Detalhes em `planejamento/sprints/SPRINT_04.md` e `documentacao/configuracao_do_dispositivo.md`.
+
+- **Comandos automáticos (04/11/2026):** os **comandos automáticos locais** funcionam sem conectividade e são a **regra do sensor** (entrada analógica para saída digital, cadastrada com máximo, mínimo e frequência) e a **agenda**, que só vale offline. O **comando automático remoto** é o do CCO e vale online. Com regra do sensor, a agenda e o CCO são ignorados. Os campos do cadastro vêm por MQTT ou Modbus, com endereço Modbus. Falha do sensor: a saída só volta a operar pelo sensor depois de 5 minutos estáveis. Sem pedido válido, mantém o último estado válido do comando. Depois de reinício, desligada, automática e offline.
+
 ## Próximo passo recomendado
-B5, B6 e B7 fechados pelo usuário em 01/11/2026. B8 fechado pelo usuário em 01/11/2026. B9 a B17 confirmados como fora do device. Plano de implantação criado em `planejamento/PLANO_IMPLANTACAO_FIRMWARE.md`. Fase 0 em andamento na SPRINT_00: FW-001 concluído em 02/11/2026 (pastas com README). Próximo: FW-002 (CMake raiz com seleção de perfil). As pendências de heartbeat, formato de SETUP e INFO e nomes dos grupos do JSON ficam para a implantação. Execução do teste NB-IoT (P-026) fica para a fase de bancada.
+A entrevista está encerrada e o firmware está em desenvolvimento. Os dois builds STM32 compilam sem avisos. Próximo: executar o roteiro de bancada da entrada digital (FW-056) quando o device estiver disponível, soldar a L2 e fechar o FW-012. O FW-007 (ESP32) e a parte ESP32 do FW-046 foram para a SPRINT_07 e só começam depois de finalizados os testes do STM32 e de o STM32 estar validado (decisão de 03/11/2026). O estado de cada módulo está em `documentacao/ESTADO_IMPLEMENTACAO.md`; o backlog e as sprints, em `planejamento/`. As pendências de heartbeat, formato de SETUP e INFO e nomes dos grupos do JSON ficam para a fase 7. Execução do teste NB-IoT (P-026) fica para a fase de bancada.
 
 ## Histórico de atualizações
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.170 | P-046, P-047 e P-048 resolvidas; firmware passa a ser compilado com -Os |
+| 04/11/2026 | 0.3.169 | FW-026 e FW-028: escravo Modbus RTU pronto; P-048 aberta (paridade) |
+| 04/11/2026 | 0.3.168 | FW-064: configuração persistente; P-047 aberta (propostas da configuração) |
+| 04/11/2026 | 0.3.167 | P-045 resolvida; P-046 aberta (local da persistência); persistência da agenda escrita |
+| 04/11/2026 | 0.3.166 | FW-032: tarefa da agenda pelo RTC escrita; P-045 aberta (agenda sem fuso) |
+| 04/11/2026 | 0.3.165 | FW-030: driver do RTC escrito, sem teste em hardware |
+| 04/11/2026 | 0.3.164 | P-030 resolvida: bateria VBAT opcional; cristais só no OloggerMulti |
+| 04/11/2026 | 0.3.163 | FW-032: aplicador da agenda pelo horário atual pronto |
+| 04/11/2026 | 0.3.162 | FW-030 parcial: módulo `tempo` pronto |
+| 04/11/2026 | 0.3.161 | Saída em frequência: o sensor manda; teste na bancada |
+| 04/11/2026 | 0.3.160 | FW-023: gerador ligado ao TIM6 e aos pinos (sem teste em hardware) |
+| 04/11/2026 | 0.3.159 | FW-023: gerador de frequência pronto e testado |
+| 04/11/2026 | 0.3.158 | FW-061 pronto nos dois lados; FW-023 com as decisões de 0 Hz, duty de 50% e canais |
+| 04/11/2026 | 0.3.157 | FW-023 parcial (freq_saida pronto) |
+| 04/11/2026 | 0.3.156 | P-044 resolvida; FW-063 parcial (regra_sensor pronto) |
+| 04/11/2026 | 0.3.155 | P-043 resolvida (fuso pelo CCO, só a última agenda, aplicação pelo horário atual); P-044 aberta (identificador do comando) |
+| 04/11/2026 | 0.3.154 | P-041 e P-042 resolvidas (sentido confirmado; agenda por MQTT); P-043 aberta |
+| 04/11/2026 | 0.3.153 | P-041 resolvida (cadastro por MQTT ou Modbus; agenda é comando local); P-042 aberta (cadastro da agenda) |
+| 04/11/2026 | 0.3.152 | Comandos automáticos locais e remotos; P-040 resolvida; P-041 aberta; novo FW-063 |
+| 04/11/2026 | 0.3.151 | FW-025 em código pronto; pendência P-040 com o que o B4 não especifica |
+| 04/11/2026 | 0.3.150 | ADR-0003 decidido (imagem na flash externa com bootloader); P-038 resolvida; novo FW-062 |
+| 04/11/2026 | 0.3.149 | SPRINT_00 concluída em 04/11/2026 (changelog 0.2.0); cinco regras do padrão de código confirmadas; ADR-0003 escolhido como o primeiro a decidir |
+| 04/11/2026 | 0.3.148 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |
+| 04/11/2026 | 0.3.147 | Pendências P-038 (espaço de flash do STM32L412C8) e P-039 (ADRs de FreeRTOS e MISRA); criada a pasta `documentacao/adr/` |
+| 03/11/2026 | 0.3.146 | O "acionamento por tempo" é o retardo de acionamento; ligar com a saída ligada ou aguardando é descartado; mapa Modbus das saídas ajustado (P-037) |
+| 03/11/2026 | 0.3.145 | Saídas digitais: pulsada é a saída em frequência, retardo de acionamento, sleep e frequência não coexistem, melhorias de hardware anotadas; P-034 e P-036 resolvidas, P-035 anotada e P-037 aberta |
+| 03/11/2026 | 0.3.144 | SPRINT_04 começou: saídas digitais discretas (FW-022) em código pronto; pendências P-034 a P-036 |
+| 03/11/2026 | 0.3.143 | Decisão do responsável técnico: o ESP32 (FW-007) fica para depois de finalizados os testes do STM32 e de ele estar validado; movido para a SPRINT_07 |
+| 03/11/2026 | 0.3.142 | Fase de desenvolvimento: aquisição analógica, entrada digital, contador de pulsos, totalizador e gerência de energia em código; decisões de 03/11/2026 registradas; pendências P-028 a P-033; backlog com situação e sprints 01 a 09 criadas |
 | 15/10/2026 | 0.1.0 | Criação do status inicial a partir do rascunho |
 | 15/10/2026 | 0.2.0 | Removido nome provisório; decisões de stack deferidas; lambda e auditoria incorporados |
 | 15/10/2026 | 0.3.0 | Entrevista em 18 blocos: IoT/MQTT, apps móveis, banco/RLS/LGPD e auditoria separada |
@@ -427,6 +493,13 @@ B5, B6 e B7 fechados pelo usuário em 01/11/2026. B8 fechado pelo usuário em 01
 | 01/11/2026 | 0.3.94 | Usuário confirmou continuar coletando e substituir os dados mais antigos com memória cheia |
 | 01/11/2026 | 0.3.95 | Usuário definiu espaço separado e pequeno para alertas, apagados após sincronização |
 | 01/11/2026 | 0.3.96 | Usuário confirmou substituir o alerta mais antigo quando o espaço reservado estiver cheio |
+| 02/11/2026 | 0.3.141 | FW-046 concluído no STM32: FreeRTOS com alocação estática nos dois builds, tarefa de vida executando no L412 real com o tick de 1 ms conferido (9,9 ciclos/s para 10 esperados). Parte ESP32 adiada |
+| 02/11/2026 | 0.3.140 | FW-003 concluído: pinagem das duas placas conferida contra as netlists e compilada com o HAL real; corrigido aviso do linker no y7080. Decisão: testar todo o STM32 antes do ESP32 |
+| 02/11/2026 | 0.3.139 | OloggerMulti: BOOT0 do U1 sem ligação no esquema (HW-006), contornado por bits de opção sem intervenção física; imagem vazia executando no STM32L412 real (PC em `0x0800....`, SysTick contando). Criado FW-051 para o procedimento de gravação |
+| 02/11/2026 | 0.3.138 | FW-004, FW-005 e FW-008 concluídos: Doxygen com dicionário gerado, modelo de arquivo C e verificador de padrão, com 20 testes das ferramentas. OloggerMulti gravado por SWD, mas o BOOT0 em nível alto impede a execução; correção de hardware adiada |
+| 02/11/2026 | 0.3.137 | FW-006 concluído: imagens vazias dos dois builds STM32 compilam e linkam com `-Werror` (HAL L4 v1.18.2 para OloggerMulti e HAL L0 v1.12.4 para y7080) |
+| 02/11/2026 | 0.3.136 | FW-006 parcial: imagem vazia do OloggerMulti (STM32L412C8) compila e linka com HAL L4 v1.18.2 e `-Werror`; y7080 aguarda o pacote STM32CubeL0 |
+| 02/11/2026 | 0.3.135 | FW-002 concluído: CMake raiz com seleção de build por device, toolchain ARM e opções de CPU por MCU; configura os dois builds e recusa device inválido. Alvos STM32 pendentes de HAL (FW-006) |
 | 02/11/2026 | 0.3.134 | FreeRTOS aprovado para todo o sistema, com alocação estática; mapeamento Modbus aprovado com escravo de status; escrita em equipamento externo fora do escopo; backlog FW-046 a FW-050 |
 | 02/11/2026 | 0.3.133 | Decisões: MQTT do y7080 no modem; rádio externo do OloggerMulti na UART1 do STM32 com repasse transparente; dados Modbus só na RAM, 8 equipamentos e 64 variáveis; configuração pelo sistema e pelo gateway USB. Proposta em `documentacao/modbus_mapeamento_dados.md` |
 | 02/11/2026 | 0.3.132 | Composição confirmada pelo responsável técnico: OloggerMulti com saída em frequência, ESP32-C6 como único rádio e UART de rádio externo transparente (`RADIO_UART_EXTERNO`); y7080 com entrada diferencial, celular e MQTT, sem entradas nem saídas digitais; ESP-IDF v5.4.4 de referência |

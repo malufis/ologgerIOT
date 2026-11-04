@@ -1,13 +1,20 @@
 # Dicionário de funções — firmware oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 02/11/2026 · **Versão:** 0.2.0
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.18
 
 ## Como manter
 
 Toda função criada ou alterada no firmware entra neste dicionário no mesmo item em que foi feita. A skill `doc-sync` cuida disso ao fechar o item.
 
-- **Até o FW-004 e o FW-008:** a tabela é mantida à mão pelo desenvolvedor ou pelo agente que criou a função. Cada linha é conferida contra o código.
-- **Depois do FW-008:** a tabela é gerada por `tools/gera_dicionario.py`, a partir dos comentários Doxygen (FW-004). Não editar à mão. Corrija o comentário no código e regenere.
+A tabela é **gerada**, a partir dos comentários Doxygen. Não editar à mão o trecho entre os marcadores. Corrija o comentário no código e regenere:
+
+```
+doxygen Doxyfile
+python tools/gera_dicionario.py
+python tools/gera_dicionario.py --check
+```
+
+O `--check` não escreve: sai com código 1 se o dicionário estiver desatualizado. O Doxygen está configurado para falhar em função ou parâmetro sem documentação, então uma função pública sem Doxygen não chega ao dicionário.
 
 Cada entrada informa: nome, módulo, arquivo, finalidade, parâmetros, retorno e status da função (`ativa` ou `obsoleta`).
 
@@ -15,13 +22,203 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 
 ## Funções
 
+<!-- DICIONARIO:INICIO -->
 | Função | Módulo | Arquivo | Finalidade | Retorno | Status |
 |---|---|---|---|---|---|
-| — | — | — | Nenhuma função implementada ainda | — | — |
+| `adc_diagnostico` | adc | `lib/adc/include/adc.h` | Diagnóstico de bancada: mede VREFINT e a entrada 4 com conversões simples. | void | ativa |
+| `adc_inicia` | adc | `lib/adc/include/adc.h` | Inicia a aquisição contínua. | ADC_OK, ADC_ERRO_PARAMETRO ou ADC_ERRO_HAL. | ativa |
+| `adc_para` | adc | `lib/adc/include/adc.h` | Para a aquisição para o equipamento dormir: timer, DMA, ADC e referência interna. | ADC_OK ou ADC_ERRO_HAL. | ativa |
+| `adc_retoma` | adc | `lib/adc/include/adc.h` | Retoma a aquisição com a taxa e o callback de adc_inicia(). | ADC_OK, ADC_ERRO_PARAMETRO (se adc_inicia() nunca foi chamado) ou ADC_ERRO_HAL. | ativa |
+| `agenda_carrega_hex` | agenda | `lib/agenda/include/agenda.h` | Carrega a agenda a partir da cadeia hexadecimal recebida do CCO. | AGENDA_OK, AGENDA_ERRO_PARAMETRO, AGENDA_ERRO_TAMANHO ou AGENDA_ERRO_CARACTERE. | ativa |
+| `agenda_estado` | agenda | `lib/agenda/include/agenda.h` | Informa o que a agenda pede para um instante da semana. | AGENDA_SEM_AGENDA se a agenda não está definida ou o instante é inválido; senão, ligada ou desligada. | ativa |
+| `agenda_indice` | agenda | `lib/agenda/include/agenda.h` | Calcula o índice do intervalo de 30 minutos de um instante da semana. | Índice de 0 a 335, ou AGENDA_INDICE_INVALIDO se algum argumento estiver fora da faixa. | ativa |
+| `agenda_limpa` | agenda | `lib/agenda/include/agenda.h` | Deixa a agenda sem definição: o estado de qualquer instante passa a ser "sem agenda". | AGENDA_OK ou AGENDA_ERRO_PARAMETRO. | ativa |
+| `agenda_aplicador_atualiza` | agenda_aplicador | `lib/agenda/include/agenda_aplicador.h` | Avalia as agendas no horário atual e informa as saídas com um estado a pedir. | Quantidade de saídas com um estado a pedir, ou zero se algum ponteiro for nulo. | ativa |
+| `agenda_aplicador_carrega` | agenda_aplicador | `lib/agenda/include/agenda_aplicador.h` | Carrega a agenda de uma saída; só troca a agenda se a cadeia for válida por inteiro. | AGENDA_OK, AGENDA_ERRO_PARAMETRO (nulo ou canal inválido), AGENDA_ERRO_TAMANHO ou AGENDA_ERRO_CARACTERE. | ativa |
+| `agenda_aplicador_limpa` | agenda_aplicador | `lib/agenda/include/agenda_aplicador.h` | Apaga todas as agendas e volta ao estado de partida. | AGENDA_OK, ou AGENDA_ERRO_PARAMETRO se ap for nulo. | ativa |
+| `agenda_aplicador_reavalia` | agenda_aplicador | `lib/agenda/include/agenda_aplicador.h` | Marca todas as saídas para serem avaliadas de novo na próxima atualização. | AGENDA_OK, ou AGENDA_ERRO_PARAMETRO se ap for nulo. | ativa |
+| `agenda_config_desempacota` | agenda_config | `lib/agenda/include/agenda_config.h` | Desempacota uma carga nas agendas e no fuso, só se ela for válida por inteiro. | AGENDA_CONFIG_OK, AGENDA_CONFIG_ERRO_PARAMETRO, AGENDA_CONFIG_ERRO_FORMATO ou AGENDA_CONFIG_ERRO_CAMPO. | ativa |
+| `agenda_config_empacota` | agenda_config | `lib/agenda/include/agenda_config.h` | Empacota o fuso e as agendas numa carga. | AGENDA_CONFIG_OK ou AGENDA_CONFIG_ERRO_PARAMETRO. | ativa |
+| `agenda_tarefa_alteracoes` | agenda_tarefa | `lib/agenda/include/agenda_tarefa.h` | Quantas vezes uma agenda foi alterada desde a partida. | Contador de alterações; o módulo de configuração o compara para saber quando gravar. | ativa |
+| `agenda_tarefa_carrega` | agenda_tarefa | `lib/agenda/include/agenda_tarefa.h` | Carrega a agenda de uma saída, recebida do CCO. | Os códigos de agenda.h: AGENDA_OK ou o erro de parâmetro, tamanho ou caractere. | ativa |
+| `agenda_tarefa_define_fuso` | agenda_tarefa | `lib/agenda/include/agenda_tarefa.h` | Define o fuso horário da instalação, enviado pelo CCO. | AGENDA_TAREFA_OK ou AGENDA_TAREFA_ERRO_FUSO. | ativa |
+| `agenda_tarefa_exporta` | agenda_tarefa | `lib/agenda/include/agenda_tarefa.h` | Empacota as agendas para a gravação (formato de agenda_config.h). | AGENDA_CONFIG_OK ou AGENDA_CONFIG_ERRO_PARAMETRO. | ativa |
+| `agenda_tarefa_importa` | agenda_tarefa | `lib/agenda/include/agenda_tarefa.h` | Restaura as agendas gravadas, só se a carga for válida por inteiro. | AGENDA_CONFIG_OK ou o erro de agenda_config.h (as agendas ficam como estavam). | ativa |
+| `agenda_tarefa_inicia` | agenda_tarefa | `lib/agenda/include/agenda_tarefa.h` | Cria a tarefa que aplica as agendas, com memória estática. | AGENDA_TAREFA_OK ou AGENDA_TAREFA_ERRO_TAREFA. | ativa |
+| `aquisicao_contagens` | aquisicao | `lib/aquisicao/include/aquisicao.h` | Lê a média de contagens do ADC do último segundo de uma entrada. | AQUISICAO_OK, AQUISICAO_ERRO_PARAMETRO ou AQUISICAO_ERRO_SEM_DADO. | ativa |
+| `aquisicao_inicia` | aquisicao | `lib/aquisicao/include/aquisicao.h` | Cria a tarefa de aquisição e inicia o ADC. | AQUISICAO_OK, AQUISICAO_ERRO_PARAMETRO ou AQUISICAO_ERRO_INICIO. | ativa |
+| `aquisicao_ma` | aquisicao | `lib/aquisicao/include/aquisicao.h` | Lê a corrente média do último segundo de uma entrada. | AQUISICAO_OK, AQUISICAO_ERRO_PARAMETRO ou AQUISICAO_ERRO_SEM_DADO. | ativa |
+| `aquisicao_para` | aquisicao | `lib/aquisicao/include/aquisicao.h` | Para a aquisição, o timer e o ADC, para o equipamento dormir. | AQUISICAO_OK ou AQUISICAO_ERRO_INICIO. | ativa |
+| `aquisicao_retoma` | aquisicao | `lib/aquisicao/include/aquisicao.h` | Retoma a aquisição depois do sleep, com a mesma taxa. | AQUISICAO_OK ou AQUISICAO_ERRO_INICIO. | ativa |
+| `aquisicao_segundos` | aquisicao | `lib/aquisicao/include/aquisicao.h` | Lê a quantidade de segundos fechados desde a partida. | Segundos fechados. | ativa |
+| `armazem_grava` | armazem | `lib/armazem/include/armazem.h` | Grava uma carga nova, sem apagar a anterior até a nova estar conferida. | ARMAZEM_OK, ARMAZEM_ERRO_PARAMETRO, ARMAZEM_ERRO_TAMANHO ou ARMAZEM_ERRO_FLASH (a carga anterior continua valendo). | ativa |
+| `armazem_inicia` | armazem | `lib/armazem/include/armazem.h` | Inicia o armazém e procura o registro válido mais recente. | ARMAZEM_OK, ou ARMAZEM_ERRO_PARAMETRO se algum ponteiro for nulo ou o espaço for pequeno. | ativa |
+| `armazem_le` | armazem | `lib/armazem/include/armazem.h` | Lê a carga do registro válido mais recente. | ARMAZEM_OK, ARMAZEM_ERRO_PARAMETRO, ARMAZEM_ERRO_VAZIO ou ARMAZEM_ERRO_TAMANHO. | ativa |
+| `config_bits_validos` | config | `lib/config/include/config.h` | Diz se os 32 bits guardados são um valor aceito pelo parâmetro. | true se estiver nos limites. | ativa |
+| `config_conflito` | config | `lib/config/include/config.h` | Diz se a configuração viola uma regra de exclusão. | true se há conflito. | ativa |
+| `config_desempacota` | config | `lib/config/include/config.h` | Carrega a configuração de uma carga gravada. | CONFIG_OK, CONFIG_ERRO_PARAMETRO, CONFIG_ERRO_TAMANHO ou CONFIG_ERRO_VERSAO. | ativa |
+| `config_empacota` | config | `lib/config/include/config.h` | Empacota a configuração numa carga para o armazém. | CONFIG_OK, CONFIG_ERRO_PARAMETRO ou CONFIG_ERRO_TAMANHO. | ativa |
+| `config_escreve_registradores` | config | `lib/config/include/config.h` | Grava registradores de retenção, só se o pedido inteiro for válido. | CONFIG_OK, CONFIG_ERRO_PARAMETRO, CONFIG_ERRO_ENDERECO ou CONFIG_ERRO_VALOR (nada muda). | ativa |
+| `config_float` | config | `lib/config/include/config.h` | Lê o valor de uma instância de ponto flutuante. | O valor, ou 0 se os argumentos forem inválidos. | ativa |
+| `config_indice` | config | `lib/config/include/config.h` | Posição de uma instância no vetor de valores. | A posição, ou CONFIG_VALORES se os argumentos forem inválidos. | ativa |
+| `config_instancias` | config | `lib/config/include/config.h` | Quantas entradas ou saídas tem um parâmetro. | Quantidade de instâncias, ou 0 se id for inválido. | ativa |
+| `config_inteiro` | config | `lib/config/include/config.h` | Lê o valor inteiro de uma instância (para parâmetros uint16 e int16). | O valor, ou 0 se os argumentos forem inválidos. | ativa |
+| `config_le_registradores` | config | `lib/config/include/config.h` | Lê registradores de retenção (holding), a partir de um endereço do mapa Modbus. | CONFIG_OK, CONFIG_ERRO_PARAMETRO ou CONFIG_ERRO_ENDERECO. | ativa |
+| `config_mudou` | config | `lib/config/include/config.h` | Diz se uma instância tem valor diferente nas duas configurações. | true se o valor mudou. Falso se os argumentos forem inválidos. | ativa |
+| `config_padroes` | config | `lib/config/include/config.h` | Põe todos os parâmetros nos valores de fábrica. | CONFIG_OK, ou CONFIG_ERRO_PARAMETRO se cfg for nulo. | ativa |
+| `config_tarefa_copia` | config_tarefa | `lib/config/include/config_tarefa.h` | Copia a configuração atual (para os módulos que a leem em laço, como as regras do sensor). | void | ativa |
+| `config_tarefa_escreve` | config_tarefa | `lib/config/include/config_tarefa.h` | Grava registradores de retenção da configuração e aplica o que mudou. | Os códigos de config.h; com erro, nada é alterado nem aplicado. | ativa |
+| `config_tarefa_inicia` | config_tarefa | `lib/config/include/config_tarefa.h` | Lê a configuração gravada, a aplica aos módulos e cria a tarefa de gravação. | CONFIG_TAREFA_OK ou CONFIG_TAREFA_ERRO_TAREFA. | ativa |
+| `config_tarefa_le` | config_tarefa | `lib/config/include/config_tarefa.h` | Lê registradores de retenção da configuração. | Os códigos de config.h (CONFIG_OK, CONFIG_ERRO_ENDERECO, ...). | ativa |
+| `controle_saida_aguardando` | controle_saida | `lib/io/include/controle_saida.h` | Lê se a saída espera o retardo de acionamento. | true se há um retardo em curso. | ativa |
+| `controle_saida_atualiza` | controle_saida | `lib/io/include/controle_saida.h` | Atualiza o estado com o instante atual e devolve se a saída está ligada. | true se a saída está ligada depois da atualização. | ativa |
+| `controle_saida_comando_manual` | controle_saida | `lib/io/include/controle_saida.h` | Comando manual direto: passa a saída ao modo manual e liga ou desliga. | true se a saída estava em modo automático e passou a manual. A chegada de todo comando manual gera um alerta ao CCO; o valor devolvido diz se houve a mudança de modo. | ativa |
+| `controle_saida_define_atraso` | controle_saida | `lib/io/include/controle_saida.h` | Define o retardo de acionamento da saída, em milissegundos. | void | ativa |
+| `controle_saida_define_conectividade` | controle_saida | `lib/io/include/controle_saida.h` | Informa se o device tem conectividade com o CCO. | void | ativa |
+| `controle_saida_define_estabilidade` | controle_saida | `lib/io/include/controle_saida.h` | Define o tempo de estabilidade do sensor depois de uma falha, em milissegundos. | void | ativa |
+| `controle_saida_define_regra_sensor` | controle_saida | `lib/io/include/controle_saida.h` | Informa se a saída tem uma regra do sensor cadastrada. | void | ativa |
+| `controle_saida_inicia` | controle_saida | `lib/io/include/controle_saida.h` | Inicia o controle: saída desligada, em modo automático, sem regra do sensor, offline, sem pedidos e sem falha, com a estabilidade padrão de 5 minutos. | CONTROLE_SAIDA_OK ou CONTROLE_SAIDA_ERRO_PARAMETRO. | ativa |
+| `controle_saida_ligada` | controle_saida | `lib/io/include/controle_saida.h` | Lê se a saída está ligada. | true se a saída está ligada. | ativa |
+| `controle_saida_modo` | controle_saida | `lib/io/include/controle_saida.h` | Lê o modo da saída. | Modo manual ou automático. | ativa |
+| `controle_saida_modo_automatico` | controle_saida | `lib/io/include/controle_saida.h` | Comando de modo automático: a saída avalia e executa a regra válida na hora. | void | ativa |
+| `controle_saida_pedido` | controle_saida | `lib/io/include/controle_saida.h` | Registra o pedido de uma fonte automática e, em modo automático, o aplica. | void | ativa |
+| `controle_saida_sensor_falha` | controle_saida | `lib/io/include/controle_saida.h` | Informa se o sensor que controla a saída falhou. | void | ativa |
+| `controle_saida_sensor_indisponivel` | controle_saida | `lib/io/include/controle_saida.h` | Lê se o sensor ainda está em falha ou esperando a estabilidade depois dela. | true se a saída ainda não pode operar pelo sensor. | ativa |
+| `energia_define_habilitada` | energia | `lib/energia/include/energia.h` | Liga ou desliga o modo sleep. Começa desligado. | ENERGIA_OK ou ENERGIA_ERRO_BLOQUEADO (só ao ligar). | ativa |
+| `energia_habilitada` | energia | `lib/energia/include/energia.h` | Informa se o sleep está habilitado. | true se o equipamento pode entrar em sleep. | ativa |
+| `energia_inicia` | energia | `lib/energia/include/energia.h` | Cria a tarefa de gerência de energia com memória estática. | ENERGIA_OK ou ENERGIA_ERRO. | ativa |
+| `energia_solicita_acordar` | energia | `lib/energia/include/energia.h` | Pede para o equipamento sair do sleep na próxima oportunidade. | void | ativa |
+| `flash_interna_ops` | flash_interna | `lib/armazem/include/flash_interna.h` | Devolve as operações do armazém sobre as duas últimas páginas da flash interna. | Ponteiro para uma tabela constante, válida durante toda a execução. | ativa |
+| `freq_saida_cadastra` | freq_saida | `lib/io/include/freq_saida.h` | Cadastra as frequências de 4 mA e de 20 mA. Só troca o cadastro se ambas forem válidas. | FREQ_SAIDA_OK, ou o código de erro (o cadastro anterior fica como estava). | ativa |
+| `freq_saida_calcula` | freq_saida | `lib/io/include/freq_saida.h` | Calcula a frequência da saída para uma corrente. | FREQ_SAIDA_OK, FREQ_SAIDA_ERRO_PARAMETRO se algum ponteiro for nulo ou ma não for numérico, ou FREQ_SAIDA_ERRO_SEM_CADASTRO se não houver cadastro (então hz recebe 0). | ativa |
+| `freq_saida_limpa` | freq_saida | `lib/io/include/freq_saida.h` | Deixa a conversão sem cadastro. | FREQ_SAIDA_OK, ou FREQ_SAIDA_ERRO_PARAMETRO se freq for nula. | ativa |
+| `gerador_freq_define` | gerador_freq | `lib/io/include/gerador_freq.h` | Define a frequência do gerador. | GERADOR_FREQ_OK, ou o código de erro (o gerador fica como estava). | ativa |
+| `gerador_freq_limpa` | gerador_freq | `lib/io/include/gerador_freq.h` | Para o gerador: nível baixo e fase zerada. | GERADOR_FREQ_OK, ou GERADOR_FREQ_ERRO_PARAMETRO se gerador for nulo. | ativa |
+| `gerador_freq_tick` | gerador_freq | `lib/io/include/gerador_freq.h` | Avança um tick e devolve o nível da saída. | true para nível alto (transistor ligado), false para nível baixo. | ativa |
+| `io_backup_grava` | io_backup | `lib/io/include/io_backup.h` | Grava uma palavra de backup. | void | ativa |
+| `io_backup_inicia` | io_backup | `lib/io/include/io_backup.h` | Liga o acesso ao domínio de backup e o clock do TAMP. | void | ativa |
+| `io_backup_le` | io_backup | `lib/io/include/io_backup.h` | Lê uma palavra de backup. | Valor da palavra; zero se o índice for inválido. | ativa |
+| `io_entrada_acordar_desabilita` | io_entrada | `lib/io/include/io_entrada.h` | Desliga a interrupção externa e volta as entradas ao modo de leitura simples. | void | ativa |
+| `io_entrada_acordar_habilita` | io_entrada | `lib/io/include/io_entrada.h` | Liga a interrupção externa na borda de ativação das entradas, para contar dormindo. | IO_OK. | ativa |
+| `io_entrada_coleta_pulsos` | io_entrada | `lib/io/include/io_entrada.h` | Lê e zera os pulsos contados em uma entrada pela interrupção externa. | Pulsos contados desde a última coleta; zero se o canal for inválido. | ativa |
+| `io_entrada_inicia` | io_entrada | `lib/io/include/io_entrada.h` | Configura os pinos das entradas digitais como entrada, sem resistor interno. | IO_OK. | ativa |
+| `io_entrada_irq` | io_entrada | `lib/io/include/io_entrada.h` | Trata a interrupção externa das entradas: soma um pulso em cada linha disparada. | void | ativa |
+| `io_entrada_le` | io_entrada | `lib/io/include/io_entrada.h` | Lê o estado de uma entrada digital. | IO_OK ou IO_ERRO_PARAMETRO. | ativa |
+| `io_filtro_amostras_do_tempo` | io_filtro | `lib/io/include/io_filtro.h` | Converte um tempo de estabilidade em número de amostras, arredondando para cima. | IO_FILTRO_OK ou IO_FILTRO_ERRO_PARAMETRO (nulo, zero ou número fora de uint16_t). | ativa |
+| `io_filtro_atualiza` | io_filtro | `lib/io/include/io_filtro.h` | Recebe uma amostra do nível da entrada e devolve o estado aceito. | Estado aceito após esta amostra. | ativa |
+| `io_filtro_inicia` | io_filtro | `lib/io/include/io_filtro.h` | Inicia o filtro com o estado aceito e o número de amostras de estabilidade. | IO_FILTRO_OK ou IO_FILTRO_ERRO_PARAMETRO. | ativa |
+| `io_frequencia_atualiza` | io_frequencia | `lib/io/include/io_frequencia.h` | Replica na saída a leitura do sensor: calcula a frequência e a aplica. | IO_FREQUENCIA_OK, IO_FREQUENCIA_ERRO_NAO_FREQUENCIA, IO_FREQUENCIA_ERRO_SEM_CADASTRO ou TIPO_SAIDA_ERRO_PARAMETRO (canal inválido ou corrente não numérica). | ativa |
+| `io_frequencia_cadastra` | io_frequencia | `lib/io/include/io_frequencia.h` | Cadastra as frequências de 4 mA e de 20 mA de uma saída em modo frequência. | IO_FREQUENCIA_OK, TIPO_SAIDA_ERRO_PARAMETRO ou IO_FREQUENCIA_ERRO_FREQUENCIA. | ativa |
+| `io_frequencia_define_hz` | io_frequencia | `lib/io/include/io_frequencia.h` | Define a frequência de uma saída em modo frequência. | IO_FREQUENCIA_OK, TIPO_SAIDA_ERRO_PARAMETRO, IO_FREQUENCIA_ERRO_NAO_FREQUENCIA ou IO_FREQUENCIA_ERRO_FREQUENCIA. | ativa |
+| `io_frequencia_define_tipo` | io_frequencia | `lib/io/include/io_frequencia.h` | Define o tipo de uma saída, respeitando a exclusão com o sleep. | TIPO_SAIDA_OK ou o código de erro de tipo_saida.h. | ativa |
+| `io_frequencia_hz_atual` | io_frequencia | `lib/io/include/io_frequencia.h` | Frequência que a saída está gerando agora. | Frequência em Hz; 0 se a saída não está em modo frequência ou está parada. | ativa |
+| `io_frequencia_inicia` | io_frequencia | `lib/io/include/io_frequencia.h` | Configura o TIM6 para interromper a 100 kHz, sem iniciá-lo. | IO_FREQUENCIA_OK ou IO_FREQUENCIA_ERRO_TIMER. | ativa |
+| `io_frequencia_irq` | io_frequencia | `lib/io/include/io_frequencia.h` | Atende a interrupção do TIM6: avança os geradores e escreve os pinos. | void | ativa |
+| `io_frequencia_sleep_permitido` | io_frequencia | `lib/io/include/io_frequencia.h` | Gancho sleep_permitido de energia.h. | false se alguma saída está em frequência (o sleep não pode ligar). | ativa |
+| `io_frequencia_tipo` | io_frequencia | `lib/io/include/io_frequencia.h` | Lê o tipo de uma saída. | TIPO_SAIDA_OK ou TIPO_SAIDA_ERRO_PARAMETRO. | ativa |
+| `io_pulsos_atualiza` | io_pulsos | `lib/io/include/io_pulsos.h` | Recebe o estado filtrado da entrada e conta a transição para ativo. | void | ativa |
+| `io_pulsos_contagem` | io_pulsos | `lib/io/include/io_pulsos.h` | Lê o total de pulsos contados. | Pulsos contados desde o início. | ativa |
+| `io_pulsos_define_timeout` | io_pulsos | `lib/io/include/io_pulsos.h` | Altera o tempo sem pulso necessário para poder dormir. | IO_PULSOS_OK ou IO_PULSOS_ERRO_PARAMETRO. | ativa |
+| `io_pulsos_inicia` | io_pulsos | `lib/io/include/io_pulsos.h` | Inicia o contador. O instante inicial conta como atividade. | IO_PULSOS_OK ou IO_PULSOS_ERRO_PARAMETRO. | ativa |
+| `io_pulsos_pode_dormir` | io_pulsos | `lib/io/include/io_pulsos.h` | Informa se a entrada ficou sem pulso pelo tempo configurado. | true se passou ao menos o tempo de inatividade desde o último pulso. | ativa |
+| `io_pulsos_soma` | io_pulsos | `lib/io/include/io_pulsos.h` | Soma pulsos contados enquanto o equipamento dormia. | void | ativa |
+| `io_saida_define` | io_saida | `lib/io/include/io_saida.h` | Liga ou desliga uma saída no pino. | IO_SAIDA_OK ou IO_SAIDA_ERRO_PARAMETRO. | ativa |
+| `io_saida_inicia` | io_saida | `lib/io/include/io_saida.h` | Configura os pinos das saídas, todos desligados. | IO_SAIDA_OK. | ativa |
+| `io_saida_le` | io_saida | `lib/io/include/io_saida.h` | Lê o estado que o pino de uma saída está comandando. | IO_SAIDA_OK ou IO_SAIDA_ERRO_PARAMETRO. | ativa |
+| `io_saidas_aguardando` | io_saidas | `lib/io/include/io_saidas.h` | Informa se uma saída está esperando o retardo de acionamento. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
+| `io_saidas_cede_pino` | io_saidas | `lib/io/include/io_saidas.h` | Cede o pino da saída ao gerador de frequência, ou o devolve ao controle discreto. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
+| `io_saidas_comando_manual` | io_saidas | `lib/io/include/io_saidas.h` | Comando manual direto: passa a saída ao modo manual e a liga ou desliga. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
+| `io_saidas_define_atraso` | io_saidas | `lib/io/include/io_saidas.h` | Define o retardo de acionamento (relé de tempo) de uma saída. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
+| `io_saidas_define_conectividade` | io_saidas | `lib/io/include/io_saidas.h` | Informa se o device tem conectividade com o CCO, para todas as saídas. | IO_SAIDAS_OK. | ativa |
+| `io_saidas_define_estabilidade` | io_saidas | `lib/io/include/io_saidas.h` | Define o tempo de estabilidade do sensor depois de uma falha. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
+| `io_saidas_define_regra_sensor` | io_saidas | `lib/io/include/io_saidas.h` | Informa se a saída tem uma regra do sensor cadastrada (entrada analógica para a saída). | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
+| `io_saidas_estado` | io_saidas | `lib/io/include/io_saidas.h` | Lê o estado de uma saída. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
+| `io_saidas_inicia` | io_saidas | `lib/io/include/io_saidas.h` | Cria a tarefa que liga as saídas ao fim do retardo, com memória estática. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_TAREFA. | ativa |
+| `io_saidas_modo` | io_saidas | `lib/io/include/io_saidas.h` | Lê o modo de uma saída (manual ou automático). | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
+| `io_saidas_modo_automatico` | io_saidas | `lib/io/include/io_saidas.h` | Comando de modo automático: a saída avalia e executa a regra válida na hora. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
+| `io_saidas_pedido` | io_saidas | `lib/io/include/io_saidas.h` | Registra o pedido de uma fonte automática: sensor, agenda ou CCO. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
+| `io_saidas_prepara` | io_saidas | `lib/io/include/io_saidas.h` | Leva os pinos das saídas ao estado desligado e zera os estados. | IO_SAIDAS_OK. | ativa |
+| `io_saidas_sensor_falha` | io_saidas | `lib/io/include/io_saidas.h` | Informa se o sensor que controla a saída falhou. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
+| `io_tarefa_bruto` | io_tarefa | `lib/io/include/io_tarefa.h` | Lê o estado das entradas sem filtro. | Máscara de bits, igual a io_tarefa_estado(), mas da última leitura direta. | ativa |
+| `io_tarefa_define_inatividade` | io_tarefa | `lib/io/include/io_tarefa.h` | Altera o tempo sem pulso necessário para poder dormir, em todas as entradas. | IO_TAREFA_OK ou IO_TAREFA_ERRO. | ativa |
+| `io_tarefa_define_total` | io_tarefa | `lib/io/include/io_tarefa.h` | Define o totalizador de uma entrada, por exemplo para igualar ao medidor. | IO_TAREFA_OK ou IO_TAREFA_ERRO. | ativa |
+| `io_tarefa_estado` | io_tarefa | `lib/io/include/io_tarefa.h` | Lê o estado filtrado das entradas. | Máscara de bits: o bit 0 é a entrada D1 e o bit 3 é a D4; 1 = ativa (há tensão). | ativa |
+| `io_tarefa_inicia` | io_tarefa | `lib/io/include/io_tarefa.h` | Inicia as entradas, o filtro e cria a tarefa com memória estática. | IO_TAREFA_OK ou IO_TAREFA_ERRO. | ativa |
+| `io_tarefa_pode_dormir` | io_tarefa | `lib/io/include/io_tarefa.h` | Informa se todas as entradas ficaram sem pulso pelo tempo de inatividade. | true se nenhuma entrada recebeu pulso no tempo configurado. | ativa |
+| `io_tarefa_prepara_sleep` | io_tarefa | `lib/io/include/io_tarefa.h` | Prepara as entradas para dormir: liga a contagem pela interrupção externa. | void | ativa |
+| `io_tarefa_pulsos` | io_tarefa | `lib/io/include/io_tarefa.h` | Lê o total de pulsos contados em uma entrada desde a partida. | Pulsos contados; zero se o canal for inválido. | ativa |
+| `io_tarefa_retoma` | io_tarefa | `lib/io/include/io_tarefa.h` | Retoma a leitura periódica depois do sleep. | void | ativa |
+| `io_tarefa_total` | io_tarefa | `lib/io/include/io_tarefa.h` | Lê o totalizador (hodômetro) de uma entrada. | Total acumulado de pulsos; zero se o canal for inválido. | ativa |
+| `io_tarefa_trata_despertar` | io_tarefa | `lib/io/include/io_tarefa.h` | Soma os pulsos contados dormindo e ressincroniza os filtros com o estado atual. | void | ativa |
+| `io_totalizador_corrompido` | io_totalizador | `lib/io/include/io_totalizador.h` | Informa se o total de uma entrada foi perdido por corrupção no armazém. | true se nenhuma cópia era válida na última carga e o total recomeçou em zero. Uma entrada nunca gravada (armazém zerado) também aparece como corrompida. | ativa |
+| `io_totalizador_define` | io_totalizador | `lib/io/include/io_totalizador.h` | Define o total de uma entrada, por exemplo para igualar à leitura do medidor. | IO_TOTALIZADOR_OK ou IO_TOTALIZADOR_ERRO_PARAMETRO. | ativa |
+| `io_totalizador_inicia` | io_totalizador | `lib/io/include/io_totalizador.h` | Carrega os totais do armazém e guarda a referência para as gravações seguintes. | IO_TOTALIZADOR_OK ou IO_TOTALIZADOR_ERRO_PARAMETRO. | ativa |
+| `io_totalizador_le` | io_totalizador | `lib/io/include/io_totalizador.h` | Lê o total de uma entrada. | Total acumulado; zero se o canal for inválido. | ativa |
+| `io_totalizador_soma` | io_totalizador | `lib/io/include/io_totalizador.h` | Soma pulsos ao total de uma entrada e grava no armazém. | IO_TOTALIZADOR_OK ou IO_TOTALIZADOR_ERRO_PARAMETRO. | ativa |
+| `modbus_mapa_ops` | modbus_mapa | `lib/modbus/include/modbus_mapa.h` | Operações do escravo ligadas ao firmware. | Ponteiro para uma tabela constante, válida durante toda a execução. | ativa |
+| `modbus_crc16` | modbus_rtu | `lib/modbus/include/modbus_rtu.h` | Calcula o CRC-16 do Modbus (polinômio 0xA001, valor inicial 0xFFFF). | CRC; no quadro vai o byte baixo primeiro. | ativa |
+| `modbus_rtu_processa` | modbus_rtu | `lib/modbus/include/modbus_rtu.h` | Processa um quadro recebido e monta a resposta. | Tamanho da resposta, ou 0 se não há o que responder (quadro de outro escravo, CRC errado, quadro curto ou difusão). | ativa |
+| `modbus_tarefa_inicia` | modbus_tarefa | `lib/modbus/include/modbus_tarefa.h` | Inicia a RS-485 com a velocidade da configuração e cria a tarefa do escravo. | MODBUS_TAREFA_OK ou MODBUS_TAREFA_ERRO. | ativa |
+| `regra_sensor_avalia` | regra_sensor | `lib/io/include/regra_sensor.h` | Avalia um valor da entrada e devolve o pedido da regra. | O pedido atual: LIGA, DESLIGA, ou NENHUM se a regra não está definida ou ainda não alcançou nenhum limiar. Um valor não numérico mantém o pedido anterior. | ativa |
+| `regra_sensor_cadastra` | regra_sensor | `lib/io/include/regra_sensor.h` | Cadastra a regra. Só troca a regra se todos os campos forem válidos. | REGRA_SENSOR_OK, ou o código de erro (a regra anterior fica como estava). | ativa |
+| `regra_sensor_limpa` | regra_sensor | `lib/io/include/regra_sensor.h` | Deixa a regra sem cadastro e sem pedido. | REGRA_SENSOR_OK, ou REGRA_SENSOR_ERRO_PARAMETRO se regra for nula. | ativa |
+| `regras_tarefa_inicia` | regras_tarefa | `lib/config/include/regras_tarefa.h` | Cria a tarefa das regras, com memória estática. | REGRAS_TAREFA_OK ou REGRAS_TAREFA_ERRO_TAREFA. | ativa |
+| `regras_tarefa_leitura` | regras_tarefa | `lib/config/include/regras_tarefa.h` | Última leitura de uma entrada analógica, para o Modbus. | REGRAS_TAREFA_OK, ou REGRAS_TAREFA_ERRO_TAREFA se a entrada for inválida (com valida falso). | ativa |
+| `rs485_define_velocidade` | rs485 | `lib/modbus/include/rs485.h` | Muda a velocidade (entre dois quadros). | RS485_OK ou RS485_ERRO_PARAMETRO. | ativa |
+| `rs485_envia` | rs485 | `lib/modbus/include/rs485.h` | Envia um quadro e espera o último bit sair. | RS485_OK, RS485_ERRO_PARAMETRO ou RS485_ERRO_TEMPO. | ativa |
+| `rs485_inicia` | rs485 | `lib/modbus/include/rs485.h` | Liga o USART2, os pinos e a interrupção, com a velocidade pedida. | RS485_OK ou RS485_ERRO_PARAMETRO. | ativa |
+| `rs485_irq` | rs485 | `lib/modbus/include/rs485.h` | Atende a interrupção do USART2. | void | ativa |
+| `rs485_recebe` | rs485 | `lib/modbus/include/rs485.h` | Espera um quadro completo e o copia. | Tamanho do quadro, ou 0. | ativa |
+| `rtc_define` | rtc | `lib/rtc/include/rtc.h` | Acerta o RTC com a hora UTC dada (por exemplo, a do servidor NTP). | RTC_OK, RTC_ERRO_LSE (cristal parado), RTC_ERRO_DATA ou RTC_ERRO_TEMPO. | ativa |
+| `rtc_hora_valida` | rtc | `lib/rtc/include/rtc.h` | Informa se o RTC tem uma hora válida. | true se o LSE subiu e o RTC já recebeu data e hora. | ativa |
+| `rtc_inicia` | rtc | `lib/rtc/include/rtc.h` | Liga o cristal LSE e o RTC, sem alterar a hora que o RTC já tem. | RTC_OK, RTC_ERRO_LSE ou RTC_ERRO_CONFIG. | ativa |
+| `rtc_le` | rtc | `lib/rtc/include/rtc.h` | Lê a hora atual em UTC. | RTC_OK, RTC_ERRO_PARAMETRO ou RTC_ERRO_INVALIDA. | ativa |
+| `rtos_tick_handler` | rtos | `lib/rtos/include/rtos.h` | Trata o tick do sistema, chamado pela interrupção do SysTick. | void | ativa |
+| `saida_aguardando` | saida | `lib/io/include/saida.h` | Informa se a saída está esperando o retardo de acionamento. | true se há um retardo em curso; a saída continua desligada. | ativa |
+| `saida_atualiza` | saida | `lib/io/include/saida.h` | Atualiza o estado com o instante atual e devolve se a saída está ligada. | true se a saída está ligada depois da atualização. | ativa |
+| `saida_define_atraso` | saida | `lib/io/include/saida.h` | Define o retardo de acionamento da saída. | void | ativa |
+| `saida_desliga` | saida | `lib/io/include/saida.h` | Comando de desligar. Cancela o retardo em curso e desliga a saída. | void | ativa |
+| `saida_inicia` | saida | `lib/io/include/saida.h` | Inicia a saída desligada e sem retardo. | SAIDA_OK ou SAIDA_ERRO_PARAMETRO. | ativa |
+| `saida_liga` | saida | `lib/io/include/saida.h` | Comando de ligar a saída, respeitando o retardo de acionamento. | void | ativa |
+| `saida_ligada` | saida | `lib/io/include/saida.h` | Lê o estado da saída sem atualizar o retardo. | true se a saída está ligada. | ativa |
+| `sensor_contagens_para_ma` | sensor | `lib/sensor/include/sensor.h` | Converte contagens do ADC em corrente, pela tensão no resistor shunt. | SENSOR_OK ou SENSOR_ERRO_PARAMETRO. | ativa |
+| `sensor_ma_para_valor` | sensor | `lib/sensor/include/sensor.h` | Converte corrente 4-20 mA em valor de engenharia, com zero, span e offset. | SENSOR_OK ou SENSOR_ERRO_PARAMETRO. | ativa |
+| `sensor_media_acumula` | sensor | `lib/sensor/include/sensor.h` | Acumula uma amostra e, ao fechar um segundo, entrega a média. | SENSOR_OK ou SENSOR_ERRO_PARAMETRO. | ativa |
+| `sensor_media_inicia` | sensor | `lib/sensor/include/sensor.h` | Inicia o acumulador para uma taxa de amostragem. | SENSOR_OK, SENSOR_ERRO_PARAMETRO ou SENSOR_ERRO_TAXA. | ativa |
+| `tempo_de_utc` | tempo | `lib/tempo/include/tempo.h` | Converte data e hora em UTC nos segundos desde 01/01/1970 (o inverso com fuso zero). | TEMPO_OK, TEMPO_ERRO_PARAMETRO ou TEMPO_ERRO_DATA. | ativa |
+| `tempo_inicio_de_intervalo` | tempo | `lib/tempo/include/tempo.h` | Diz se o instante local é o início de um intervalo de 30 minutos da agenda. | true se o minuto é 0 ou 30. Falso se local for nulo. | ativa |
+| `tempo_para_local` | tempo | `lib/tempo/include/tempo.h` | Converte o tempo UTC na data e hora locais. | TEMPO_OK, TEMPO_ERRO_PARAMETRO ou TEMPO_ERRO_FUSO. | ativa |
+| `tipos_saida_algum_em_frequencia` | tipo_saida | `lib/io/include/tipo_saida.h` | Diz se alguma saída está em frequência. | true se há uma saída em frequência: o sleep não pode ligar. Falso se tipos for nulo. | ativa |
+| `tipos_saida_define` | tipo_saida | `lib/io/include/tipo_saida.h` | Define o tipo de uma saída, respeitando a exclusão com o sleep. | TIPO_SAIDA_OK, ou o código de erro (o tipo anterior fica como estava). | ativa |
+| `tipos_saida_limpa` | tipo_saida | `lib/io/include/tipo_saida.h` | Põe todas as saídas no tipo discreto. | TIPO_SAIDA_OK, ou TIPO_SAIDA_ERRO_PARAMETRO se tipos for nulo. | ativa |
+| `tipos_saida_tipo` | tipo_saida | `lib/io/include/tipo_saida.h` | Lê o tipo de uma saída. | TIPO_SAIDA_OK ou TIPO_SAIDA_ERRO_PARAMETRO. | ativa |
+| `vida_contador` | vida | `lib/vida/include/vida.h` | Lê o contador de ciclos da tarefa de vida. | Quantidade de ciclos executados desde a partida. | ativa |
+| `vida_inicia` | vida | `lib/vida/include/vida.h` | Cria a tarefa de vida com memória estática. | 0 em sucesso, código negativo em erro. | ativa |
+| `vida_pilha_livre_palavras` | vida | `lib/vida/include/vida.h` | Lê a menor folga de pilha medida na tarefa de vida. | Folga mínima, em palavras de 32 bits. Zero antes do primeiro ciclo. | ativa |
+<!-- DICIONARIO:FIM -->
 
 ## Histórico
 
 | Data | Versão | Alteração |
 |---|---|---|
-| 01/11/2026 | 0.1.0 | Criado esqueleto do dicionário de funções, gerado a partir do Doxygen |
+| 04/11/2026 | 0.3.18 | Tabela regenerada com 170 funções públicas: entram as de `modbus_rtu`, `modbus_mapa`, `rs485` e `modbus_tarefa` |
+| 04/11/2026 | 0.3.17 | Tabela regenerada com 159 funções públicas: entram as de `config`, `config_tarefa`, `regras_tarefa` e as novas de `agenda_tarefa` |
+| 04/11/2026 | 0.3.16 | Tabela regenerada com 139 funções públicas: entram as de `armazem`, `flash_interna` e `agenda_config` |
+| 04/11/2026 | 0.3.15 | Tabela regenerada com 133 funções públicas: entram as de `agenda_tarefa` e `agenda_aplicador_reavalia` |
+| 04/11/2026 | 0.3.14 | Tabela regenerada com 129 funções públicas: entram as de `rtc` e `tempo_de_utc` |
+| 04/11/2026 | 0.3.13 | Tabela regenerada com 124 funções públicas: entram as de `agenda_aplicador` |
+| 04/11/2026 | 0.3.12 | Tabela regenerada com 121 funções públicas: entram `tempo_para_local` e `tempo_inicio_de_intervalo` |
+| 04/11/2026 | 0.3.11 | Tabela regenerada com 119 funções públicas: entram `io_frequencia_cadastra` e `io_frequencia_atualiza` |
+| 04/11/2026 | 0.3.10 | Tabela regenerada com 117 funções públicas: entram `io_frequencia_inicia`, `_define_hz`, `_irq` e `io_saidas_cede_pino` |
+| 04/11/2026 | 0.3.9 | Tabela regenerada com 113 funções públicas: entram as de `gerador_freq` |
+| 04/11/2026 | 0.3.8 | Tabela regenerada com 110 funções públicas: entram as de `tipo_saida` e `io_frequencia` |
+| 04/11/2026 | 0.3.7 | Tabela regenerada com 103 funções públicas: entram `freq_saida_limpa`, `freq_saida_cadastra` e `freq_saida_calcula` |
+| 04/11/2026 | 0.3.6 | Tabela regenerada com 100 funções públicas: entram `regra_sensor_limpa`, `regra_sensor_cadastra` e `regra_sensor_avalia` |
+| 04/11/2026 | 0.3.5 | Tabela regenerada com 97 funções públicas: entra o módulo `agenda` (4 funções) |
+| 04/11/2026 | 0.3.4 | Tabela regenerada com 93 funções públicas: entram `controle_saida_define_regra_sensor`, `controle_saida_define_conectividade` e `io_saidas_define_conectividade`; `define_regra_local` virou `define_regra_sensor` |
+| 04/11/2026 | 0.3.3 | Tabela regenerada com 91 funções públicas: entram `io_saidas_define_regra_local`, `io_saidas_define_estabilidade`, `controle_saida_define_regra_local`, `controle_saida_define_estabilidade` e `controle_saida_sensor_indisponivel` |
+| 04/11/2026 | 0.3.2 | Tabela regenerada com 86 funções públicas: entram `controle_saida` (modo manual e automático) e os comandos de `io_saidas`; saem `io_saidas_liga` e `io_saidas_desliga` |
+| 04/11/2026 | 0.3.1 | Tabela regenerada com 73 funções públicas: entram `saida`, `io_saida`, `io_saidas` e o retardo de acionamento; sai `io_saidas_aciona` |
+| 03/11/2026 | 0.3.0 | Tabela regenerada com 56 funções públicas: `io`, `energia`, parada e retomada da aquisição e as demais |
 | 02/11/2026 | 0.2.0 | Regra de manutenção antes da geração automática; tabela de funções com colunas definidas; só interface pública entra |
+| 01/11/2026 | 0.1.0 | Criado esqueleto do dicionário de funções, gerado a partir do Doxygen |

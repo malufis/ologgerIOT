@@ -1,6 +1,6 @@
 # Agenda operacional offline — oLoggerIOT
 
-> **Criado em:** 31/10/2026 · **Última modificação:** 01/11/2026 · **Versão:** 0.1.20
+> **Criado em:** 31/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.28
 
 ## Objetivo informado
 
@@ -27,8 +27,8 @@ Uma semana contém **336 intervalos de 30 minutos**: 48 por dia durante sete dia
 - Após retorno de energia, o usuário confirmou que a **agenda poderá acionar ligar e desligar**. Considerar a ordem da agenda como origem possível de um novo acionamento, respeitando o atraso de partida por saída já definido. A regra anterior de não restaurar automaticamente o último estado continua registrada; o momento de aplicação da agenda após reinicialização ainda precisa ser definido.
 - O usuário definiu controle de saídas por entrada analógica configurada localmente: **o sensor prevalece sobre a agenda** em conflito no modo automático. Comando manual prevalece sobre as regras automáticas e mantém **a saída destinatária** no modo manual até comando de modo automático para ela; o CCO é alertado. Outras saídas não mudam automaticamente de modo. Comandos de regras do sistema também são classificados como automáticos. Ver [configuração do dispositivo](configuracao_do_dispositivo.md).
 - Ao retornar uma saída ao modo automático, avaliar e executar imediatamente a regra válida naquele momento, respeitando a prioridade do sensor sobre a agenda e as regras de partida definidas. A necessidade de nova leitura quando não houver dado válido permanece a especificar.
-- Durante sleep, ao chegar o horário de uma mudança pela agenda offline, o STM32 deve despertar, executar a regra e voltar a dormir, conforme definição do usuário.
-- O usuário informou que o dispositivo dispõe de **relógio interno com bateria** para manter data e hora sem internet. A hora deverá ser conferida com um **servidor NTP quatro vezes ao dia**, substituindo a frequência anterior de uma vez ao dia, e atualizada quando o sistema iniciar após boot total. A agenda utiliza o relógio mantido por bateria durante o período offline; política de ajuste, disponibilidade e recuperação caso a sincronização falhe ainda serão definidas. Não confundir conferência NTP indisponível com perda comprovada da hora correta.
+- ~~Durante sleep, ao chegar o horário de uma mudança pela agenda offline, o STM32 deve despertar, executar a regra e voltar a dormir.~~ **Substituído em 04/11/2026:** a agenda **só funciona com o modo sleep desabilitado**; com o sleep habilitado ela não é aplicada e não há despertar para ela.
+- O usuário informou que o dispositivo dispõe de **relógio interno com bateria** para manter data e hora sem internet. **Atualização de 04/11/2026:** a bateria de backup é **opcional**, conforme a implantação; sem ela, a hora se perde na falta de energia e só volta pelo NTP, e a agenda não é aplicada enquanto a hora for inválida. O OloggerMulti tem o cristal de 32,768 kHz para o RTC; o y7080 não tem cristal. A hora deverá ser conferida com um **servidor NTP quatro vezes ao dia**, substituindo a frequência anterior de uma vez ao dia, e atualizada quando o sistema iniciar após boot total. A agenda utiliza o relógio mantido por bateria durante o período offline; política de ajuste, disponibilidade e recuperação caso a sincronização falhe ainda serão definidas. Não confundir conferência NTP indisponível com perda comprovada da hora correta.
 - Se o relógio **perder a hora correta**, o usuário corrigiu a orientação anterior: **cada saída permanece no último estado até a hora ser corrigida**, inclusive em modo manual; novas ações por regra local de sensor não alteram esse estado durante esse período. Novos comandos manuais aguardam a correção da hora. A perda da hora por si só não determina o desligamento. Como a hora deixa de ser confiável, a agenda não deve decidir novos horários até haver hora válida. O tratamento de alertas nesse estado ainda não foi especificado.
 - Após a correção da hora, executar automaticamente o último comando de cada saída que estava aguardando, incluindo comandos de desligar e respeitando as regras de desligamento já definidas. Em 01/11/2026, o usuário definiu que um comando adiado para uma saída permanece válido até ser substituído por novo comando para a mesma saída; o novo comando substitui o anterior. A interação com outras condições de operação ainda precisa ser detalhada.
 - O usuário definiu hora correta como premissa inegociável para a telemetria: dados sem horário válido não têm validade. O equipamento deve informar o problema e solicitar manutenção quando a hora estiver inválida. Sem conexão, guardar o aviso para envio após a reconexão, identificando que o horário da ocorrência é desconhecido. O tratamento de outros eventos ainda precisa ser definido.
@@ -45,10 +45,57 @@ Uma semana contém **336 intervalos de 30 minutos**: 48 por dia durante sete dia
 
 Os pontos listados nesta seção ainda não foram decididos ou implementados. As regras são requisitos a esclarecer no B4 e no bloco de automação; a organização do firmware continua para definição posterior pelo usuário.
 
+## Classificação da agenda (04/11/2026)
+
+- A agenda é um **comando automático local**: funciona sem conectividade, e por isso vale só com o device offline.
+- Com conectividade, em modo automático, o comando que vale é o do **CCO**. A agenda não é aplicada enquanto o device está online.
+- Ao ficar offline, a saída aplica na hora o estado do intervalo atual da agenda. Ao reconectar, mantém o último estado e espera um novo comando do CCO.
+- Uma saída com **regra do sensor** cadastrada (entrada analógica para saída digital) ignora a agenda.
+- O cadastro da agenda é feito por MQTT, pelo CCO (seção seguinte). O comportamento das saídas está em `documentacao/configuracao_do_dispositivo.md`.
+
+## Cadastro da agenda por MQTT (P-042, 04/11/2026)
+
+A agenda chega ao device **por MQTT, vinda do CCO, como configuração**. O formato abaixo é uma **proposta a confirmar**; o módulo `lib/agenda` já o implementa e testa.
+
+- **Canal:** mensagem de configuração no tópico `COMANDO`. O device responde em `RESULTADO` com "recebido" e depois "executado" ou "falhou com motivo". A agenda **não tem endereço Modbus**: são 336 bits por saída, até 15 saídas, e a atualização precisa ser atômica. Só se recebe por MQTT.
+- **Conteúdo:** uma cadeia de **84 caracteres hexadecimais por saída** (42 bytes, um bit por intervalo de 30 minutos; 1 = ligada, 0 = desligada). O intervalo k é `dia * 48 + hora * 2 + minuto / 30`, com o dia de 0 (segunda) a 6 (domingo). O bit k fica no byte `k / 8`, na posição `k % 8`, do menos significativo para o mais significativo. O byte 0 vem primeiro, em maiúsculas ou minúsculas.
+- **Exemplo** (a saída 1 liga na segunda das 08h às 08h30, que é o intervalo 16, byte 2, bit 0):
+
+```json
+{
+  "id": "12345",
+  "agenda": {
+    "versao": 7,
+    "saidas": {
+      "1": "000001000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "2": ""
+    }
+  }
+}
+```
+
+- **Saída que não vem na mensagem:** mantém a agenda que já tinha. **Cadeia vazia (`""`):** apaga a agenda da saída, que passa a "sem agenda".
+- **Validação por inteiro:** se qualquer saída tiver número inexistente neste build, cadeia que não tenha exatamente 84 caracteres ou caractere fora de 0 a 9 e A a F, o device **recusa a mensagem inteira**, responde "falhou com motivo" e **mantém a agenda anterior**. Só uma mensagem válida troca as agendas, de uma vez.
+- **Sessão de configuração:** vale a regra da sessão (`documentacao/integracao_sistema.md`): durante uma sessão ativa o device recusa o comando MQTT com aviso.
+- **Versão e responsabilidade (decidido em 04/11/2026):** o **CCO é responsável pela agenda**. O device **guarda só a última agenda que o CCO enviar**: não guarda versões antigas, não compara versões e não recusa uma agenda por ser mais antiga. O campo `versao` é opcional, é guardado junto com a agenda e informado ao sistema, mas nunca é comparado.
+- **Aprovação:** a aprovação pelo CCO ou integrador acontece no sistema, antes do envio. O device não a verifica.
+- **Armazenamento:** a agenda precisa sobreviver a reinício. Ficará na memória não volátil, com CRC e gravação atômica, no mesmo estilo da configuração do mapeamento Modbus (FW-048). São 42 bytes por saída, 168 bytes no OloggerMulti, mais a versão.
+- **Quando atua:** só com o device **offline**, em modo automático, **sem regra do sensor** na saída e com a **hora válida**. A agenda é aplicada **pelo horário atual**: a cada limite de 30 minutos o device pede à saída o estado do intervalo, e ao ficar offline pede o do intervalo atual. **Depois de um reinício, a agenda assume na hora o estado do intervalo do horário atual** (se reiniciou às 9h30, vale o que está agendado para as 9h30), sem esperar as tentativas de reconexão; se depois o device conecta, a saída mantém o estado e espera um novo comando do CCO. A agenda só funciona com o modo sleep desabilitado. **Implementado** (lógica) em `agenda_aplicador`: pede o estado na primeira avaliação, a cada virada de intervalo e depois de carregar ou apagar a agenda; sem hora válida não pede nada e as saídas mantêm o estado. A tarefa `agenda_tarefa` lê o RTC, aplica o fuso enviado pelo CCO e entrega o pedido às saídas; o fuso começa em **Brasília (UTC−3)** e vale até o CCO enviar outro (decidido em 04/11/2026). **A agenda e o fuso gravados persistem ao reinício**: ficam, com toda a configuração, nas duas últimas páginas da flash interna e são carregados na partida (`documentacao/configuracao_do_dispositivo.md`).
+- **Hora de referência (decidido em 04/11/2026):** o horário da instalação, o mesmo do `timestamp` do JSON. O **fuso horário é um parâmetro de configuração, enviado pelo CCO**, em minutos em relação ao UTC (endereço Modbus 40403 proposto, `documentacao/mapa_modbus.md`). O device não muda o fuso sozinho: se houver horário de verão, o CCO envia o novo valor.
+- **No código:** `agenda_carrega_hex` valida e carrega; `agenda_estado(dia, hora, minuto)` devolve ligada, desligada ou sem agenda; a tarefa que lê o relógio e entrega o pedido a `controle_saida_pedido` com a fonte `CONTROLE_FONTE_AGENDA` é parte do FW-032.
+
 ## Histórico
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.28 | A agenda é gravada junto com toda a configuração |
+| 04/11/2026 | 0.1.27 | Agenda só com o sleep desabilitado; fuso padrão de Brasília; persistência da agenda e do fuso |
+| 04/11/2026 | 0.1.26 | Tarefa da agenda pelo RTC; agenda só com o fuso configurado (proposta) |
+| 04/11/2026 | 0.1.25 | Bateria de backup opcional; cristais do OloggerMulti |
+| 04/11/2026 | 0.1.24 | Aplicador da agenda pelo horário atual implementado (lógica) |
+| 04/11/2026 | 0.1.23 | P-043: fuso horário configurado pelo CCO; sem ordem de versão, o device guarda só a última agenda; depois de reinício a agenda assume o intervalo do horário atual |
+| 04/11/2026 | 0.1.22 | P-042: a agenda chega por MQTT do CCO, em 84 caracteres hexadecimais por saída, com validação por inteiro; formato proposto e implementado em `lib/agenda` |
+| 04/11/2026 | 0.1.21 | A agenda é comando automático local e só vale offline; online vale o CCO; cadastro da agenda pendente (P-042) |
 | 31/10/2026 | 0.1.0 | Registrada e analisada a proposta de agenda semanal offline derivada do histórico, em intervalos de 30 minutos, e sua relação com regras existentes |
 | 31/10/2026 | 0.1.1 | Usuário confirmou estado por intervalo, aprovação pelo CCO/integrador e possibilidade de a agenda acionar saídas após retorno de energia; prioridades ainda pendentes |
 | 31/10/2026 | 0.1.2 | Usuário definiu prioridade de comando manual e sensor sobre agenda, classificação manual/automático e aviso ao CCO |

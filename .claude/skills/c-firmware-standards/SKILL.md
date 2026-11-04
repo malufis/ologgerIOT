@@ -56,4 +56,4 @@ Só com justificativa no código: `/* MISRA-DEV: regra X.Y, motivo */`. Registre
 
 ## Antes de terminar
 
-Rode `tools/verifica_padrao.py` quando existir (FW-008). Se a função passou de 40 linhas ou o arquivo de 400, divida antes de considerar a tarefa pronta.
+Rode `python tools/verifica_padrao.py` e `doxygen Doxyfile` (sem avisos). Se a função passou de 40 linhas ou o arquivo de 400, divida antes de considerar a tarefa pronta. Arquivo novo parte de `tools/modelos/`.

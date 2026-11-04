@@ -1,6 +1,6 @@
 # Integração do device com o sistema — oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 01/11/2026 · **Versão:** 0.1.0
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.5
 
 ## Para quem é
 
@@ -77,6 +77,29 @@ O device expõe o mapa Modbus RTU de `documentacao/mapa_modbus.md`, com 15 posi�
 
 Aplicação Python no notebook do técnico, com chaveiro serial ligado ao STM32. Envia apenas as configurações definidas no catálogo de comandos locais. Não há app de celular; o celular do integrador usa WhatsApp, pelo sistema.
 
+## Cadastro da agenda das saídas (proposta de 04/11/2026)
+
+A agenda semanal das saídas chega no tópico `COMANDO`, vinda do CCO, em JSON, e não tem endereço Modbus. Cada saída leva uma cadeia de 84 caracteres hexadecimais (336 intervalos de 30 minutos, um bit por intervalo). A mensagem é validada por inteiro: se qualquer saída for inválida, o device recusa tudo e responde em `RESULTADO` com o motivo, mantendo a agenda anterior. Formato completo, exemplo e regras em `documentacao/agenda_operacional_offline.md`.
+
+## Identificador do comando (decidido em 04/11/2026)
+
+O device responde a cada comando em duas etapas no tópico `RESULTADO`: primeiro "recebido" e depois "executado" ou "falhou com motivo". O **identificador** liga cada resposta ao comando que a originou, mesmo com vários comandos em andamento ou com um reenvio.
+
+- **Formato proposto:** o campo `id` do JSON do comando, um texto de até 36 caracteres ASCII imprimíveis (cabe um UUID ou um contador), escolhido pelo CCO.
+- **O device não interpreta o identificador.** Devolve o mesmo texto, sem alteração, em todas as respostas daquele comando.
+- **Repetição:** se chegar um comando com um identificador já recebido (o MQTT pode entregar a mesma mensagem duas vezes), o device **não executa de novo**. Repete a resposta já dada. Guarda os últimos 8 identificadores para isso.
+- **Alternativa:** o MQTT 5.0 tem a propriedade nativa de dados de correlação (`Correlation Data`), que serviria ao mesmo fim fora do corpo da mensagem. A proposta mantém o `id` no JSON, porque o formato do projeto já usa o corpo da mensagem.
+
+Exemplo de resposta:
+
+```json
+{ "id": "12345", "etapa": "recebido" }
+{ "id": "12345", "etapa": "executado" }
+{ "id": "12346", "etapa": "falhou", "motivo": "agenda: saida 9 inexistente" }
+```
+
+A proposta foi aceita pelo responsável técnico em 04/11/2026. Os nomes `etapa` e `motivo` e a lista de motivos seguem como proposta até a implementação do FW-035.
+
 ## Pendências de integração
 
 - Formato de `SETUP` e `INFO`.
@@ -84,9 +107,16 @@ Aplicação Python no notebook do técnico, com chaveiro serial ligado ao STM32.
 - Nomes dos grupos do JSON.
 - Formato do identificador de comando e da confirmação de lote.
 - Caminho base dos tópicos: formato e tamanho máximo.
+- Cadastro da regra do sensor por MQTT (04/11/2026): os campos entrada associada, limiares máximo e mínimo, sentido e frequências de 4 mA e 20 mA chegam com as chaves iguais aos endereços Modbus (40181 a 40240, 40241 a 40255 e 40307 a 40381, estes últimos em proposta), sob a regra da sessão de configuração.
+- Grupo `digital` do JSON (aberto em 03/11/2026): estado de cada entrada e, no modo contador de pulsos, o totalizador de 32 bits enviado como valor absoluto. O servidor calcula as diferenças entre duas leituras, o que torna uma transmissão perdida sem perda de contagem. Nomes dos campos a definir junto com o mapa Modbus (P-032).
 
 ## Histórico
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.5 | Identificador do comando aceito (P-044) |
+| 04/11/2026 | 0.1.4 | Proposta do identificador do comando: texto de até 36 caracteres, devolvido sem alteração, com descarte de repetição |
+| 04/11/2026 | 0.1.3 | Registrada a agenda das saídas no tópico COMANDO (P-042) |
+| 04/11/2026 | 0.1.2 | Registrado o cadastro da regra do sensor por MQTT, com chaves iguais aos endereços Modbus |
+| 03/11/2026 | 0.1.1 | Registrada a pendência do grupo digital do JSON com o totalizador enviado como valor absoluto |
 | 01/11/2026 | 0.1.0 | Criado contrato de integração com tópicos padrão, confirmações, formato de dados, mapa Modbus e sessão de configuração |
