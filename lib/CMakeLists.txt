@@ -28,6 +28,13 @@ if(IO_FONTES)
   target_link_libraries(io PUBLIC ${OLOG_HAL_TARGET} rtos freertos)
 endif()
 
+# Agenda semanal das saídas (lógica pura, testada no PC em tests/agenda). Só serve a quem tem
+# saída digital discreta.
+if(SAIDA_DISCRETA IN_LIST OLOG_FEATURES)
+  add_library(agenda STATIC agenda/src/agenda.c)
+  target_include_directories(agenda PUBLIC agenda/include)
+endif()
+
 # Gerência de energia com Stop 2. Existe só para o STM32L4; o do STM32L0 (y7080) é a fazer.
 if(OLOG_MCU STREQUAL "STM32L412C8")
   add_library(energia STATIC energia/src/energia.c)
