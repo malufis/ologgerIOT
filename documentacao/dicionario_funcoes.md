@@ -1,6 +1,6 @@
 # Dicionário de funções — firmware oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.15
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.16
 
 ## Como manter
 
@@ -37,6 +37,8 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `agenda_aplicador_carrega` | agenda_aplicador | `lib/agenda/include/agenda_aplicador.h` | Carrega a agenda de uma saída; só troca a agenda se a cadeia for válida por inteiro. | AGENDA_OK, AGENDA_ERRO_PARAMETRO (nulo ou canal inválido), AGENDA_ERRO_TAMANHO ou AGENDA_ERRO_CARACTERE. | ativa |
 | `agenda_aplicador_limpa` | agenda_aplicador | `lib/agenda/include/agenda_aplicador.h` | Apaga todas as agendas e volta ao estado de partida. | AGENDA_OK, ou AGENDA_ERRO_PARAMETRO se ap for nulo. | ativa |
 | `agenda_aplicador_reavalia` | agenda_aplicador | `lib/agenda/include/agenda_aplicador.h` | Marca todas as saídas para serem avaliadas de novo na próxima atualização. | AGENDA_OK, ou AGENDA_ERRO_PARAMETRO se ap for nulo. | ativa |
+| `agenda_config_desempacota` | agenda_config | `lib/agenda/include/agenda_config.h` | Desempacota uma carga nas agendas e no fuso, só se ela for válida por inteiro. | AGENDA_CONFIG_OK, AGENDA_CONFIG_ERRO_PARAMETRO, AGENDA_CONFIG_ERRO_FORMATO ou AGENDA_CONFIG_ERRO_CAMPO. | ativa |
+| `agenda_config_empacota` | agenda_config | `lib/agenda/include/agenda_config.h` | Empacota o fuso e as agendas numa carga. | AGENDA_CONFIG_OK ou AGENDA_CONFIG_ERRO_PARAMETRO. | ativa |
 | `agenda_tarefa_carrega` | agenda_tarefa | `lib/agenda/include/agenda_tarefa.h` | Carrega a agenda de uma saída, recebida do CCO. | Os códigos de agenda.h: AGENDA_OK ou o erro de parâmetro, tamanho ou caractere. | ativa |
 | `agenda_tarefa_define_fuso` | agenda_tarefa | `lib/agenda/include/agenda_tarefa.h` | Define o fuso horário da instalação, enviado pelo CCO. | AGENDA_TAREFA_OK ou AGENDA_TAREFA_ERRO_FUSO. | ativa |
 | `agenda_tarefa_inicia` | agenda_tarefa | `lib/agenda/include/agenda_tarefa.h` | Cria a tarefa que aplica as agendas, com memória estática. | AGENDA_TAREFA_OK ou AGENDA_TAREFA_ERRO_TAREFA. | ativa |
@@ -46,6 +48,9 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `aquisicao_para` | aquisicao | `lib/aquisicao/include/aquisicao.h` | Para a aquisição, o timer e o ADC, para o equipamento dormir. | AQUISICAO_OK ou AQUISICAO_ERRO_INICIO. | ativa |
 | `aquisicao_retoma` | aquisicao | `lib/aquisicao/include/aquisicao.h` | Retoma a aquisição depois do sleep, com a mesma taxa. | AQUISICAO_OK ou AQUISICAO_ERRO_INICIO. | ativa |
 | `aquisicao_segundos` | aquisicao | `lib/aquisicao/include/aquisicao.h` | Lê a quantidade de segundos fechados desde a partida. | Segundos fechados. | ativa |
+| `armazem_grava` | armazem | `lib/armazem/include/armazem.h` | Grava uma carga nova, sem apagar a anterior até a nova estar conferida. | ARMAZEM_OK, ARMAZEM_ERRO_PARAMETRO, ARMAZEM_ERRO_TAMANHO ou ARMAZEM_ERRO_FLASH (a carga anterior continua valendo). | ativa |
+| `armazem_inicia` | armazem | `lib/armazem/include/armazem.h` | Inicia o armazém e procura o registro válido mais recente. | ARMAZEM_OK, ou ARMAZEM_ERRO_PARAMETRO se algum ponteiro for nulo ou o espaço for pequeno. | ativa |
+| `armazem_le` | armazem | `lib/armazem/include/armazem.h` | Lê a carga do registro válido mais recente. | ARMAZEM_OK, ARMAZEM_ERRO_PARAMETRO, ARMAZEM_ERRO_VAZIO ou ARMAZEM_ERRO_TAMANHO. | ativa |
 | `controle_saida_aguardando` | controle_saida | `lib/io/include/controle_saida.h` | Lê se a saída espera o retardo de acionamento. | true se há um retardo em curso. | ativa |
 | `controle_saida_atualiza` | controle_saida | `lib/io/include/controle_saida.h` | Atualiza o estado com o instante atual e devolve se a saída está ligada. | true se a saída está ligada depois da atualização. | ativa |
 | `controle_saida_comando_manual` | controle_saida | `lib/io/include/controle_saida.h` | Comando manual direto: passa a saída ao modo manual e liga ou desliga. | true se a saída estava em modo automático e passou a manual. A chegada de todo comando manual gera um alerta ao CCO; o valor devolvido diz se houve a mudança de modo. | ativa |
@@ -64,6 +69,7 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `energia_habilitada` | energia | `lib/energia/include/energia.h` | Informa se o sleep está habilitado. | true se o equipamento pode entrar em sleep. | ativa |
 | `energia_inicia` | energia | `lib/energia/include/energia.h` | Cria a tarefa de gerência de energia com memória estática. | ENERGIA_OK ou ENERGIA_ERRO. | ativa |
 | `energia_solicita_acordar` | energia | `lib/energia/include/energia.h` | Pede para o equipamento sair do sleep na próxima oportunidade. | void | ativa |
+| `flash_interna_ops` | flash_interna | `lib/armazem/include/flash_interna.h` | Devolve as operações do armazém sobre as duas últimas páginas da flash interna. | Ponteiro para uma tabela constante, válida durante toda a execução. | ativa |
 | `freq_saida_cadastra` | freq_saida | `lib/io/include/freq_saida.h` | Cadastra as frequências de 4 mA e de 20 mA. Só troca o cadastro se ambas forem válidas. | FREQ_SAIDA_OK, ou o código de erro (o cadastro anterior fica como estava). | ativa |
 | `freq_saida_calcula` | freq_saida | `lib/io/include/freq_saida.h` | Calcula a frequência da saída para uma corrente. | FREQ_SAIDA_OK, FREQ_SAIDA_ERRO_PARAMETRO se algum ponteiro for nulo ou ma não for numérico, ou FREQ_SAIDA_ERRO_SEM_CADASTRO se não houver cadastro (então hz recebe 0). | ativa |
 | `freq_saida_limpa` | freq_saida | `lib/io/include/freq_saida.h` | Deixa a conversão sem cadastro. | FREQ_SAIDA_OK, ou FREQ_SAIDA_ERRO_PARAMETRO se freq for nula. | ativa |
@@ -164,6 +170,7 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.16 | Tabela regenerada com 139 funções públicas: entram as de `armazem`, `flash_interna` e `agenda_config` |
 | 04/11/2026 | 0.3.15 | Tabela regenerada com 133 funções públicas: entram as de `agenda_tarefa` e `agenda_aplicador_reavalia` |
 | 04/11/2026 | 0.3.14 | Tabela regenerada com 129 funções públicas: entram as de `rtc` e `tempo_de_utc` |
 | 04/11/2026 | 0.3.13 | Tabela regenerada com 124 funções públicas: entram as de `agenda_aplicador` |

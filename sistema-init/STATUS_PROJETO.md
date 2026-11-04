@@ -1,6 +1,6 @@
 # Status do Projeto — oLoggerIOT
 
-> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.166
+> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.167
 > **Repositório:** https://github.com/malufis/ologgerIOT
 
 ## Fase atual
@@ -62,7 +62,8 @@
 | P-042 | Agenda semanal offline (FW-032): formato do cadastro dos 336 intervalos de 30 minutos | Fase 6 | RESOLVIDO em 04/11/2026 (proposta a confirmar) — vem por MQTT do CCO, sem endereço Modbus, em 84 caracteres hexadecimais por saída, validada por inteiro; implementado em `lib/agenda` |
 | P-043 | Agenda: fuso, versão, momento depois de reinício, identificador do comando e tratamento de saída ausente e de cadeia vazia | Fase 6 | RESOLVIDO em 04/11/2026 — fuso horário configurado pelo CCO (40403, proposta); o device guarda só a última agenda, sem ordem de versão; depois de reinício a agenda assume o intervalo do horário atual; saída ausente mantém e cadeia vazia apaga (proposta mantida); identificador do comando em proposta (P-044) |
 | P-044 | Identificador do comando MQTT | Fase 7 | RESOLVIDO em 04/11/2026 — aceito: campo `id` de até 36 caracteres, devolvido sem alteração em cada resposta, descarte de repetição com os últimos 8; nomes `etapa` e `motivo` e endereço 40403 do fuso seguem como proposta |
-| P-045 | Agenda sem fuso configurado: confirmar que a agenda só é aplicada depois que o CCO enviar o fuso (40403). Como o fuso e a agenda ainda não são guardados em memória persistente, depois de um reinício a agenda só volta quando o CCO enviar de novo a agenda e o fuso | Fase 6 | PENDENTE — confirmar |
+| P-045 | Agenda sem fuso configurado | Fase 6 | RESOLVIDO em 04/11/2026 — o fuso começa em Brasília (−180), e a agenda e o fuso gravados persistem ao reinício; a agenda só funciona com o sleep desabilitado |
+| P-046 | Onde guardar a agenda e o fuso: proposta de usar as duas últimas páginas de 2 KB da flash interna (0x0800F000 a 0x0800FFFF), fora da área do programa de 60 KB. Confirmar com o layout do bootloader (FW-062, ADR-0003) e com o responsável técnico; a alternativa é a flash externa, que depende do driver FW-018 | Fase 6 | PENDENTE — confirmar |
 
 ## Decisões tomadas
 B0 — Identificação: respostas e resumo confirmados pelo usuário em 29/10/2026.
@@ -362,6 +363,7 @@ A entrevista está encerrada e o firmware está em desenvolvimento. Os dois buil
 ## Histórico de atualizações
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.167 | P-045 resolvida; P-046 aberta (local da persistência); persistência da agenda escrita |
 | 04/11/2026 | 0.3.166 | FW-032: tarefa da agenda pelo RTC escrita; P-045 aberta (agenda sem fuso) |
 | 04/11/2026 | 0.3.165 | FW-030: driver do RTC escrito, sem teste em hardware |
 | 04/11/2026 | 0.3.164 | P-030 resolvida: bateria VBAT opcional; cristais só no OloggerMulti |

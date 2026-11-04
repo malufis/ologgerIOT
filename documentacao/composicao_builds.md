@@ -1,6 +1,6 @@
 # Composição dos builds — oLoggerIOT
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.12
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.13
 > **Status:** composição confirmada pelo responsável técnico em 02/11/2026. A lista vigente está em `builds/composicao.cmake`.
 
 ## Princípio
@@ -92,13 +92,14 @@ A pinagem de cada placa está em `devices/<build>/pinos.h` (FW-003), com um par 
 - Validar no manual AT do SIM7080G os comandos do cliente MQTT, que roda no modem (decidido em 02/11/2026).
 - Rádio externo do OloggerMulti na UART1 do STM32 (PA9/PA10), decidido em 02/11/2026: o STM32 é o cérebro e recebe todos os dados externos. O conector ligado à UART0 do ESP32 fica fora do uso do firmware até confirmação do seu uso.
 - Integrador por tipo de rádio externo: fase futura. `lib/radio_externo` só repassa bytes, sem interpretar (decidido em 02/11/2026).
-- Medir flash e RAM de cada build (FW-006). Em 03/11/2026: `ologgermulti` com 30 252 bytes de código (04/11/2026, com o RTC e a agenda) e `y7080` com 4 944.
+- Medir flash e RAM de cada build (FW-006). Em 03/11/2026: `ologgermulti` com 34 240 bytes de código (04/11/2026, com o RTC, a agenda e a persistência; área do programa de 60 KB) e `y7080` com 4 944.
 - Gerência de energia do y7080 (STM32L0): o módulo `lib/energia` só existe para o L4.
 
 ## Histórico
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.13 | Tamanho do build do OloggerMulti atualizado para 34 240 bytes de código |
 | 04/11/2026 | 0.2.12 | Tamanho do build do OloggerMulti atualizado para 30 252 bytes de código |
 | 04/11/2026 | 0.2.11 | Nova funcionalidade RELOGIO (RTC), só no OloggerMulti; tamanho do build atualizado para 27 116 bytes |
 | 04/11/2026 | 0.2.10 | Tamanho do build do OloggerMulti atualizado para 26 280 bytes de código |
