@@ -1,6 +1,6 @@
 # Agenda operacional offline — oLoggerIOT
 
-> **Criado em:** 31/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.23
+> **Criado em:** 31/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.24
 
 ## Objetivo informado
 
@@ -80,7 +80,7 @@ A agenda chega ao device **por MQTT, vinda do CCO, como configuração**. O form
 - **Versão e responsabilidade (decidido em 04/11/2026):** o **CCO é responsável pela agenda**. O device **guarda só a última agenda que o CCO enviar**: não guarda versões antigas, não compara versões e não recusa uma agenda por ser mais antiga. O campo `versao` é opcional, é guardado junto com a agenda e informado ao sistema, mas nunca é comparado.
 - **Aprovação:** a aprovação pelo CCO ou integrador acontece no sistema, antes do envio. O device não a verifica.
 - **Armazenamento:** a agenda precisa sobreviver a reinício. Ficará na memória não volátil, com CRC e gravação atômica, no mesmo estilo da configuração do mapeamento Modbus (FW-048). São 42 bytes por saída, 168 bytes no OloggerMulti, mais a versão.
-- **Quando atua:** só com o device **offline**, em modo automático, **sem regra do sensor** na saída e com a **hora válida**. A agenda é aplicada **pelo horário atual**: a cada limite de 30 minutos o device pede à saída o estado do intervalo, e ao ficar offline pede o do intervalo atual. **Depois de um reinício, a agenda assume na hora o estado do intervalo do horário atual** (se reiniciou às 9h30, vale o que está agendado para as 9h30), sem esperar as tentativas de reconexão; se depois o device conecta, a saída mantém o estado e espera um novo comando do CCO. Com o STM32 em sleep, ele desperta no limite do intervalo para aplicar a mudança.
+- **Quando atua:** só com o device **offline**, em modo automático, **sem regra do sensor** na saída e com a **hora válida**. A agenda é aplicada **pelo horário atual**: a cada limite de 30 minutos o device pede à saída o estado do intervalo, e ao ficar offline pede o do intervalo atual. **Depois de um reinício, a agenda assume na hora o estado do intervalo do horário atual** (se reiniciou às 9h30, vale o que está agendado para as 9h30), sem esperar as tentativas de reconexão; se depois o device conecta, a saída mantém o estado e espera um novo comando do CCO. Com o STM32 em sleep, ele desperta no limite do intervalo para aplicar a mudança. **Implementado** (lógica) em `agenda_aplicador`: pede o estado na primeira avaliação, a cada virada de intervalo e depois de carregar ou apagar a agenda; sem hora válida não pede nada e as saídas mantêm o estado.
 - **Hora de referência (decidido em 04/11/2026):** o horário da instalação, o mesmo do `timestamp` do JSON. O **fuso horário é um parâmetro de configuração, enviado pelo CCO**, em minutos em relação ao UTC (endereço Modbus 40403 proposto, `documentacao/mapa_modbus.md`). O device não muda o fuso sozinho: se houver horário de verão, o CCO envia o novo valor.
 - **No código:** `agenda_carrega_hex` valida e carrega; `agenda_estado(dia, hora, minuto)` devolve ligada, desligada ou sem agenda; a tarefa que lê o relógio e entrega o pedido a `controle_saida_pedido` com a fonte `CONTROLE_FONTE_AGENDA` é parte do FW-032.
 
@@ -88,6 +88,7 @@ A agenda chega ao device **por MQTT, vinda do CCO, como configuração**. O form
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.24 | Aplicador da agenda pelo horário atual implementado (lógica) |
 | 04/11/2026 | 0.1.23 | P-043: fuso horário configurado pelo CCO; sem ordem de versão, o device guarda só a última agenda; depois de reinício a agenda assume o intervalo do horário atual |
 | 04/11/2026 | 0.1.22 | P-042: a agenda chega por MQTT do CCO, em 84 caracteres hexadecimais por saída, com validação por inteiro; formato proposto e implementado em `lib/agenda` |
 | 04/11/2026 | 0.1.21 | A agenda é comando automático local e só vale offline; online vale o CCO; cadastro da agenda pendente (P-042) |

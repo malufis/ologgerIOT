@@ -1,6 +1,6 @@
 # Dicionário de funções — firmware oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.12
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.13
 
 ## Como manter
 
@@ -33,6 +33,9 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `agenda_estado` | agenda | `lib/agenda/include/agenda.h` | Informa o que a agenda pede para um instante da semana. | AGENDA_SEM_AGENDA se a agenda não está definida ou o instante é inválido; senão, ligada ou desligada. | ativa |
 | `agenda_indice` | agenda | `lib/agenda/include/agenda.h` | Calcula o índice do intervalo de 30 minutos de um instante da semana. | Índice de 0 a 335, ou AGENDA_INDICE_INVALIDO se algum argumento estiver fora da faixa. | ativa |
 | `agenda_limpa` | agenda | `lib/agenda/include/agenda.h` | Deixa a agenda sem definição: o estado de qualquer instante passa a ser "sem agenda". | AGENDA_OK ou AGENDA_ERRO_PARAMETRO. | ativa |
+| `agenda_aplicador_atualiza` | agenda_aplicador | `lib/agenda/include/agenda_aplicador.h` | Avalia as agendas no horário atual e informa as saídas com um estado a pedir. | Quantidade de saídas com um estado a pedir, ou zero se algum ponteiro for nulo. | ativa |
+| `agenda_aplicador_carrega` | agenda_aplicador | `lib/agenda/include/agenda_aplicador.h` | Carrega a agenda de uma saída; só troca a agenda se a cadeia for válida por inteiro. | AGENDA_OK, AGENDA_ERRO_PARAMETRO (nulo ou canal inválido), AGENDA_ERRO_TAMANHO ou AGENDA_ERRO_CARACTERE. | ativa |
+| `agenda_aplicador_limpa` | agenda_aplicador | `lib/agenda/include/agenda_aplicador.h` | Apaga todas as agendas e volta ao estado de partida. | AGENDA_OK, ou AGENDA_ERRO_PARAMETRO se ap for nulo. | ativa |
 | `aquisicao_contagens` | aquisicao | `lib/aquisicao/include/aquisicao.h` | Lê a média de contagens do ADC do último segundo de uma entrada. | AQUISICAO_OK, AQUISICAO_ERRO_PARAMETRO ou AQUISICAO_ERRO_SEM_DADO. | ativa |
 | `aquisicao_inicia` | aquisicao | `lib/aquisicao/include/aquisicao.h` | Cria a tarefa de aquisição e inicia o ADC. | AQUISICAO_OK, AQUISICAO_ERRO_PARAMETRO ou AQUISICAO_ERRO_INICIO. | ativa |
 | `aquisicao_ma` | aquisicao | `lib/aquisicao/include/aquisicao.h` | Lê a corrente média do último segundo de uma entrada. | AQUISICAO_OK, AQUISICAO_ERRO_PARAMETRO ou AQUISICAO_ERRO_SEM_DADO. | ativa |
@@ -152,6 +155,7 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.13 | Tabela regenerada com 124 funções públicas: entram as de `agenda_aplicador` |
 | 04/11/2026 | 0.3.12 | Tabela regenerada com 121 funções públicas: entram `tempo_para_local` e `tempo_inicio_de_intervalo` |
 | 04/11/2026 | 0.3.11 | Tabela regenerada com 119 funções públicas: entram `io_frequencia_cadastra` e `io_frequencia_atualiza` |
 | 04/11/2026 | 0.3.10 | Tabela regenerada com 117 funções públicas: entram `io_frequencia_inicia`, `_define_hz`, `_irq` e `io_saidas_cede_pino` |

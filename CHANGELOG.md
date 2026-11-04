@@ -1,6 +1,6 @@
 # Changelog — oLoggerIOT firmware
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.20
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.21
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versões seguem a numeração do projeto (ver `sistema-init/STATUS_PROJETO.md`). Cada entrada cita o item do backlog (`FW-###`) quando houver.
 
@@ -9,7 +9,8 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 Trabalho das sprints 01 (aquisição analógica), 01B (entrada digital) e 04 (saídas), ainda em andamento, e documentação posterior à SPRINT_00.
 
 ### Adicionado
-- FW-032 (parcial): `lib/agenda`, agenda semanal de 336 intervalos de 30 minutos por saída. `agenda_carrega_hex` valida por inteiro a cadeia de 84 caracteres hexadecimais recebida do CCO por MQTT (sem alterar a agenda anterior em caso de erro) e `agenda_estado` devolve ligada, desligada ou sem agenda para um instante. 57 verificações no PC. Falta o RTC, o armazenamento persistente, a aplicação por intervalo e o recebimento por MQTT. Formato em `documentacao/agenda_operacional_offline.md` (P-042).
+- FW-032 (parcial): `lib/agenda`, agenda semanal de 336 intervalos de 30 minutos por saída. `agenda_carrega_hex` valida por inteiro a cadeia de 84 caracteres hexadecimais recebida do CCO por MQTT (sem alterar a agenda anterior em caso de erro) e `agenda_estado` devolve ligada, desligada ou sem agenda para um instante. 57 verificações no PC. Falta o driver do RTC, o armazenamento persistente, entregar o pedido à saída e o recebimento por MQTT. Formato em `documentacao/agenda_operacional_offline.md` (P-042).
+- FW-032 (parcial): `agenda_aplicador`, aplicação das agendas das quatro saídas pelo horário atual. Pede o estado do intervalo atual na primeira avaliação depois da partida (se reiniciou às 9h30, vale o agendado para as 9h30), a cada virada de intervalo de 30 minutos e logo depois de carregar ou apagar a agenda; com hora inválida não pede nada e as saídas mantêm o estado. Só a última agenda enviada vale; cadeia vazia apaga a agenda e cadeia inválida mantém a anterior. 13 testes (42 verificações) no PC.
 - FW-030 (parcial): `lib/tempo`, conversão do tempo UTC em segundos para data, hora e dia da semana locais (0 = segunda) com o fuso da instalação em minutos (−720 a +840). 12 testes no PC, com anos bissextos (2000, 2024 e 2100), virada de dia e de ano, fuso de meia hora e limite de 32 bits. Falta o driver do RTC e a conferência NTP.
 - FW-023 (parcial): `io_frequencia_cadastra` e `io_frequencia_atualiza`, que replicam na saída em frequência a leitura do sensor (frequência de 4 mA a 20 mA, 0 Hz na falha). Decidido: o sensor manda na saída em frequência e os comandos manual e automático não a influenciam.
 - FW-023 (parcial): `io_frequencia` liga o gerador ao TIM6 (interrupção a 100 kHz, que só roda com alguma saída acima de 0 Hz) e aos pinos PB13 a PB15; `io_frequencia_define_tipo` cede o pino ao gerador (`io_saidas_cede_pino`) e `io_frequencia_define_hz` define a frequência; o tratador `TIM6_IRQHandler` fica em `src/interrupcoes.c`. Compila nos dois builds; **sem teste em hardware**.
