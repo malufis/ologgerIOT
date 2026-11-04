@@ -1,6 +1,6 @@
 ﻿# Configuração do dispositivo — oLoggerIOT
 
-> **Criado em:** 29/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.53
+> **Criado em:** 29/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.54
 
 ## Origem e estado
 
@@ -131,7 +131,7 @@ A frequência de atualização e a relação entre quantidade de entradas e saí
 - **Estado na partida:** todas as saídas partem desligadas. Não religam sozinhas depois de falta de energia: aguardam novo comando, conforme a regra do B4.
 - **Comandos implementados:** ligar e desligar. O "acionamento por tempo" é o retardo de acionamento (próximo item).
 - **Retardo de acionamento (relé de tempo, confirmado em 03/11/2026):** a saída discreta pode ter um retardo configurável por saída, em segundos. **Todo comando que liga a saída espera o retardo**; retardo zero liga na hora. Um comando de desligar durante a espera cancela a partida. Com o retardo em andamento, outro comando de ligar é descartado e a contagem continua. Com a saída já ligada, outro comando de ligar é descartado (o retardo não é reaplicado).
-- **Modo manual e automático (FW-025, 04/11/2026):** cada saída tem o seu modo. O comando manual direto prevalece, põe a saída em manual e vale até o comando de modo automático. Em automático valem os comandos automáticos locais ou remotos, como descrito na seção seguinte. A volta ao automático avalia e executa a regra válida na hora e, sem nenhum pedido válido, **mantém o último estado válido do comando** (confirmado em 04/11/2026). **Depois de um reinício a saída volta desligada e em modo automático** (confirmado em 04/11/2026). O alerta ao CCO na chegada do comando manual depende do espaço de alertas (FW-021) e ainda não existe.
+- **Modo manual e automático (FW-025, 04/11/2026):** cada saída tem o seu modo. O comando manual direto prevalece, põe a saída em manual e vale até o comando de modo automático. Em automático valem os comandos locais (regra do sensor e agenda offline) ou o do CCO (online), como descrito na seção seguinte. A volta ao automático avalia e executa a regra válida na hora e, sem nenhum pedido válido, **mantém o último estado válido do comando** (confirmado em 04/11/2026). **Depois de um reinício a saída volta desligada e em modo automático** (confirmado em 04/11/2026). O alerta ao CCO na chegada do comando manual depende do espaço de alertas (FW-021) e ainda não existe.
 - **Ainda não implementado:** saída em frequência (FW-023) e o alerta ao CCO na chegada do comando manual.
 - **"Pulsada" é a saída em frequência (decidido em 03/11/2026):** não é acionamento por tempo. A saída discreta é só ligada ou desligada, com o retardo de acionamento. O tipo da saída no mapa Modbus ficou 0 = discreto e 1 = frequência.
 - **Sleep e frequência (decidido em 03/11/2026):** a saída em frequência só pode ser habilitada se o modo sleep não estiver ativo, e o sleep só liga se nenhuma saída estiver em frequência. O sleep tem uma função de ligar e desligar (modo de operação 40412).
@@ -142,13 +142,18 @@ A frequência de atualização e a relação entre quantidade de entradas e saí
 
 Definição do responsável técnico em 04/11/2026.
 
-- **Comando automático local:** o comando que o próprio device gera a partir de uma **entrada analógica** para uma saída digital, por uma regra **cadastrada**. O cadastro leva **máximo, mínimo e frequência**: nas saídas discretas, o máximo e o mínimo são os limiares que ligam e desligam a saída (exemplo do B4: ligar a 5 bar e desligar a 4 bar); na saída em frequência, a frequência em Hz correspondente ao mínimo e ao máximo da faixa (4 mA e 20 mA). A regra pode ser cadastrada na instalação ou enviada pelo CCO, mas o comando é gerado e executado **localmente**, inclusive sem comunicação.
-- **Comando automático remoto:** o que vem do **CCO**: a regra automática da plataforma e a agenda offline, que tem origem no CCO. **Só vale quando a saída não tem regra local definida.** Se a saída tem regra local, o comando remoto é ignorado.
-- **Ordem de prioridade em cada saída:** (1) comando manual; (2) falha do sensor, que desliga; (3) regra local, se definida; (4) comando automático remoto, se não há regra local.
+- **Comandos automáticos locais** (funcionam sem conectividade): são de duas origens.
+  - **Regra do sensor:** o comando que o próprio device gera, a partir de uma **entrada analógica**, para uma saída digital, por uma regra **cadastrada**. O cadastro leva **máximo, mínimo e frequência**: nas saídas discretas, o máximo e o mínimo são os limiares que ligam e desligam a saída (exemplo do B4: ligar a 5 bar e desligar a 4 bar); na saída em frequência, a frequência em Hz correspondente a 4 mA e a 20 mA. A saída tem regra do sensor quando a entrada analógica associada é diferente de zero.
+  - **Agenda:** é um comando local, porque funciona sem conectividade. Vale **só com o device offline**.
+- **Comando automático remoto:** o do **CCO**. **Com conectividade, em automático, é o comando do CCO que vale**; a agenda não é aplicada enquanto o device está online.
+- **Ordem de prioridade em cada saída:** (1) comando manual; (2) falha do sensor, que desliga; (3) regra do sensor, se cadastrada; (4) comando do CCO, se o device está online, ou agenda, se está offline.
+- **Quando a saída não tem regra do sensor,** valem a agenda (offline) e o CCO (online). Com regra do sensor cadastrada, a agenda e o CCO são ignorados.
+- **Conectividade:** ao ficar offline, a saída aplica na hora o estado do intervalo atual da agenda. Ao reconectar, avisa, **mantém o último estado e espera um novo comando do CCO**; o comando antigo do CCO não volta a valer.
 - **Falha do sensor:** em automático, a saída desliga. Quando a falha termina, a saída só **volta a operar pelo sensor depois de 5 minutos estáveis** (sem nova falha); uma falha dentro desse tempo reinicia a contagem. Até lá a saída continua desligada. Em manual, o comando manual se mantém. O código aceita configurar o tempo; o padrão é de 5 minutos.
-- **Retardo de acionamento:** vale para todo comando que liga a saída, local ou remoto, como em qualquer outro comando.
-- **A definir (P-041):** os campos exatos do cadastro (sentido das comparações, histerese e tempos), os endereços Modbus dos limiares máximo e mínimo (hoje o mapa só tem a entrada associada e as frequências de 4 mA e 20 mA), e se a agenda offline fica na fonte remota, como está hoje.
-- **Implementação:** o código separa as duas fontes em `controle_saida` (`CONTROLE_FONTE_LOCAL` e `CONTROLE_FONTE_REMOTA`) e sabe se a saída tem regra local. O **cadastro e o avaliador da regra local** são o item FW-063, ainda não implementado.
+- **Retardo de acionamento:** vale para todo comando que liga a saída, qualquer que seja a origem.
+- **Cadastro da regra (decidido em 04/11/2026):** os campos **chegam por MQTT ou por Modbus e têm endereço Modbus**. As chaves do JSON do MQTT seguem o endereço Modbus do dado. O cadastro segue a regra da sessão de configuração. Os endereços propostos estão em `documentacao/mapa_modbus.md`: limiar máximo (40307–40336), limiar mínimo (40337–40366), sentido (40367–40381, proposta), além da entrada associada (40241–40255) e das frequências de 4 mA e 20 mA (40181–40240), que já existiam. Os limiares ficam na unidade de engenharia da entrada associada (por exemplo, bar).
+- **Ainda a confirmar:** o sentido da comparação (0 = liga no máximo e desliga no mínimo, como no exemplo; 1 = inverso, comum em nível de reservatório) e os endereços propostos. O formato e os endereços do cadastro da agenda semanal ainda não foram definidos (P-042).
+- **Implementação:** `controle_saida` tem as três fontes (`CONTROLE_FONTE_SENSOR`, `CONTROLE_FONTE_AGENDA` e `CONTROLE_FONTE_CCO`) e sabe se a saída tem regra do sensor e se o device está online. O **cadastro e o avaliador da regra do sensor** são o item FW-063, ainda não implementado.
 
 ## Fluxos propostos pelo usuário
 
@@ -206,6 +211,7 @@ Depois de estabelecida a conectividade do dispositivo, a configuração continua
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.54 | A agenda é comando local e só vale offline; online vale o CCO; o cadastro da regra do sensor chega por MQTT ou Modbus, com endereços |
 | 04/11/2026 | 0.1.53 | Comandos automáticos locais (regra cadastrada) e remotos (CCO), espera de 5 minutos depois da falha do sensor, último estado válido e estado depois de reinício |
 | 04/11/2026 | 0.1.52 | FW-025: modo manual e automático por saída, prioridade do sensor local e falha do sensor |
 | 04/11/2026 | 0.1.51 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |

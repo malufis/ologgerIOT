@@ -1,6 +1,6 @@
 # Integração do device com o sistema — oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 03/11/2026 · **Versão:** 0.1.1
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.2
 
 ## Para quem é
 
@@ -84,11 +84,13 @@ Aplicação Python no notebook do técnico, com chaveiro serial ligado ao STM32.
 - Nomes dos grupos do JSON.
 - Formato do identificador de comando e da confirmação de lote.
 - Caminho base dos tópicos: formato e tamanho máximo.
+- Cadastro da regra do sensor por MQTT (04/11/2026): os campos entrada associada, limiares máximo e mínimo, sentido e frequências de 4 mA e 20 mA chegam com as chaves iguais aos endereços Modbus (40181 a 40240, 40241 a 40255 e 40307 a 40381, estes últimos em proposta), sob a regra da sessão de configuração.
 - Grupo `digital` do JSON (aberto em 03/11/2026): estado de cada entrada e, no modo contador de pulsos, o totalizador de 32 bits enviado como valor absoluto. O servidor calcula as diferenças entre duas leituras, o que torna uma transmissão perdida sem perda de contagem. Nomes dos campos a definir junto com o mapa Modbus (P-032).
 
 ## Histórico
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.2 | Registrado o cadastro da regra do sensor por MQTT, com chaves iguais aos endereços Modbus |
 | 03/11/2026 | 0.1.1 | Registrada a pendência do grupo digital do JSON com o totalizador enviado como valor absoluto |
 | 01/11/2026 | 0.1.0 | Criado contrato de integração com tópicos padrão, confirmações, formato de dados, mapa Modbus e sessão de configuração |

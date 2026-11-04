@@ -1,6 +1,6 @@
 # Dicionário de funções — firmware oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.3
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.4
 
 ## Como manter
 
@@ -39,9 +39,10 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `controle_saida_atualiza` | controle_saida | `lib/io/include/controle_saida.h` | Atualiza o estado com o instante atual e devolve se a saída está ligada. | true se a saída está ligada depois da atualização. | ativa |
 | `controle_saida_comando_manual` | controle_saida | `lib/io/include/controle_saida.h` | Comando manual direto: passa a saída ao modo manual e liga ou desliga. | true se a saída estava em modo automático e passou a manual. A chegada de todo comando manual gera um alerta ao CCO; o valor devolvido diz se houve a mudança de modo. | ativa |
 | `controle_saida_define_atraso` | controle_saida | `lib/io/include/controle_saida.h` | Define o retardo de acionamento da saída, em milissegundos. | void | ativa |
+| `controle_saida_define_conectividade` | controle_saida | `lib/io/include/controle_saida.h` | Informa se o device tem conectividade com o CCO. | void | ativa |
 | `controle_saida_define_estabilidade` | controle_saida | `lib/io/include/controle_saida.h` | Define o tempo de estabilidade do sensor depois de uma falha, em milissegundos. | void | ativa |
-| `controle_saida_define_regra_local` | controle_saida | `lib/io/include/controle_saida.h` | Informa se a saída tem uma regra local cadastrada. | void | ativa |
-| `controle_saida_inicia` | controle_saida | `lib/io/include/controle_saida.h` | Inicia o controle: saída desligada, em modo automático, sem regra local, sem pedidos e sem falha, com a estabilidade padrão de 5 minutos. | CONTROLE_SAIDA_OK ou CONTROLE_SAIDA_ERRO_PARAMETRO. | ativa |
+| `controle_saida_define_regra_sensor` | controle_saida | `lib/io/include/controle_saida.h` | Informa se a saída tem uma regra do sensor cadastrada. | void | ativa |
+| `controle_saida_inicia` | controle_saida | `lib/io/include/controle_saida.h` | Inicia o controle: saída desligada, em modo automático, sem regra do sensor, offline, sem pedidos e sem falha, com a estabilidade padrão de 5 minutos. | CONTROLE_SAIDA_OK ou CONTROLE_SAIDA_ERRO_PARAMETRO. | ativa |
 | `controle_saida_ligada` | controle_saida | `lib/io/include/controle_saida.h` | Lê se a saída está ligada. | true se a saída está ligada. | ativa |
 | `controle_saida_modo` | controle_saida | `lib/io/include/controle_saida.h` | Lê o modo da saída. | Modo manual ou automático. | ativa |
 | `controle_saida_modo_automatico` | controle_saida | `lib/io/include/controle_saida.h` | Comando de modo automático: a saída avalia e executa a regra válida na hora. | void | ativa |
@@ -76,13 +77,14 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `io_saidas_aguardando` | io_saidas | `lib/io/include/io_saidas.h` | Informa se uma saída está esperando o retardo de acionamento. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
 | `io_saidas_comando_manual` | io_saidas | `lib/io/include/io_saidas.h` | Comando manual direto: passa a saída ao modo manual e a liga ou desliga. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
 | `io_saidas_define_atraso` | io_saidas | `lib/io/include/io_saidas.h` | Define o retardo de acionamento (relé de tempo) de uma saída. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
+| `io_saidas_define_conectividade` | io_saidas | `lib/io/include/io_saidas.h` | Informa se o device tem conectividade com o CCO, para todas as saídas. | IO_SAIDAS_OK. | ativa |
 | `io_saidas_define_estabilidade` | io_saidas | `lib/io/include/io_saidas.h` | Define o tempo de estabilidade do sensor depois de uma falha. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
-| `io_saidas_define_regra_local` | io_saidas | `lib/io/include/io_saidas.h` | Informa se a saída tem uma regra local cadastrada (entrada analógica para a saída). | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
+| `io_saidas_define_regra_sensor` | io_saidas | `lib/io/include/io_saidas.h` | Informa se a saída tem uma regra do sensor cadastrada (entrada analógica para a saída). | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
 | `io_saidas_estado` | io_saidas | `lib/io/include/io_saidas.h` | Lê o estado de uma saída. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
 | `io_saidas_inicia` | io_saidas | `lib/io/include/io_saidas.h` | Cria a tarefa que liga as saídas ao fim do retardo, com memória estática. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_TAREFA. | ativa |
 | `io_saidas_modo` | io_saidas | `lib/io/include/io_saidas.h` | Lê o modo de uma saída (manual ou automático). | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
 | `io_saidas_modo_automatico` | io_saidas | `lib/io/include/io_saidas.h` | Comando de modo automático: a saída avalia e executa a regra válida na hora. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
-| `io_saidas_pedido` | io_saidas | `lib/io/include/io_saidas.h` | Registra o pedido de uma fonte automática: local (regra cadastrada) ou remota (CCO). | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
+| `io_saidas_pedido` | io_saidas | `lib/io/include/io_saidas.h` | Registra o pedido de uma fonte automática: sensor, agenda ou CCO. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
 | `io_saidas_prepara` | io_saidas | `lib/io/include/io_saidas.h` | Leva os pinos das saídas ao estado desligado e zera os estados. | IO_SAIDAS_OK. | ativa |
 | `io_saidas_sensor_falha` | io_saidas | `lib/io/include/io_saidas.h` | Informa se o sensor que controla a saída falhou. | IO_SAIDAS_OK ou IO_SAIDAS_ERRO_PARAMETRO. | ativa |
 | `io_tarefa_bruto` | io_tarefa | `lib/io/include/io_tarefa.h` | Lê o estado das entradas sem filtro. | Máscara de bits, igual a io_tarefa_estado(), mas da última leitura direta. | ativa |
@@ -122,6 +124,7 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.4 | Tabela regenerada com 93 funções públicas: entram `controle_saida_define_regra_sensor`, `controle_saida_define_conectividade` e `io_saidas_define_conectividade`; `define_regra_local` virou `define_regra_sensor` |
 | 04/11/2026 | 0.3.3 | Tabela regenerada com 91 funções públicas: entram `io_saidas_define_regra_local`, `io_saidas_define_estabilidade`, `controle_saida_define_regra_local`, `controle_saida_define_estabilidade` e `controle_saida_sensor_indisponivel` |
 | 04/11/2026 | 0.3.2 | Tabela regenerada com 86 funções públicas: entram `controle_saida` (modo manual e automático) e os comandos de `io_saidas`; saem `io_saidas_liga` e `io_saidas_desliga` |
 | 04/11/2026 | 0.3.1 | Tabela regenerada com 73 funções públicas: entram `saida`, `io_saida`, `io_saidas` e o retardo de acionamento; sai `io_saidas_aciona` |

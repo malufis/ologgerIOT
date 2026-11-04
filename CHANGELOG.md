@@ -1,6 +1,6 @@
 # Changelog — oLoggerIOT firmware
 
-> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.10
+> **Criado em:** 02/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.11
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versões seguem a numeração do projeto (ver `sistema-init/STATUS_PROJETO.md`). Cada entrada cita o item do backlog (`FW-###`) quando houver.
 
@@ -9,8 +9,8 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 Trabalho das sprints 01 (aquisição analógica), 01B (entrada digital) e 04 (saídas), ainda em andamento, e documentação posterior à SPRINT_00.
 
 ### Adicionado
-- FW-063 (backlog): regra local entrada analógica para saída digital, o comando automático local, com cadastro de máximo, mínimo e frequência.
-- FW-025: modo manual e automático por saída em `lib/io` (`controle_saida`, 65 verificações no PC) e nas quatro saídas (`io_saidas_comando_manual`, `io_saidas_modo_automatico`, `io_saidas_pedido`, `io_saidas_sensor_falha`, `io_saidas_define_regra_local`, `io_saidas_define_estabilidade`, `io_saidas_modo`). O comando manual prevalece; em automático vale a regra local, se definida, e só sem ela o comando remoto do CCO; a falha do sensor desliga em automático e mantém em manual, e a saída só volta a operar pelo sensor depois de 5 minutos estáveis; a volta ao automático avalia na hora e, sem pedido, mantém o último estado válido. Compila no `ologgermulti` (26 256 bytes). Sem alerta ao CCO e sem teste em hardware.
+- FW-063 (backlog): regra do sensor entrada analógica para saída digital (comando automático local), com o cadastro por MQTT ou Modbus (limiares máximo e mínimo e sentido propostos no mapa, 40307 a 40381) e o avaliador com histerese.
+- FW-025: modo manual e automático por saída em `lib/io` (`controle_saida`, 82 verificações no PC) e nas quatro saídas (`io_saidas_comando_manual`, `io_saidas_modo_automatico`, `io_saidas_pedido`, `io_saidas_sensor_falha`, `io_saidas_define_regra_sensor`, `io_saidas_define_conectividade`, `io_saidas_define_estabilidade`, `io_saidas_modo`). O comando manual prevalece; em automático vale a regra do sensor, se cadastrada, ou, sem ela, a agenda (comando local, só offline) e o CCO (só online); a falha do sensor desliga em automático e mantém em manual, e a saída só volta a operar pelo sensor depois de 5 minutos estáveis; a volta ao automático avalia na hora e, sem pedido, mantém o último estado válido. Compila no `ologgermulti` (26 280 bytes). Sem alerta ao CCO e sem teste em hardware.
 - FW-062 (backlog): layout da flash interna do STM32 com bootloader. ADR-0003 decidido em 04/11/2026: a atualização usa a imagem na flash externa com um bootloader.
 - `documentacao/desvios_misra.md`: registro do desvio DEV-001 (`MISRA-DEV` em `lib/adc/src/adc.c`), que estava marcado no código sem registro.
 - `documentacao/adr/`: três decisões de arquitetura em estado de proposta (versão do FreeRTOS, ferramenta MISRA, atualização e proteção). Registrado o risco de espaço de flash do STM32L412C8 (64 KB, imagem atual de 25,8 KB).
@@ -34,7 +34,7 @@ Trabalho das sprints 01 (aquisição analógica), 01B (entrada digital) e 04 (sa
 - Aquisição analógica (fase 1, em bancada): driver do ADC com TIM6, ADC1 e DMA, tarefa de aquisição e módulo `sensor` (média por segundo e conversão 4-20 mA). Entrada 4 medida com 8 mA: 8,007 mA. Calibração de bancada por dois pontos, referência efetiva de 2,367 V; causa do fator ~1,37 em aberto.
 
 ### Alterado
-- `controle_saida`: as fontes de pedido passaram a se chamar `CONTROLE_FONTE_LOCAL` (regra cadastrada) e `CONTROLE_FONTE_REMOTA` (CCO), no lugar de `SENSOR` e `EXTERNA`; o comando remoto só vale sem regra local.
+- `controle_saida`: as fontes de pedido passaram a se chamar `CONTROLE_FONTE_SENSOR` (regra cadastrada), `CONTROLE_FONTE_AGENDA` (local, só offline) e `CONTROLE_FONTE_CCO` (remota, só online). A agenda deixou de ser tratada como comando remoto. `io_saidas_define_regra_local` virou `io_saidas_define_regra_sensor`.
 - `saida_liga` passou a receber o instante atual, para aplicar o retardo de acionamento.
 - `energia_define_habilitada` passou de `void` para `int32_t` e pode recusar com `ENERGIA_ERRO_BLOQUEADO`.
 - Padrão de código C (`documentacao/padrao_codigo_c.md`): as cinco regras de interrupções, sleep e armazenamento foram confirmadas pelo responsável técnico em 04/11/2026.

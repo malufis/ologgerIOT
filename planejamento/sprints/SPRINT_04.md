@@ -1,6 +1,6 @@
 # SPRINT_04 — Saídas e controle
 
-> **Criado em:** 03/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.7
+> **Criado em:** 03/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.8
 > **Período:** 30/11/2026 a 04/12/2026
 
 Em andamento desde 03/11/2026: o FW-022 e o FW-024 estão em código pronto; os demais itens estão pendentes. As datas são a sequência de semanas a partir de 02/11/2026 e mudam se a SPRINT_00, a SPRINT_01 ou a SPRINT_01B atrasarem.
@@ -16,9 +16,9 @@ Saídas discretas (ligar e desligar, com retardo de acionamento), saída em freq
 | FW-022 | Saídas discretas: ligar e desligar, com as saídas desligadas na partida | Código pronto em 03/11/2026: ligar e desligar (`saida`, `io_saida`, `io_saidas`), com as saídas desligadas na partida. Bancada pendente |
 | FW-023 | Saída em frequência (a "pulsada") proporcional a 4–20 mA, com 4 mA e 20 mA configuráveis; só pode ser habilitada com o sleep desligado | Pendente |
 | FW-024 | Retardo de acionamento (relé de tempo, o "acionamento por tempo") por saída discreta, com cancelamento por comando de desligar | Código pronto em 03/11/2026 (`saida_define_atraso`, `io_saidas_define_atraso`): 36 verificações no PC com o retardo, o comando descartado, o cancelamento por desligar e a volta do contador. Regras confirmadas em 03/11/2026. Bancada pendente |
-| FW-025 | Modo manual e automático por saída, com prioridade do sensor | Código pronto em 04/11/2026 (`controle_saida`, `io_saidas`): 65 verificações no PC com manual, automático, regra local e comando remoto do CCO, falha do sensor com espera de 5 minutos e retardo. Falta o alerta ao CCO na chegada do comando manual. Bancada pendente |
+| FW-025 | Modo manual e automático por saída, com prioridade do sensor | Código pronto em 04/11/2026 (`controle_saida`, `io_saidas`): 82 verificações no PC com manual, automático, regra do sensor, agenda local offline, comando do CCO online, falha do sensor com espera de 5 minutos e retardo. Falta o alerta ao CCO na chegada do comando manual. Bancada pendente |
 | FW-061 | Ligar e desligar o modo sleep (modo de operação, registro 40412), com exclusão mútua: o sleep só liga se nenhuma saída estiver em frequência, e a saída em frequência só habilita com o sleep desligado | Lado do sleep pronto em 03/11/2026 (`energia_define_habilitada` devolve erro se um módulo impede). Falta o lado das saídas (FW-023) e o comando do Modbus |
-| FW-063 | Regra local entrada analógica para saída digital (comando automático local): cadastro de entrada, saída, máximo, mínimo e sentido, e o avaliador com histerese que gera os pedidos da fonte local; na saída em frequência, a frequência em 4 mA e 20 mA (FW-023). Sem regra cadastrada vale o comando automático remoto do CCO | Pendente; criado em 04/11/2026 |
+| FW-063 | Regra do sensor entrada analógica para saída digital (comando automático local): cadastro por MQTT ou Modbus (entrada associada, limiares máximo e mínimo e sentido, mais a frequência em 4 mA e 20 mA, todos com endereço Modbus) e o avaliador com histerese que gera os pedidos da fonte do sensor. Sem regra cadastrada valem a agenda (offline) e o CCO (online) | Pendente; criado em 04/11/2026 |
 
 ## Estado das saídas digitais (03/11/2026)
 
@@ -44,13 +44,15 @@ Implementado conforme o B4 e as definições de 04/11/2026 (`documentacao/config
 
 - Cada saída tem modo **manual** ou **automático**, e um comando muda só o modo da saída a que se destina.
 - Um **comando manual direto** prevalece, põe a saída em manual e ela fica assim até o comando de modo automático. Respeita o retardo de acionamento.
-- **Comando automático local:** regra **cadastrada** (entrada analógica para a saída digital, com máximo, mínimo e frequência). **Comando automático remoto:** o do CCO (regra da plataforma e agenda offline). **O remoto só vale quando a saída não tem regra local definida.** Com regra local, o comando remoto é ignorado.
-- **Falha do sensor:** em automático a saída desliga; em manual mantém o comando manual. Quando a falha termina, a saída só volta a operar pelo sensor depois de **5 minutos estáveis**; até lá fica desligada. Uma nova falha dentro desse tempo reinicia a contagem.
+- **Comandos automáticos locais:** a **regra do sensor** (cadastrada: entrada analógica para a saída digital, com máximo, mínimo e frequência) e a **agenda**, que funciona sem conectividade e só vale **offline**. **Comando automático remoto:** o do **CCO**, que vale **online**. Com regra do sensor, a agenda e o CCO são ignorados.
+- **Conectividade:** ao ficar offline, a agenda é aplicada na hora. Ao reconectar, a saída mantém o último estado e espera um novo comando do CCO.
+- **Falha do sensor:** em automático a saída desliga; em manual mantém o comando manual. Quando a falha termina, a saída só volta a operar pelo sensor depois de **5 minutos estáveis**; até lá fica desligada.
 - **Volta ao automático:** avalia e executa a regra válida na hora; sem pedido válido, **mantém o último estado válido do comando**.
-- **Reinício:** a saída volta desligada e em modo automático (o modo manual não é guardado).
-- **Alerta ao CCO** na chegada do comando manual: entendido, mas depende do espaço de alertas (FW-021) e ainda não existe. `io_saidas_comando_manual` informa se houve mudança de modo.
+- **Reinício:** a saída volta desligada, em modo automático e offline (o modo manual não é guardado).
+- **Cadastro da regra:** os campos vêm por MQTT ou Modbus e têm endereço Modbus (proposta no mapa, 40307 a 40381). O cadastro e o avaliador são o FW-063.
+- **Alerta ao CCO** na chegada do comando manual: depende do espaço de alertas (FW-021) e ainda não existe. `io_saidas_comando_manual` informa se houve mudança de modo.
 
-**Falta:** o cadastro e o avaliador da regra local (FW-063), a saída em frequência (FW-023), o alerta ao CCO e a ligação com os comandos do sistema e do Modbus. A interação do modo manual com a saída em frequência segue em aberto.
+**Falta:** o FW-063, a saída em frequência (FW-023), o alerta ao CCO e a ligação com os comandos do sistema e do Modbus. A interação do modo manual com a saída em frequência segue em aberto.
 
 ### Ainda a confirmar
 
@@ -67,6 +69,7 @@ Implementado conforme o B4 e as definições de 04/11/2026 (`documentacao/config
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.8 | Agenda como comando local (só offline) e CCO online; cadastro da regra do sensor por MQTT ou Modbus; 82 verificações |
 | 04/11/2026 | 0.1.7 | FW-025 com as definições de 04/11/2026 (local e remoto, 5 minutos, último estado, reinício); novo FW-063 |
 | 04/11/2026 | 0.1.6 | FW-025 em código pronto: modo manual e automático por saída, com prioridade do sensor local e falha do sensor |
 | 04/11/2026 | 0.1.5 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |

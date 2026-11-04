@@ -1,6 +1,6 @@
 # Sprints do firmware — índice
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.8
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.9
 
 Sprints de uma semana. Cada sprint tem um arquivo com meta, itens do backlog, estado e critério de encerramento. Itens concluídos são marcados no arquivo da sprint e no `BACKLOG.md`.
 
@@ -26,6 +26,7 @@ As datas são a sequência de semanas a partir de 02/11/2026. O protótipo de ba
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.9 | SPRINT_04: agenda local e CCO online no FW-025 |
 | 04/11/2026 | 0.2.8 | SPRINT_04 inclui o FW-063 (regra local) |
 | 04/11/2026 | 0.2.7 | SPRINT_04: FW-025 em código pronto |
 | 04/11/2026 | 0.2.6 | SPRINT_08 inclui o FW-062 |

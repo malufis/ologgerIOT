@@ -1,6 +1,6 @@
 # Agenda operacional offline — oLoggerIOT
 
-> **Criado em:** 31/10/2026 · **Última modificação:** 01/11/2026 · **Versão:** 0.1.20
+> **Criado em:** 31/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.21
 
 ## Objetivo informado
 
@@ -45,10 +45,19 @@ Uma semana contém **336 intervalos de 30 minutos**: 48 por dia durante sete dia
 
 Os pontos listados nesta seção ainda não foram decididos ou implementados. As regras são requisitos a esclarecer no B4 e no bloco de automação; a organização do firmware continua para definição posterior pelo usuário.
 
+## Classificação da agenda (04/11/2026)
+
+- A agenda é um **comando automático local**: funciona sem conectividade, e por isso vale só com o device offline.
+- Com conectividade, em modo automático, o comando que vale é o do **CCO**. A agenda não é aplicada enquanto o device está online.
+- Ao ficar offline, a saída aplica na hora o estado do intervalo atual da agenda. Ao reconectar, mantém o último estado e espera um novo comando do CCO.
+- Uma saída com **regra do sensor** cadastrada (entrada analógica para saída digital) ignora a agenda.
+- O formato do cadastro da agenda e os endereços Modbus ou chaves MQTT para recebê-la do CCO ainda não foram definidos (P-042). O comportamento das saídas está em `documentacao/configuracao_do_dispositivo.md`.
+
 ## Histórico
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.21 | A agenda é comando automático local e só vale offline; online vale o CCO; cadastro da agenda pendente (P-042) |
 | 31/10/2026 | 0.1.0 | Registrada e analisada a proposta de agenda semanal offline derivada do histórico, em intervalos de 30 minutos, e sua relação com regras existentes |
 | 31/10/2026 | 0.1.1 | Usuário confirmou estado por intervalo, aprovação pelo CCO/integrador e possibilidade de a agenda acionar saídas após retorno de energia; prioridades ainda pendentes |
 | 31/10/2026 | 0.1.2 | Usuário definiu prioridade de comando manual e sensor sobre agenda, classificação manual/automático e aviso ao CCO |
