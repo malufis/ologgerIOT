@@ -1,6 +1,6 @@
 # Integração do device com o sistema — oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.2
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.3
 
 ## Para quem é
 
@@ -77,6 +77,10 @@ O device expõe o mapa Modbus RTU de `documentacao/mapa_modbus.md`, com 15 posi�
 
 Aplicação Python no notebook do técnico, com chaveiro serial ligado ao STM32. Envia apenas as configurações definidas no catálogo de comandos locais. Não há app de celular; o celular do integrador usa WhatsApp, pelo sistema.
 
+## Cadastro da agenda das saídas (proposta de 04/11/2026)
+
+A agenda semanal das saídas chega no tópico `COMANDO`, vinda do CCO, em JSON, e não tem endereço Modbus. Cada saída leva uma cadeia de 84 caracteres hexadecimais (336 intervalos de 30 minutos, um bit por intervalo). A mensagem é validada por inteiro: se qualquer saída for inválida, o device recusa tudo e responde em `RESULTADO` com o motivo, mantendo a agenda anterior. Formato completo, exemplo e regras em `documentacao/agenda_operacional_offline.md`.
+
 ## Pendências de integração
 
 - Formato de `SETUP` e `INFO`.
@@ -91,6 +95,7 @@ Aplicação Python no notebook do técnico, com chaveiro serial ligado ao STM32.
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.3 | Registrada a agenda das saídas no tópico COMANDO (P-042) |
 | 04/11/2026 | 0.1.2 | Registrado o cadastro da regra do sensor por MQTT, com chaves iguais aos endereços Modbus |
 | 03/11/2026 | 0.1.1 | Registrada a pendência do grupo digital do JSON com o totalizador enviado como valor absoluto |
 | 01/11/2026 | 0.1.0 | Criado contrato de integração com tópicos padrão, confirmações, formato de dados, mapa Modbus e sessão de configuração |

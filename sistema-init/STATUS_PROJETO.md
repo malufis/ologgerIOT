@@ -1,6 +1,6 @@
 # Status do Projeto — oLoggerIOT
 
-> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.153
+> **Criado em:** 15/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.154
 > **Repositório:** https://github.com/malufis/ologgerIOT
 
 ## Fase atual
@@ -58,8 +58,9 @@
 | P-038 | Espaço de flash do STM32L412C8: 64 KB, com a imagem atual em 25,8 KB | Fase 9 | RESOLVIDO em 04/11/2026 — ADR-0003: imagem na flash externa com bootloader; novo FW-062 reserva o espaço e mede a folga por fase |
 | P-039 | ADR-0001 (versão do FreeRTOS nos dois builds) e ADR-0002 (ferramenta MISRA): propostas aguardando decisão | Fase 0 | PENDENTE |
 | P-040 | Modo manual e automático das saídas (FW-025) | Fase 4 | RESOLVIDO em 04/11/2026 — o sensor volta a operar depois de 5 minutos estáveis; sem pedido válido mantém o último estado válido; depois de reinício a saída volta desligada e em automático. Resta o alerta ao CCO na chegada do comando manual, que depende do espaço de alertas (FW-021) |
-| P-041 | Regra do sensor entrada analógica para saída digital (FW-063): cadastro e classificação da agenda | Fase 4 | RESOLVIDO em 04/11/2026 — os campos vêm por MQTT ou Modbus e têm endereço Modbus (proposta no mapa: limiares 40307–40366 e sentido 40367–40381, a confirmar); a agenda é comando local e só vale offline; online vale o CCO. Resta confirmar o sentido da comparação e os endereços propostos |
-| P-042 | Agenda semanal offline (FW-032): formato do cadastro dos 336 intervalos de 30 minutos e endereços Modbus ou chaves MQTT para recebê-la do CCO | Fase 6 | PENDENTE — definir |
+| P-041 | Regra do sensor entrada analógica para saída digital (FW-063): cadastro e classificação da agenda | Fase 4 | RESOLVIDO em 04/11/2026 — os campos vêm por MQTT ou Modbus e têm endereço Modbus (limiares 40307–40366 e sentido 40367–40381, endereços propostos a confirmar); sentido 0 = liga no mínimo e desliga no máximo, sentido 1 = liga no máximo e desliga no mínimo; a agenda é comando local e só vale offline, e online vale o CCO |
+| P-042 | Agenda semanal offline (FW-032): formato do cadastro dos 336 intervalos de 30 minutos | Fase 6 | RESOLVIDO em 04/11/2026 (proposta a confirmar) — vem por MQTT do CCO, sem endereço Modbus, em 84 caracteres hexadecimais por saída, validada por inteiro; implementado em `lib/agenda` |
+| P-043 | Agenda: fuso e hora de referência (a hora da instalação do `timestamp`), regra de versão (recusar mais antiga?), momento de aplicar depois de reinício, formato do identificador do comando e como as saídas ausentes e a cadeia vazia são tratadas (proposta: ausente mantém, vazia apaga) | Fase 6 | PENDENTE — confirmar |
 
 ## Decisões tomadas
 B0 — Identificação: respostas e resumo confirmados pelo usuário em 29/10/2026.
@@ -359,6 +360,7 @@ A entrevista está encerrada e o firmware está em desenvolvimento. Os dois buil
 ## Histórico de atualizações
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.154 | P-041 e P-042 resolvidas (sentido confirmado; agenda por MQTT); P-043 aberta |
 | 04/11/2026 | 0.3.153 | P-041 resolvida (cadastro por MQTT ou Modbus; agenda é comando local); P-042 aberta (cadastro da agenda) |
 | 04/11/2026 | 0.3.152 | Comandos automáticos locais e remotos; P-040 resolvida; P-041 aberta; novo FW-063 |
 | 04/11/2026 | 0.3.151 | FW-025 em código pronto; pendência P-040 com o que o B4 não especifica |

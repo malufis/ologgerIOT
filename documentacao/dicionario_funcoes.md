@@ -1,6 +1,6 @@
 # Dicionário de funções — firmware oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.4
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.3.5
 
 ## Como manter
 
@@ -29,6 +29,10 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 | `adc_inicia` | adc | `lib/adc/include/adc.h` | Inicia a aquisição contínua. | ADC_OK, ADC_ERRO_PARAMETRO ou ADC_ERRO_HAL. | ativa |
 | `adc_para` | adc | `lib/adc/include/adc.h` | Para a aquisição para o equipamento dormir: timer, DMA, ADC e referência interna. | ADC_OK ou ADC_ERRO_HAL. | ativa |
 | `adc_retoma` | adc | `lib/adc/include/adc.h` | Retoma a aquisição com a taxa e o callback de adc_inicia(). | ADC_OK, ADC_ERRO_PARAMETRO (se adc_inicia() nunca foi chamado) ou ADC_ERRO_HAL. | ativa |
+| `agenda_carrega_hex` | agenda | `lib/agenda/include/agenda.h` | Carrega a agenda a partir da cadeia hexadecimal recebida do CCO. | AGENDA_OK, AGENDA_ERRO_PARAMETRO, AGENDA_ERRO_TAMANHO ou AGENDA_ERRO_CARACTERE. | ativa |
+| `agenda_estado` | agenda | `lib/agenda/include/agenda.h` | Informa o que a agenda pede para um instante da semana. | AGENDA_SEM_AGENDA se a agenda não está definida ou o instante é inválido; senão, ligada ou desligada. | ativa |
+| `agenda_indice` | agenda | `lib/agenda/include/agenda.h` | Calcula o índice do intervalo de 30 minutos de um instante da semana. | Índice de 0 a 335, ou AGENDA_INDICE_INVALIDO se algum argumento estiver fora da faixa. | ativa |
+| `agenda_limpa` | agenda | `lib/agenda/include/agenda.h` | Deixa a agenda sem definição: o estado de qualquer instante passa a ser "sem agenda". | AGENDA_OK ou AGENDA_ERRO_PARAMETRO. | ativa |
 | `aquisicao_contagens` | aquisicao | `lib/aquisicao/include/aquisicao.h` | Lê a média de contagens do ADC do último segundo de uma entrada. | AQUISICAO_OK, AQUISICAO_ERRO_PARAMETRO ou AQUISICAO_ERRO_SEM_DADO. | ativa |
 | `aquisicao_inicia` | aquisicao | `lib/aquisicao/include/aquisicao.h` | Cria a tarefa de aquisição e inicia o ADC. | AQUISICAO_OK, AQUISICAO_ERRO_PARAMETRO ou AQUISICAO_ERRO_INICIO. | ativa |
 | `aquisicao_ma` | aquisicao | `lib/aquisicao/include/aquisicao.h` | Lê a corrente média do último segundo de uma entrada. | AQUISICAO_OK, AQUISICAO_ERRO_PARAMETRO ou AQUISICAO_ERRO_SEM_DADO. | ativa |
@@ -124,6 +128,7 @@ Função `static` (interna ao arquivo) não entra aqui. Só entra a função da 
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.3.5 | Tabela regenerada com 97 funções públicas: entra o módulo `agenda` (4 funções) |
 | 04/11/2026 | 0.3.4 | Tabela regenerada com 93 funções públicas: entram `controle_saida_define_regra_sensor`, `controle_saida_define_conectividade` e `io_saidas_define_conectividade`; `define_regra_local` virou `define_regra_sensor` |
 | 04/11/2026 | 0.3.3 | Tabela regenerada com 91 funções públicas: entram `io_saidas_define_regra_local`, `io_saidas_define_estabilidade`, `controle_saida_define_regra_local`, `controle_saida_define_estabilidade` e `controle_saida_sensor_indisponivel` |
 | 04/11/2026 | 0.3.2 | Tabela regenerada com 86 funções públicas: entram `controle_saida` (modo manual e automático) e os comandos de `io_saidas`; saem `io_saidas_liga` e `io_saidas_desliga` |

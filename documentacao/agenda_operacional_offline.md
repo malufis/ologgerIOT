@@ -1,6 +1,6 @@
 # Agenda operacional offline — oLoggerIOT
 
-> **Criado em:** 31/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.21
+> **Criado em:** 31/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.22
 
 ## Objetivo informado
 
@@ -51,12 +51,44 @@ Os pontos listados nesta seção ainda não foram decididos ou implementados. As
 - Com conectividade, em modo automático, o comando que vale é o do **CCO**. A agenda não é aplicada enquanto o device está online.
 - Ao ficar offline, a saída aplica na hora o estado do intervalo atual da agenda. Ao reconectar, mantém o último estado e espera um novo comando do CCO.
 - Uma saída com **regra do sensor** cadastrada (entrada analógica para saída digital) ignora a agenda.
-- O formato do cadastro da agenda e os endereços Modbus ou chaves MQTT para recebê-la do CCO ainda não foram definidos (P-042). O comportamento das saídas está em `documentacao/configuracao_do_dispositivo.md`.
+- O cadastro da agenda é feito por MQTT, pelo CCO (seção seguinte). O comportamento das saídas está em `documentacao/configuracao_do_dispositivo.md`.
+
+## Cadastro da agenda por MQTT (P-042, 04/11/2026)
+
+A agenda chega ao device **por MQTT, vinda do CCO, como configuração**. O formato abaixo é uma **proposta a confirmar**; o módulo `lib/agenda` já o implementa e testa.
+
+- **Canal:** mensagem de configuração no tópico `COMANDO`. O device responde em `RESULTADO` com "recebido" e depois "executado" ou "falhou com motivo". A agenda **não tem endereço Modbus**: são 336 bits por saída, até 15 saídas, e a atualização precisa ser atômica. Só se recebe por MQTT.
+- **Conteúdo:** uma cadeia de **84 caracteres hexadecimais por saída** (42 bytes, um bit por intervalo de 30 minutos; 1 = ligada, 0 = desligada). O intervalo k é `dia * 48 + hora * 2 + minuto / 30`, com o dia de 0 (segunda) a 6 (domingo). O bit k fica no byte `k / 8`, na posição `k % 8`, do menos significativo para o mais significativo. O byte 0 vem primeiro, em maiúsculas ou minúsculas.
+- **Exemplo** (a saída 1 liga na segunda das 08h às 08h30, que é o intervalo 16, byte 2, bit 0):
+
+```json
+{
+  "id": "12345",
+  "agenda": {
+    "versao": 7,
+    "saidas": {
+      "1": "000001000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "2": ""
+    }
+  }
+}
+```
+
+- **Saída que não vem na mensagem:** mantém a agenda que já tinha. **Cadeia vazia (`""`):** apaga a agenda da saída, que passa a "sem agenda".
+- **Validação por inteiro:** se qualquer saída tiver número inexistente neste build, cadeia que não tenha exatamente 84 caracteres ou caractere fora de 0 a 9 e A a F, o device **recusa a mensagem inteira**, responde "falhou com motivo" e **mantém a agenda anterior**. Só uma mensagem válida troca as agendas, de uma vez.
+- **Sessão de configuração:** vale a regra da sessão (`documentacao/integracao_sistema.md`): durante uma sessão ativa o device recusa o comando MQTT com aviso.
+- **Versão:** o campo `versao` é guardado e informado ao sistema. Não há ainda regra de ordem (por exemplo, recusar versão mais antiga).
+- **Aprovação:** a aprovação pelo CCO ou integrador acontece no sistema, antes do envio. O device não a verifica.
+- **Armazenamento:** a agenda precisa sobreviver a reinício. Ficará na memória não volátil, com CRC e gravação atômica, no mesmo estilo da configuração do mapeamento Modbus (FW-048). São 42 bytes por saída, 168 bytes no OloggerMulti, mais a versão.
+- **Quando atua:** só com o device **offline** (declarado depois de esgotar as tentativas de reconexão), em modo automático, **sem regra do sensor** na saída e com a **hora válida**. A cada limite de 30 minutos o device pede à saída o estado do intervalo, e ao ficar offline pede o do intervalo atual. Com o STM32 em sleep, ele desperta no limite do intervalo para aplicar a mudança.
+- **Hora de referência:** o horário da instalação, o mesmo do `timestamp` do JSON. O fuso e a conversão ainda são decisão em aberto (P-043).
+- **No código:** `agenda_carrega_hex` valida e carrega; `agenda_estado(dia, hora, minuto)` devolve ligada, desligada ou sem agenda; a tarefa que lê o relógio e entrega o pedido a `controle_saida_pedido` com a fonte `CONTROLE_FONTE_AGENDA` é parte do FW-032.
 
 ## Histórico
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.22 | P-042: a agenda chega por MQTT do CCO, em 84 caracteres hexadecimais por saída, com validação por inteiro; formato proposto e implementado em `lib/agenda` |
 | 04/11/2026 | 0.1.21 | A agenda é comando automático local e só vale offline; online vale o CCO; cadastro da agenda pendente (P-042) |
 | 31/10/2026 | 0.1.0 | Registrada e analisada a proposta de agenda semanal offline derivada do histórico, em intervalos de 30 minutos, e sua relação com regras existentes |
 | 31/10/2026 | 0.1.1 | Usuário confirmou estado por intervalo, aprovação pelo CCO/integrador e possibilidade de a agenda acionar saídas após retorno de energia; prioridades ainda pendentes |

@@ -1,6 +1,6 @@
 ﻿# Configuração do dispositivo — oLoggerIOT
 
-> **Criado em:** 29/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.54
+> **Criado em:** 29/10/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.55
 
 ## Origem e estado
 
@@ -152,7 +152,7 @@ Definição do responsável técnico em 04/11/2026.
 - **Falha do sensor:** em automático, a saída desliga. Quando a falha termina, a saída só **volta a operar pelo sensor depois de 5 minutos estáveis** (sem nova falha); uma falha dentro desse tempo reinicia a contagem. Até lá a saída continua desligada. Em manual, o comando manual se mantém. O código aceita configurar o tempo; o padrão é de 5 minutos.
 - **Retardo de acionamento:** vale para todo comando que liga a saída, qualquer que seja a origem.
 - **Cadastro da regra (decidido em 04/11/2026):** os campos **chegam por MQTT ou por Modbus e têm endereço Modbus**. As chaves do JSON do MQTT seguem o endereço Modbus do dado. O cadastro segue a regra da sessão de configuração. Os endereços propostos estão em `documentacao/mapa_modbus.md`: limiar máximo (40307–40336), limiar mínimo (40337–40366), sentido (40367–40381, proposta), além da entrada associada (40241–40255) e das frequências de 4 mA e 20 mA (40181–40240), que já existiam. Os limiares ficam na unidade de engenharia da entrada associada (por exemplo, bar).
-- **Ainda a confirmar:** o sentido da comparação (0 = liga no máximo e desliga no mínimo, como no exemplo; 1 = inverso, comum em nível de reservatório) e os endereços propostos. O formato e os endereços do cadastro da agenda semanal ainda não foram definidos (P-042).
+- **Sentido da comparação (confirmado em 04/11/2026):** sentido 0 = liga no mínimo e desliga no máximo; sentido 1 = liga no máximo e desliga no mínimo (o exemplo do B4, ligar a 5 bar e desligar a 4 bar, é o sentido 1). **Ainda a confirmar:** os endereços Modbus propostos. A agenda semanal chega por MQTT, do CCO, sem endereço Modbus: formato em `documentacao/agenda_operacional_offline.md` (P-042); resta o fuso, a limpeza e a versão (P-043).
 - **Implementação:** `controle_saida` tem as três fontes (`CONTROLE_FONTE_SENSOR`, `CONTROLE_FONTE_AGENDA` e `CONTROLE_FONTE_CCO`) e sabe se a saída tem regra do sensor e se o device está online. O **cadastro e o avaliador da regra do sensor** são o item FW-063, ainda não implementado.
 
 ## Fluxos propostos pelo usuário
@@ -211,6 +211,7 @@ Depois de estabelecida a conectividade do dispositivo, a configuração continua
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.55 | Sentido da comparação confirmado; agenda semanal por MQTT |
 | 04/11/2026 | 0.1.54 | A agenda é comando local e só vale offline; online vale o CCO; o cadastro da regra do sensor chega por MQTT ou Modbus, com endereços |
 | 04/11/2026 | 0.1.53 | Comandos automáticos locais (regra cadastrada) e remotos (CCO), espera de 5 minutos depois da falha do sensor, último estado válido e estado depois de reinício |
 | 04/11/2026 | 0.1.52 | FW-025: modo manual e automático por saída, prioridade do sensor local e falha do sensor |

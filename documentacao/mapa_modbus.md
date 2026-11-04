@@ -1,6 +1,6 @@
 # Mapa Modbus do device oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.8
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.9
 
 ## Origem e estado
 
@@ -60,7 +60,7 @@ Mapa definido pelo usuário em 01/11/2026: seguir a norma Modbus, com float ocup
 | 40286–40300 | holding uint16 | Modo manual/automático da saída n: 0 = automático, 1 = manual |
 | 40307–40336 | holding float | Limiar máximo da regra do sensor da saída n, na unidade de engenharia da entrada associada (**proposta de 04/11/2026**) |
 | 40337–40366 | holding float | Limiar mínimo da regra do sensor da saída n, na unidade de engenharia da entrada associada (**proposta de 04/11/2026**) |
-| 40367–40381 | holding uint16 | Sentido da regra do sensor da saída n: 0 = liga no máximo e desliga no mínimo, 1 = liga no mínimo e desliga no máximo (**proposta de 04/11/2026**) |
+| 40367–40381 | holding uint16 | Sentido da regra do sensor da saída n: 0 = liga no mínimo e desliga no máximo, 1 = liga no máximo e desliga no mínimo (**confirmado em 04/11/2026**; endereços ainda a confirmar) |
 
 ## Sistema trifásico (reservado, sem hardware identificado)
 
@@ -194,12 +194,14 @@ Os nomes dos grupos (analogico, digital, falhas, sistema, rede) são uma propost
 - Lista final de campos do heartbeat e formato das mensagens SETUP e INFO.
 - Entrada digital (aberto em 03/11/2026): o registrador de modo da entrada (40151–40165) hoje diz "0 = discreto, 1 = pulsado". Falta definir os modos (discreto, contador de pulsos e frequência em Hz) e o endereço do totalizador de 32 bits de cada entrada, que será lido como valor absoluto (o servidor calcula as diferenças). Item P-032 em `STATUS_PROJETO.md`.
 - Saída digital (resolvido em 03/11/2026): "pulsada" é a saída em frequência, então o tipo da saída (40166–40180) ficou 0 = discreto, 1 = frequência e 2 reservado. O "acionamento por tempo" é o retardo de acionamento (40256–40270), e o registrador 40271–40285 ficou reservado. O modo de operação (40412: 0 = contínuo, 1 = sleep) só pode ser 1 se nenhuma saída estiver em frequência, e a saída só pode ir para frequência com o modo de operação em 0.
-- Regra do sensor entrada analógica para saída digital (04/11/2026): o cadastro vem por MQTT ou Modbus, com endereço Modbus para cada campo; as chaves do JSON seguem o endereço. Foram acrescentados os limiares máximo (40307–40336) e mínimo (40337–40366) e o sentido (40367–40381), como **proposta a confirmar**, em faixa livre depois do bloco trifásico. A saída tem regra do sensor quando a entrada associada (40241–40255) é diferente de zero. Sem regra, valem a agenda offline e o CCO online. O cadastro da agenda semanal não tem registradores definidos (P-042).
+- Regra do sensor entrada analógica para saída digital (04/11/2026): o cadastro vem por MQTT ou Modbus, com endereço Modbus para cada campo; as chaves do JSON seguem o endereço. Foram acrescentados os limiares máximo (40307–40336) e mínimo (40337–40366) e o sentido (40367–40381), com endereços **propostos a confirmar**. O **sentido foi confirmado**: 0 = liga no mínimo e desliga no máximo; 1 = liga no máximo e desliga no mínimo. A saída tem regra do sensor quando a entrada associada (40241–40255) é diferente de zero. Sem regra, valem a agenda offline e o CCO online.
+- Agenda semanal das saídas (04/11/2026): **não tem registradores Modbus**; é cadastrada por MQTT, pelo CCO (`documentacao/agenda_operacional_offline.md`).
 
 ## Histórico
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.9 | Sentido da regra do sensor confirmado (0 liga no mínimo, 1 liga no máximo); registrado que a agenda não tem registradores Modbus |
 | 04/11/2026 | 0.1.8 | Propostos os endereços dos limiares máximo e mínimo e do sentido da regra do sensor (40307 a 40381) |
 | 04/11/2026 | 0.1.7 | Pendência: limiares máximo e mínimo da regra local para a saída discreta |
 | 04/11/2026 | 0.1.6 | Correções da verificação do doc-keeper antes do fechamento da SPRINT_00 (números, nomes dos registradores, concordância e referências) |

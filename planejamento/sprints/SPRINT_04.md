@@ -1,6 +1,6 @@
 # SPRINT_04 — Saídas e controle
 
-> **Criado em:** 03/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.8
+> **Criado em:** 03/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.1.9
 > **Período:** 30/11/2026 a 04/12/2026
 
 Em andamento desde 03/11/2026: o FW-022 e o FW-024 estão em código pronto; os demais itens estão pendentes. As datas são a sequência de semanas a partir de 02/11/2026 e mudam se a SPRINT_00, a SPRINT_01 ou a SPRINT_01B atrasarem.
@@ -18,7 +18,7 @@ Saídas discretas (ligar e desligar, com retardo de acionamento), saída em freq
 | FW-024 | Retardo de acionamento (relé de tempo, o "acionamento por tempo") por saída discreta, com cancelamento por comando de desligar | Código pronto em 03/11/2026 (`saida_define_atraso`, `io_saidas_define_atraso`): 36 verificações no PC com o retardo, o comando descartado, o cancelamento por desligar e a volta do contador. Regras confirmadas em 03/11/2026. Bancada pendente |
 | FW-025 | Modo manual e automático por saída, com prioridade do sensor | Código pronto em 04/11/2026 (`controle_saida`, `io_saidas`): 82 verificações no PC com manual, automático, regra do sensor, agenda local offline, comando do CCO online, falha do sensor com espera de 5 minutos e retardo. Falta o alerta ao CCO na chegada do comando manual. Bancada pendente |
 | FW-061 | Ligar e desligar o modo sleep (modo de operação, registro 40412), com exclusão mútua: o sleep só liga se nenhuma saída estiver em frequência, e a saída em frequência só habilita com o sleep desligado | Lado do sleep pronto em 03/11/2026 (`energia_define_habilitada` devolve erro se um módulo impede). Falta o lado das saídas (FW-023) e o comando do Modbus |
-| FW-063 | Regra do sensor entrada analógica para saída digital (comando automático local): cadastro por MQTT ou Modbus (entrada associada, limiares máximo e mínimo e sentido, mais a frequência em 4 mA e 20 mA, todos com endereço Modbus) e o avaliador com histerese que gera os pedidos da fonte do sensor. Sem regra cadastrada valem a agenda (offline) e o CCO (online) | Pendente; criado em 04/11/2026 |
+| FW-063 | Regra do sensor entrada analógica para saída digital (comando automático local): cadastro por MQTT ou Modbus (entrada associada, limiares máximo e mínimo e sentido, mais a frequência em 4 mA e 20 mA, todos com endereço Modbus) e o avaliador com histerese que gera os pedidos da fonte do sensor. Sentido 0: liga no mínimo e desliga no máximo; sentido 1: liga no máximo e desliga no mínimo. Sem regra cadastrada valem a agenda (offline) e o CCO (online) | Pendente; criado em 04/11/2026 |
 
 ## Estado das saídas digitais (03/11/2026)
 
@@ -69,6 +69,7 @@ Implementado conforme o B4 e as definições de 04/11/2026 (`documentacao/config
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.1.9 | FW-063 com o sentido da comparação confirmado |
 | 04/11/2026 | 0.1.8 | Agenda como comando local (só offline) e CCO online; cadastro da regra do sensor por MQTT ou Modbus; 82 verificações |
 | 04/11/2026 | 0.1.7 | FW-025 com as definições de 04/11/2026 (local e remoto, 5 minutos, último estado, reinício); novo FW-063 |
 | 04/11/2026 | 0.1.6 | FW-025 em código pronto: modo manual e automático por saída, com prioridade do sensor local e falha do sensor |

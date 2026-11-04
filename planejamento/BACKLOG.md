@@ -1,6 +1,6 @@
 # Backlog do firmware — oLoggerIOT
 
-> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.9
+> **Criado em:** 01/11/2026 · **Última modificação:** 04/11/2026 · **Versão:** 0.2.10
 
 ## Regras
 
@@ -93,7 +93,7 @@ Entrada digital ativa com tensão no campo (de 12 a 24 V; na bancada, até 12 V)
 | FW-024 | Retardo de acionamento (relé de tempo, o "acionamento por tempo") por saída discreta, com cancelamento por comando de desligar | Testes de temporização | Código pronto em 03/11/2026 (`saida_define_atraso`, `io_saidas_define_atraso`): 36 verificações no PC com o retardo, o comando descartado, o cancelamento por desligar e a volta do contador. Regras confirmadas em 03/11/2026. Bancada pendente |
 | FW-025 | Modo manual e automático por saída, com prioridade do sensor | Tabela de estados testada | Código pronto em 04/11/2026 (`controle_saida`, `io_saidas`): 82 verificações no PC com manual, automático, regra do sensor, agenda local offline, comando do CCO online, falha do sensor com espera de 5 minutos e retardo. Falta o alerta ao CCO na chegada do comando manual. Bancada pendente |
 | FW-061 | Ligar e desligar o modo sleep (modo de operação, registro 40412), com exclusão mútua: o sleep só liga se nenhuma saída estiver em frequência, e a saída em frequência só habilita com o sleep desligado | Testes: ligar o sleep com uma saída em frequência é recusado, e habilitar a frequência com o sleep ligado também | Lado do sleep pronto em 03/11/2026 (`energia_define_habilitada` devolve erro se um módulo impede). Falta o lado das saídas (FW-023) e o comando do Modbus |
-| FW-063 | Regra do sensor entrada analógica para saída digital (comando automático local): cadastro por MQTT ou Modbus (entrada associada, limiares máximo e mínimo e sentido, mais a frequência em 4 mA e 20 mA, todos com endereço Modbus) e o avaliador com histerese que gera os pedidos da fonte do sensor. Sem regra cadastrada valem a agenda (offline) e o CCO (online) | Testes no PC: liga em 5 bar e desliga em 4 bar com histerese, sentido inverso, valor entre os limiares mantém o pedido anterior, e sem regra cadastrada valem a agenda offline e o CCO online; cadastro lido e gravado pelos endereços do mapa Modbus | Pendente; criado em 04/11/2026 |
+| FW-063 | Regra do sensor entrada analógica para saída digital (comando automático local): cadastro por MQTT ou Modbus (entrada associada, limiares máximo e mínimo e sentido, mais a frequência em 4 mA e 20 mA, todos com endereço Modbus) e o avaliador com histerese que gera os pedidos da fonte do sensor. Sentido 0: liga no mínimo e desliga no máximo; sentido 1: liga no máximo e desliga no mínimo. Sem regra cadastrada valem a agenda (offline) e o CCO (online) | Testes no PC: sentido 0 e sentido 1 com histerese (exemplo: sentido 1 liga em 5 bar e desliga em 4 bar), valor entre os limiares mantém o pedido anterior, e sem regra cadastrada valem a agenda offline e o CCO online; cadastro lido e gravado pelos endereços do mapa Modbus | Pendente; criado em 04/11/2026 |
 
 ### Fase 5 — Modbus RTU (SPRINT_05)
 
@@ -114,7 +114,7 @@ Entrada digital ativa com tensão no campo (de 12 a 24 V; na bancada, até 12 V)
 |---|---|---|---|
 | FW-030 | Driver do RTC e conferência NTP quatro vezes ao dia | Teste de atualização | Pendente |
 | FW-031 | Hora inválida: medições sem validade, saídas mantêm estado, aviso guardado | Teste de perda e correção de hora | Pendente |
-| FW-032 | Agenda semanal de 336 intervalos, aplicada somente offline | Teste de transição de intervalo | Pendente |
+| FW-032 | Agenda semanal de 336 intervalos por saída, recebida do CCO por MQTT: formato (84 caracteres hexadecimais por saída), validação, armazenamento persistente com CRC, e aplicação a cada 30 minutos somente offline e na hora em que o device fica offline | Teste de transição de intervalo; cadastro recusado por inteiro quando inválido, sem alterar a agenda anterior | Parcial em 04/11/2026: formato e validação prontos (`lib/agenda`, 57 verificações no PC). Falta o RTC (FW-030), o armazenamento persistente, a aplicação por intervalo e o recebimento por MQTT (FW-035) |
 
 ### Fase 7 — MQTT e ESP32 (SPRINT_07)
 
@@ -155,6 +155,7 @@ Entrada digital ativa com tensão no campo (de 12 a 24 V; na bancada, até 12 V)
 
 | Data | Versão | Alteração |
 |---|---|---|
+| 04/11/2026 | 0.2.10 | FW-063 com o sentido confirmado; FW-032 com o formato da agenda por MQTT (parcial) |
 | 04/11/2026 | 0.2.9 | FW-063 com o cadastro por MQTT ou Modbus; FW-025 com a agenda local e o CCO online |
 | 04/11/2026 | 0.2.8 | FW-025 com a regra local, o comando remoto do CCO e a espera de 5 minutos; novo FW-063 (regra local) |
 | 04/11/2026 | 0.2.7 | FW-025 em código pronto |
